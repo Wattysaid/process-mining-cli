@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import hashlib
+import zipfile
 from typing import Dict, List, Optional, Tuple, Any
 
 import numpy as np
@@ -119,8 +120,127 @@ def load_csv_dataframe(
     timestamp_dayfirst: bool = False,
     timestamp_utc: Optional[bool] = None,
     timestamp_timezone: Optional[str] = None,
+    delimiter: str = ",",
+    encoding: Optional[str] = None,
 ) -> pd.DataFrame:
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, sep=delimiter, encoding=encoding or "utf-8")
+    rename_map = {
+        case_col: "case:concept:name",
+        activity_col: "concept:name",
+        timestamp_col: "time:timestamp",
+    }
+    if resource_col:
+        rename_map[resource_col] = "org:resource"
+    df = df.rename(columns=rename_map)
+    if "time:timestamp" in df.columns:
+        df["time:timestamp"] = normalize_timestamps(
+            df["time:timestamp"],
+            timestamp_format=timestamp_format,
+            dayfirst=timestamp_dayfirst,
+            utc=timestamp_utc,
+            timezone=timestamp_timezone,
+        )
+    return df
+
+
+def load_excel_dataframe(
+    file_path: str,
+    case_col: str,
+    activity_col: str,
+    timestamp_col: str,
+    resource_col: Optional[str] = None,
+    timestamp_format: Optional[str] = None,
+    timestamp_dayfirst: bool = False,
+    timestamp_utc: Optional[bool] = None,
+    timestamp_timezone: Optional[str] = None,
+    sheet: Optional[str] = None,
+) -> pd.DataFrame:
+    df = pd.read_excel(file_path, sheet_name=sheet or 0)
+    return normalize_dataframe_columns(
+        df,
+        case_col,
+        activity_col,
+        timestamp_col,
+        resource_col=resource_col,
+        timestamp_format=timestamp_format,
+        timestamp_dayfirst=timestamp_dayfirst,
+        timestamp_utc=timestamp_utc,
+        timestamp_timezone=timestamp_timezone,
+    )
+
+
+def load_json_dataframe(
+    file_path: str,
+    case_col: str,
+    activity_col: str,
+    timestamp_col: str,
+    resource_col: Optional[str] = None,
+    timestamp_format: Optional[str] = None,
+    timestamp_dayfirst: bool = False,
+    timestamp_utc: Optional[bool] = None,
+    timestamp_timezone: Optional[str] = None,
+    json_lines: bool = False,
+) -> pd.DataFrame:
+    try:
+        df = pd.read_json(file_path, lines=json_lines)
+    except ValueError:
+        df = pd.read_json(file_path, lines=not json_lines)
+    return normalize_dataframe_columns(
+        df,
+        case_col,
+        activity_col,
+        timestamp_col,
+        resource_col=resource_col,
+        timestamp_format=timestamp_format,
+        timestamp_dayfirst=timestamp_dayfirst,
+        timestamp_utc=timestamp_utc,
+        timestamp_timezone=timestamp_timezone,
+    )
+
+
+def load_zip_csv_dataframe(
+    file_path: str,
+    case_col: str,
+    activity_col: str,
+    timestamp_col: str,
+    resource_col: Optional[str] = None,
+    timestamp_format: Optional[str] = None,
+    timestamp_dayfirst: bool = False,
+    timestamp_utc: Optional[bool] = None,
+    timestamp_timezone: Optional[str] = None,
+    delimiter: str = ",",
+    encoding: Optional[str] = None,
+    zip_member: Optional[str] = None,
+) -> pd.DataFrame:
+    if zip_member:
+        path = f"zip://{file_path}::{zip_member}"
+        df = pd.read_csv(path, sep=delimiter, encoding=encoding or "utf-8")
+    else:
+        df = pd.read_csv(file_path, sep=delimiter, encoding=encoding or "utf-8", compression="zip")
+    return normalize_dataframe_columns(
+        df,
+        case_col,
+        activity_col,
+        timestamp_col,
+        resource_col=resource_col,
+        timestamp_format=timestamp_format,
+        timestamp_dayfirst=timestamp_dayfirst,
+        timestamp_utc=timestamp_utc,
+        timestamp_timezone=timestamp_timezone,
+    )
+
+
+def normalize_dataframe_columns(
+    df: pd.DataFrame,
+    case_col: str,
+    activity_col: str,
+    timestamp_col: str,
+    resource_col: Optional[str] = None,
+    timestamp_format: Optional[str] = None,
+    timestamp_dayfirst: bool = False,
+    timestamp_utc: Optional[bool] = None,
+    timestamp_timezone: Optional[str] = None,
+) -> pd.DataFrame:
     rename_map = {
         case_col: "case:concept:name",
         activity_col: "concept:name",
