@@ -105,7 +105,7 @@ jobs:
         if: ${{ env.COSIGN_PRIVATE_KEY != '' && env.COSIGN_PASSWORD != '' }}
         run: |
           cd release
-          cosign sign-blob --key env://COSIGN_PRIVATE_KEY --output-signature checksums.txt.sig checksums.txt
+          cosign sign-blob --yes --key env://COSIGN_PRIVATE_KEY --output-signature checksums.txt.sig checksums.txt
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
