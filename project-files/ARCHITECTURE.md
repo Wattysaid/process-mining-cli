@@ -46,6 +46,7 @@ pm-assist/
   project-files/                 # instructions for Codex
   .codex/                        # agent skill packs for Codex + cli-tool-skills library
   .profiles/                     # user profiles (YAML, user-editable)
+  .business/                     # business profiles (YAML, user-editable)
 ```
 
 ## 4. Runtime behaviour
@@ -74,6 +75,7 @@ pm-assist/
 - CLI logs: structured, levels, no secrets
 - Run artefacts: `outputs/<run-id>/run.log` plus `config.yaml` snapshot
 - QA summary: `outputs/<run-id>/quality/qa_summary.md`
+- Notebook is appended with each confirmed decision and step execution
 
 ## 7. Extensibility model
 - Pipeline steps described in a registry:

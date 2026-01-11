@@ -22,6 +22,7 @@ When the user runs `pm-assist` with no subcommand, show the startup screen and m
 - `--yes` assume “yes” for safe prompts (never for destructive prompts)
 - `--llm-provider <openai|anthropic|gemini|ollama|none>` override configured LLM provider for this run
 - `--profile <name>` use a specific user profile from `.profiles/`
+- `--business <name>` use a specific business profile from `.business/`
 
 ## 3. Command tree (MVP)
 ### `pm-assist version`
@@ -39,6 +40,7 @@ Interactive:
 - Output formats desired
 - LLM provider preference (optional, can be skipped)
 - User profile setup (name, role, aptitude level, preferred depth)
+- Business profile selection or creation
 Creates:
 - `pm-assist.yaml` template
 - `.gitignore` suggestions
@@ -47,6 +49,7 @@ Creates:
 - `docs/` folder for reports
 - `.venv/` (project-local Python environment, unless disabled)
 - `.profiles/<name>.yaml` (user profile)
+- `.business/<name>.yaml` (business profile)
 
 ### `pm-assist connect`
 MVP connectors:
@@ -141,6 +144,15 @@ Subcommands:
 - `pm-assist profile show --name <name>`
 Profile fields:
 - name, role, aptitude (beginner|intermediate|expert), preferences (prompt depth, defaults)
+
+### `pm-assist business`
+- Create or update business profiles stored in `.business/`
+Subcommands:
+- `pm-assist business init` (interactive setup)
+- `pm-assist business set --name <name>` (activate profile)
+- `pm-assist business show --name <name>`
+Business profile fields:
+- name, industry, region, systems (ERP/CRM/other), data sources, security requirements
 
 ## 4. `pm-assist agent` (optional, LLM-enabled)
 Behaviour:

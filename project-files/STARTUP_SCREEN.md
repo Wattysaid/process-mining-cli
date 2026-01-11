@@ -72,9 +72,9 @@ What would you like to do?
   3) Run environment diagnostics (doctor)
   4) Configure LLM integration
   5) Manage user or business profiles
-  5) Exit
+  6) Exit
 
-Select an option (1–5):
+Select an option (1–6):
 ```
 
 ## 3. First-time user flow

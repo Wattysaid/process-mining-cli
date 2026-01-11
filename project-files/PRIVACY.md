@@ -27,3 +27,7 @@
 - Profiles are stored in `.profiles/` as YAML.
 - Store only user-provided metadata (name, role, aptitude, preferences).
 - Avoid storing secrets or external credentials in profiles.
+
+## 6. Business profiles
+- Profiles are stored in `.business/` as YAML.
+- Store only business metadata and system context, never credentials.

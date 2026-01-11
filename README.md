@@ -5,7 +5,7 @@
 **Goal:** Build an enterprise-grade CLI assistant that enables a single practitioner to run an end-to-end process mining engagement (data engineering through mining through reporting), with guided workflows and optional LLM-powered assistance (OpenAI, Anthropic, Gemini, or local Ollama) that is token-cost controlled.
 
 ## What this repo provides (instructions only)
-This repository folder contains **MD instruction files** that an AI coding agent can use to implement the application. The `cli-tool-skills` library under `.codex/skills/` contains the minimum Python-backed capabilities the CLI must orchestrate.
+This repository folder contains **MD instruction files** that an AI coding agent can use to implement the application. The `cli-tool-skills` library under `.codex/skills/` contains the minimum Python-backed capabilities the CLI must orchestrate, and `.profiles/` + `.business/` store user/business profiles.
 
 ## Product positioning
 PM Assist is a CLI-based process mining copilot that competes with Celonis, Signavio and ARIS on *time-to-insight* for single analysts and small teams, while remaining deployable inside regulated enterprise environments (on-prem, VPC, private networks).

@@ -28,6 +28,12 @@ var rootCmd = &cobra.Command{
 		prompt.SetNonInteractive(Global.NonInteractive)
 		return nil
 	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if Global.NonInteractive {
+			return cmd.Help()
+		}
+		return runStartup(cmd)
+	},
 }
 
 var Global = &app.GlobalFlags{}
@@ -56,6 +62,7 @@ func init() {
 		commands.NewReviewCmd(Global),
 		commands.NewAgentCmd(Global),
 		commands.NewProfileCmd(Global),
+		commands.NewBusinessCmd(Global),
 	)
 }
 

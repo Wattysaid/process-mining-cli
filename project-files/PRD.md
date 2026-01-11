@@ -61,3 +61,5 @@ Secondary:
 - LLM integration is optional and requires explicit credentials + opt-in per run (or local Ollama)
 - QA report clearly flags data issues and model caveats
 - User profile is captured and used to adjust prompt depth without changing decision rules
+- Business profile is captured for repeatable setup across engagements
+- Notebook is appended with each user-confirmed step for transparent reproducibility

@@ -19,6 +19,7 @@ Use this index to navigate the instruction set.
 - `project-files/WORKFLOWS.md`
 - `project-files/QA_AND_VALIDATION.md`
 - `project-files/USER_PROFILES.md`
+- `project-files/BUSINESS_PROFILES.md`
 
 ## Outputs
 - `project-files/NOTEBOOK_AND_REPORTS.md`

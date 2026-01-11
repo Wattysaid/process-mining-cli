@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/pm-assist/pm-assist/internal/app"
+	"github.com/pm-assist/pm-assist/internal/business"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/profile"
 	"github.com/pm-assist/pm-assist/internal/runner"
@@ -47,6 +48,31 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			llmProvider, err := prompt.AskChoice("LLM provider", []string{"openai", "anthropic", "gemini", "ollama", "none"}, "none", true)
+			if err != nil {
+				return err
+			}
+			createBusiness, err := prompt.AskBool("Create a business profile now?", true)
+			if err != nil {
+				return err
+			}
+			businessName := ""
+			businessIndustry := ""
+			businessRegion := ""
+			if createBusiness {
+				businessName, err = prompt.AskString("Business name", "", true)
+				if err != nil {
+					return err
+				}
+				businessIndustry, err = prompt.AskString("Business industry", "", true)
+				if err != nil {
+					return err
+				}
+				businessRegion, err = prompt.AskString("Business region", "", true)
+				if err != nil {
+					return err
+				}
+			}
 
 			if err := os.MkdirAll(filepath.Join(projectPath, "outputs"), 0o755); err != nil {
 				return err
@@ -59,7 +85,7 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 			configPath := filepath.Join(projectPath, "pm-assist.yaml")
 			if _, err := os.Stat(configPath); os.IsNotExist(err) {
-				content := fmt.Sprintf("project:\n  name: %s\nprofiles:\n  active: %s\n", projectName, userName)
+				content := fmt.Sprintf("project:\n  name: %s\nprofiles:\n  active: %s\nbusiness:\n  active: %s\nllm:\n  provider: %s\n", projectName, userName, businessName, llmProvider)
 				if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
 					return err
 				}
@@ -73,6 +99,17 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			})
 			if err != nil {
 				return err
+			}
+
+			if createBusiness {
+				_, err = business.Save(projectPath, business.Profile{
+					Name:     businessName,
+					Industry: businessIndustry,
+					Region:   businessRegion,
+				})
+				if err != nil {
+					return err
+				}
 			}
 
 			installDeps, err := prompt.AskBool("Install Python dependencies now? (requires network)", false)
