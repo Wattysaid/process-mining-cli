@@ -56,6 +56,16 @@ func (r *Runner) RunModule(module string, args []string, env map[string]string) 
 	return runCommandWithEnv(pythonPath, cmdArgs, env)
 }
 
+// RunScript runs a python script inside the venv.
+func (r *Runner) RunScript(scriptPath string, args []string, env map[string]string) error {
+	if scriptPath == "" {
+		return errors.New("script path is required")
+	}
+	pythonPath := filepath.Join(r.VenvPath, "bin", "python")
+	cmdArgs := append([]string{scriptPath}, args...)
+	return runCommandWithEnv(pythonPath, cmdArgs, env)
+}
+
 func detectPython() (string, error) {
 	python, err := exec.LookPath("python3")
 	if err == nil {
