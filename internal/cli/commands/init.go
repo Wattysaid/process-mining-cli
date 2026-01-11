@@ -49,7 +49,7 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			templateChoice, err := prompt.AskChoice("Project layout", []string{"standard", "custom"}, "standard", true)
+			templateChoice, err := prompt.AskChoice("Project layout", []string{"standard", "minimal", "consulting", "custom"}, "standard", true)
 			if err != nil {
 				return err
 			}
@@ -93,7 +93,11 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 					return err
 				}
 			} else {
-				if err := scaffold.ApplyTemplate(projectPath, scaffold.StandardTemplate); err != nil {
+				template, ok := scaffold.Templates[templateChoice]
+				if !ok {
+					template = scaffold.StandardTemplate
+				}
+				if err := scaffold.ApplyTemplate(projectPath, template); err != nil {
 					return err
 				}
 			}

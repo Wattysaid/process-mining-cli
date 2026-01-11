@@ -8,9 +8,10 @@ import (
 	"strings"
 
 	"github.com/pm-assist/pm-assist/internal/app"
-	"github.com/pm-assist/pm-assist/internal/db"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
+	"github.com/pm-assist/pm-assist/internal/db"
+	"github.com/pm-assist/pm-assist/internal/preview"
 	"github.com/spf13/cobra"
 )
 
@@ -72,6 +73,26 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				for _, path := range paths {
 					if _, err := os.Stat(path); err != nil {
 						fmt.Printf("[WARN] Could not access %s: %v\n", path, err)
+					}
+				}
+				previewNow, err := prompt.AskBool("Preview CSV headers and sample rows?", true)
+				if err != nil {
+					return err
+				}
+				if previewNow && format == "csv" {
+					if strings.ToLower(encoding) != "utf-8" && encoding != "" {
+						fmt.Printf("[WARN] Preview skipped for encoding %s (only utf-8 supported).\n", encoding)
+					} else if len(paths) > 0 {
+						countRows, err := prompt.AskBool("Count total rows? (may be slow)", false)
+						if err != nil {
+							return err
+						}
+						sample, err := preview.PreviewCSV(paths[0], delimiter, 5, countRows)
+						if err != nil {
+							fmt.Printf("[WARN] Preview failed: %v\n", err)
+						} else {
+							fmt.Println(preview.FormatSample(sample))
+						}
 					}
 				}
 
@@ -146,14 +167,48 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				if password == "" {
 					return fmt.Errorf("credential env var %s is not set", credEnv)
 				}
-				if driver == "postgres" {
+				listCatalog, err := prompt.AskBool("List schemas and tables after validation?", false)
+				if err != nil {
+					return err
+				}
+				switch driver {
+				case "postgres":
 					dsn := fmt.Sprintf("host=%s port=%d dbname=%s user=%s password=%s sslmode=%s", host, port, dbName, user, password, sslMode)
 					fmt.Println("[INFO] Testing Postgres read-only connection...")
 					if err := db.TestPostgresReadOnly(dsn); err != nil {
 						return fmt.Errorf("read-only test failed: %w", err)
 					}
 					fmt.Println("[SUCCESS] Read-only connection validated.")
-				} else {
+					if listCatalog {
+						if err := printCatalog(func() ([]string, error) { return db.ListSchemasPostgres(dsn) }, func(schema string) ([]string, error) { return db.ListTablesPostgres(dsn, schema) }); err != nil {
+							return err
+						}
+					}
+				case "mysql":
+					dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", user, password, host, port, dbName)
+					fmt.Println("[INFO] Testing MySQL read-only connection...")
+					if err := db.TestMySQLReadOnly(dsn); err != nil {
+						return fmt.Errorf("read-only test failed: %w", err)
+					}
+					fmt.Println("[SUCCESS] Read-only connection validated.")
+					if listCatalog {
+						if err := printCatalog(func() ([]string, error) { return db.ListSchemasMySQL(dsn) }, func(schema string) ([]string, error) { return db.ListTablesMySQL(dsn, schema) }); err != nil {
+							return err
+						}
+					}
+				case "mssql":
+					dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s", user, password, host, port, dbName)
+					fmt.Println("[INFO] Testing SQL Server connection...")
+					if err := db.TestMSSQLReadOnly(dsn); err != nil {
+						return fmt.Errorf("read-only test failed: %w", err)
+					}
+					fmt.Println("[SUCCESS] Connection validated (read-only enforcement not guaranteed).")
+					if listCatalog {
+						if err := printCatalog(func() ([]string, error) { return db.ListSchemasMSSQL(dsn) }, func(schema string) ([]string, error) { return db.ListTablesMSSQL(dsn, schema) }); err != nil {
+							return err
+						}
+					}
+				default:
 					return fmt.Errorf("driver %s is not supported for read-only validation yet", driver)
 				}
 			}
@@ -193,4 +248,40 @@ func splitCSV(input string) []string {
 		}
 	}
 	return out
+}
+
+func printCatalog(listSchemas func() ([]string, error), listTables func(schema string) ([]string, error)) error {
+	schemas, err := listSchemas()
+	if err != nil {
+		return err
+	}
+	if len(schemas) == 0 {
+		fmt.Println("[INFO] No schemas found.")
+		return nil
+	}
+	fmt.Println("[INFO] Schemas:")
+	for i, schema := range schemas {
+		if i >= 10 {
+			fmt.Println("[INFO] ...")
+			break
+		}
+		fmt.Printf("  - %s\n", schema)
+	}
+	schema, err := prompt.AskString("Schema to list tables", schemas[0], true)
+	if err != nil {
+		return err
+	}
+	tables, err := listTables(schema)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("[INFO] Tables in %s:\n", schema)
+	for i, table := range tables {
+		if i >= 20 {
+			fmt.Println("[INFO] ...")
+			break
+		}
+		fmt.Printf("  - %s\n", table)
+	}
+	return nil
 }

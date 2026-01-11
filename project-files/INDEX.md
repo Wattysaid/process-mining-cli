@@ -12,6 +12,7 @@ Use this index to navigate the instruction set.
 - `project-files/ARCHITECTURE.md`
 - `project-files/INSTALLATION_AND_RELEASE.md`
 - `project-files/CODING_STANDARDS.md`
+- `project-files/IMPLEMENTATION_PLAN.md`
 
 ## CLI and workflows
 - `project-files/STARTUP_SCREEN.md`
@@ -20,6 +21,7 @@ Use this index to navigate the instruction set.
 - `project-files/QA_AND_VALIDATION.md`
 - `project-files/USER_PROFILES.md`
 - `project-files/BUSINESS_PROFILES.md`
+- `project-files/CONTEXT_HANDOFF.md`
 
 ## Outputs
 - `project-files/NOTEBOOK_AND_REPORTS.md`

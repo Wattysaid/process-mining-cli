@@ -16,6 +16,23 @@ var StandardTemplate = Template{
 	Folders: []string{"data", "outputs", "docs", ".profiles", ".business"},
 }
 
+var MinimalTemplate = Template{
+	Name:    "minimal",
+	Folders: []string{"data", "outputs"},
+}
+
+var ConsultingTemplate = Template{
+	Name:    "consulting",
+	Folders: []string{"data", "outputs", "docs", "analysis", "reports", ".profiles", ".business"},
+}
+
+// Templates lists supported project layouts.
+var Templates = map[string]Template{
+	"standard":   StandardTemplate,
+	"minimal":    MinimalTemplate,
+	"consulting": ConsultingTemplate,
+}
+
 // ApplyTemplate creates folders under projectPath.
 func ApplyTemplate(projectPath string, template Template) error {
 	for _, folder := range template.Folders {
