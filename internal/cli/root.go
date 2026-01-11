@@ -26,6 +26,7 @@ var rootCmd = &cobra.Command{
 		}
 		Global.Config = cfg
 		prompt.SetNonInteractive(Global.NonInteractive)
+		prompt.SetAssumeYes(Global.Yes)
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {

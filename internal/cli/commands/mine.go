@@ -8,6 +8,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
+	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/notebook"
 	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/policy"
@@ -47,6 +48,23 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			if policies.OfflineOnly {
 				fmt.Println("[WARN] Offline-only policy is enabled; ensure local data sources are used.")
 			}
+
+			manifestManager, err := initRunManifest(runID, outputPath, cfg)
+			if err != nil {
+				return err
+			}
+			defer logging.CloseRunLog()
+			stepName := "mine"
+			if err := manifestManager.StartStep(stepName); err != nil {
+				return err
+			}
+			stepSuccess := false
+			defer func() {
+				if !stepSuccess {
+					_ = manifestManager.FailStep(stepName, "mine failed")
+					_ = manifestManager.SetStatus("failed")
+				}
+			}()
 
 			caseCol, err := prompt.AskString("Case ID column", "case_id", true)
 			if err != nil {
@@ -101,6 +119,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 					edaArgs = append(edaArgs, "--resource", resourceCol)
 				}
 				fmt.Println("[INFO] Running EDA diagnostics...")
+				logging.Info("running EDA diagnostics", map[string]any{"script": edaScript})
 				if err := venvRunner.RunScript(edaScript, edaArgs, nil); err != nil {
 					return err
 				}
@@ -124,6 +143,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 					argsList = append(argsList, "--resource", resourceCol)
 				}
 				fmt.Println("[INFO] Running discovery...")
+				logging.Info("running discovery", map[string]any{"script": discoverScript, "miner": miner})
 				if err := venvRunner.RunScript(discoverScript, argsList, nil); err != nil {
 					return err
 				}
@@ -147,6 +167,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 					argsList = append(argsList, "--resource", resourceCol)
 				}
 				fmt.Println("[INFO] Running conformance...")
+				logging.Info("running conformance", map[string]any{"script": confScript, "method": method})
 				if err := venvRunner.RunScript(confScript, argsList, nil); err != nil {
 					return err
 				}
@@ -177,6 +198,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 					argsList = append(argsList, "--resource", resourceCol)
 				}
 				fmt.Println("[INFO] Running performance analysis...")
+				logging.Info("running performance analysis", map[string]any{"script": perfScript})
 				if err := venvRunner.RunScript(perfScript, argsList, nil); err != nil {
 					return err
 				}
@@ -191,6 +213,17 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 					return err
 				}
 			}
+
+			if err := manifestManager.AddOutputs([]string{outputPath}); err != nil {
+				return err
+			}
+			if err := manifestManager.CompleteStep(stepName); err != nil {
+				return err
+			}
+			if err := manifestManager.SetStatus("completed"); err != nil {
+				return err
+			}
+			stepSuccess = true
 
 			fmt.Println("[SUCCESS] Mining steps completed.")
 			return nil

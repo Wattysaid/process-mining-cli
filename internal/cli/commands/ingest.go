@@ -8,6 +8,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
+	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/notebook"
 	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/policy"
@@ -88,13 +89,36 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 
+			manifestManager, err := initRunManifest(runID, outputPath, cfg)
+			if err != nil {
+				return err
+			}
+			defer logging.CloseRunLog()
+			stepName := "ingest"
+			if err := manifestManager.StartStep(stepName); err != nil {
+				return err
+			}
+			stepSuccess := false
+			defer func() {
+				if !stepSuccess {
+					_ = manifestManager.FailStep(stepName, "ingest failed")
+					_ = manifestManager.SetStatus("failed")
+				}
+			}()
+
 			confirm, err := prompt.AskBool("Run ingest now?", true)
 			if err != nil {
 				return err
 			}
 			if !confirm {
+				_ = manifestManager.CompleteStep(stepName)
+				_ = manifestManager.SetStatus("completed")
 				fmt.Println("[INFO] Ingest canceled by user.")
 				return nil
+			}
+
+			if err := manifestManager.AddInputs([]string{filePath}); err != nil {
+				return err
 			}
 
 			venvRunner := &runner.Runner{ProjectPath: projectPath}
@@ -121,6 +145,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			fmt.Println("[INFO] Running ingest script...")
+			logging.Info("running ingest script", map[string]any{"script": scriptPath})
 			if err := venvRunner.RunScript(scriptPath, argsList, nil); err != nil {
 				return err
 			}
@@ -134,6 +159,17 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			if err := notebook.AppendStep(nbPath, "Ingest", markdown, code); err != nil {
 				return err
 			}
+
+			if err := manifestManager.AddOutputs([]string{outputPath}); err != nil {
+				return err
+			}
+			if err := manifestManager.CompleteStep(stepName); err != nil {
+				return err
+			}
+			if err := manifestManager.SetStatus("completed"); err != nil {
+				return err
+			}
+			stepSuccess = true
 
 			fmt.Println("[SUCCESS] Ingest completed.")
 			return nil

@@ -2,15 +2,20 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
+const CurrentSchemaVersion = 1
+
 // Config holds resolved configuration. Expand fields as the CLI grows.
 type Config struct {
 	Path       string          `yaml:"-"`
+	Version    int             `yaml:"version"`
 	Project    ProjectConfig   `yaml:"project"`
 	Profiles   ProfilesConfig  `yaml:"profiles"`
 	Business   BusinessConfig  `yaml:"business"`
@@ -97,8 +102,53 @@ func Load(path string) (*Config, error) {
 	if err := yaml.Unmarshal(data, cfg); err != nil {
 		return nil, err
 	}
+	cfg.applyDefaults()
+	if err := cfg.Validate(); err != nil {
+		return nil, err
+	}
 	cfg.Path = resolved
 	return cfg, nil
+}
+
+// Validate checks config schema version and basic constraints.
+func (c *Config) Validate() error {
+	if c.Version == 0 {
+		c.Version = CurrentSchemaVersion
+	}
+	if c.Version != CurrentSchemaVersion {
+		return fmt.Errorf("unsupported config schema version: %d", c.Version)
+	}
+	for _, connector := range c.Connectors {
+		if connector.Type == "" {
+			return errors.New("connector type is required")
+		}
+		if connector.Type == "database" && connector.Database == nil {
+			return errors.New("database connector missing database config")
+		}
+		if connector.Type == "file" && connector.File == nil {
+			return errors.New("file connector missing file config")
+		}
+	}
+	return nil
+}
+
+func (c *Config) applyDefaults() {
+	if c.Version == 0 {
+		c.Version = CurrentSchemaVersion
+	}
+	if c.Policy.AllowedConnectors == nil {
+		c.Policy.AllowedConnectors = []string{}
+	}
+	if c.Policy.DeniedConnectors == nil {
+		c.Policy.DeniedConnectors = []string{}
+	}
+	if c.LLM.Provider == "" {
+		c.LLM.Provider = "none"
+	}
+	if c.Policy.LLMEnabled == nil {
+		defaultLLM := strings.ToLower(c.LLM.Provider) != "none"
+		c.Policy.LLMEnabled = &defaultLLM
+	}
 }
 
 // Save writes the config to its path.
@@ -106,6 +156,7 @@ func (c *Config) Save() error {
 	if c.Path == "" {
 		return errors.New("config path is required")
 	}
+	c.applyDefaults()
 	data, err := yaml.Marshal(c)
 	if err != nil {
 		return err

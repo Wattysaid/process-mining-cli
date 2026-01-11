@@ -8,6 +8,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
+	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/notebook"
 	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/policy"
@@ -48,6 +49,23 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				fmt.Println("[WARN] Offline-only policy is enabled; ensure local data sources are used.")
 			}
 
+			manifestManager, err := initRunManifest(runID, outputPath, cfg)
+			if err != nil {
+				return err
+			}
+			defer logging.CloseRunLog()
+			stepName := "prepare"
+			if err := manifestManager.StartStep(stepName); err != nil {
+				return err
+			}
+			stepSuccess := false
+			defer func() {
+				if !stepSuccess {
+					_ = manifestManager.FailStep(stepName, "prepare failed")
+					_ = manifestManager.SetStatus("failed")
+				}
+			}()
+
 			inputPath, err := prompt.AskString("Input log path", filepath.Join(outputPath, "stage_01_ingest_profile", "normalised_log.csv"), true)
 			if err != nil {
 				return err
@@ -74,8 +92,14 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			if !confirm {
+				_ = manifestManager.CompleteStep(stepName)
+				_ = manifestManager.SetStatus("completed")
 				fmt.Println("[INFO] Data preparation canceled by user.")
 				return nil
+			}
+
+			if err := manifestManager.AddInputs([]string{inputPath}); err != nil {
+				return err
 			}
 
 			venvRunner := &runner.Runner{ProjectPath: projectPath}
@@ -101,6 +125,7 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			fmt.Println("[INFO] Running data quality checks...")
+			logging.Info("running data quality checks", map[string]any{"script": qualityScript})
 			if err := venvRunner.RunScript(qualityScript, qualityArgs, nil); err != nil {
 				return err
 			}
@@ -170,6 +195,7 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			fmt.Println("[INFO] Running clean and filter...")
+			logging.Info("running clean and filter", map[string]any{"script": cleanScript})
 			if err := venvRunner.RunScript(cleanScript, cleanArgs, nil); err != nil {
 				return err
 			}
@@ -195,6 +221,17 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 			if err := notebook.AppendStep(nbPath, "Clean and Filter", cleanMarkdown, cleanCode); err != nil {
 				return err
 			}
+
+			if err := manifestManager.AddOutputs([]string{outputPath}); err != nil {
+				return err
+			}
+			if err := manifestManager.CompleteStep(stepName); err != nil {
+				return err
+			}
+			if err := manifestManager.SetStatus("completed"); err != nil {
+				return err
+			}
+			stepSuccess = true
 
 			fmt.Println("[SUCCESS] Data preparation completed.")
 			return nil

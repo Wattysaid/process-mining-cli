@@ -9,10 +9,16 @@ import (
 )
 
 var nonInteractive bool
+var assumeYes bool
 
 // SetNonInteractive configures prompt behavior.
 func SetNonInteractive(value bool) {
 	nonInteractive = value
+}
+
+// SetAssumeYes configures default "yes" behavior for safe prompts.
+func SetAssumeYes(value bool) {
+	assumeYes = value
 }
 
 // AskString prompts for a string input.
@@ -55,6 +61,9 @@ func AskChoice(question string, options []string, defaultValue string, required 
 
 // AskBool prompts for a yes/no input.
 func AskBool(question string, defaultValue bool) (bool, error) {
+	if assumeYes && defaultValue {
+		return true, nil
+	}
 	defaultText := "n"
 	if defaultValue {
 		defaultText = "y"

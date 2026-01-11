@@ -1,73 +1,105 @@
-# PM Assist CLI (Process Mining Assistant)
+# PM Assist CLI
 
-**Document version:** R1.00 (2026-01-11)  
-**Audience:** Engineering team (Codex), product, security, delivery  
-**Goal:** Build an enterprise-grade CLI assistant that enables a single practitioner to run an end-to-end process mining engagement (data engineering through mining through reporting), with guided workflows and optional LLM-powered assistance (OpenAI, Anthropic, Gemini, or local Ollama) that is token-cost controlled.
+PM Assist CLI is an interactive, enterprise-ready process mining assistant that guides analysts through end-to-end engagements from data access to discovery, conformance, performance analysis, and reporting. It is a local CLI tool with optional AI assistance (OpenAI, Anthropic, Gemini, or local Ollama) that never makes decisions for the user and never executes destructive actions without confirmation.
 
-## What this repo provides (instructions only)
-This repository folder contains **MD instruction files** that an AI coding agent can use to implement the application. The `cli-tool-skills` library under `.codex/skills/` contains the minimum Python-backed capabilities the CLI must orchestrate, and `.profiles/` + `.business/` store user/business profiles.
+The tool is designed to be a trusted, auditable companion: it asks the right questions, proposes next steps, generates reproducible code and notebooks, and keeps an immutable trail of what was run.
 
-## Product positioning
-PM Assist is a CLI-based process mining copilot that competes with Celonis, Signavio and ARIS on *time-to-insight* for single analysts and small teams, while remaining deployable inside regulated enterprise environments (on-prem, VPC, private networks).
+## Highlights
+- **User-led decisions**: prompts for approval at each step; no silent actions.
+- **Profiles & business context**: stores user and business profiles in `.profiles/` and `.business/`.
+- **Optional AI**: use AI for summaries, interpretation, and task translation; keep data processing deterministic.
+- **Cross-platform**: Linux, macOS, Windows (WSL2). One-line installer.
+- **Enterprise-safe**: read-only connectors, secrets via env vars, audit-friendly outputs.
 
-## Key principles
-- **User-led decisions**: the CLI must ask questions and present options; it must not make unilateral analytical decisions.
-- **Reproducibility**: each run produces a deterministic artefact bundle (config, logs, notebooks, reports, model outputs).
-- **Enterprise hygiene**: secure secret handling, audit logs, data minimisation, read-only connectors by default.
-- **Cost control**: LLM usage is optional, measurable, capped, and used mainly for orchestration and narrative generation, not heavy computation.
-- **Composable pipelines**: pipelines are built from reusable Python snippets and modules (data science + process mining).
-- **Assistant-first**: the CLI adapts to user aptitude (beginner/intermediate/expert) and stores profiles in `.profiles/` to tailor prompts and defaults.
+## Quick Start
 
-## High-level workflow (happy path)
-1. `pm-assist init` creates a project scaffold.
-2. `pm-assist connect` registers read-only data sources (CSV/Parquet first; DB and S3/SharePoint later).
-3. `pm-assist ingest` imports data and validates schema.
-4. `pm-assist prepare` runs data prep (missingness, type fixes, duplicates, outliers, normalisation, encoding, text cleanup, date features).
-5. `pm-assist mine` performs discovery, conformance, performance, variants, drift, and (optional) predictive monitoring.
-6. `pm-assist report` generates:
-   - a Jupyter notebook (executed or unexecuted, configurable)
-   - an executive report (Markdown/HTML/PDF roadmap)
-   - an artefact bundle for auditability
-7. `pm-assist review` runs automated checks and produces a QA summary.
-8. Optional: `pm-assist agent` provides guided Q&A and narrative drafting using OpenAI, Anthropic, Gemini, or local Ollama.
+### Install (Linux/macOS/WSL2)
+```bash
+curl -fsSL https://YOUR_RELEASES_HOST/install.sh | sh
+```
 
-## Project outputs (per run)
-- `./outputs/<run-id>/`
-  - `config.yaml` (resolved configuration snapshot)
-  - `run.log` (structured log)
-  - `data_profile/` (optional profiling reports)
-  - `event_log/` (canonical event log in parquet)
-  - `models/` (DFG, Petri, BPMN exports)
-  - `analysis_notebook.ipynb`
-  - `report.md` + `report.html` (+ pdf if enabled)
-  - `quality/` (validation and test results)
+### Verify
+```bash
+pm-assist doctor
+pm-assist version
+```
 
-## Success criteria
-- Install via a single command (curl installer) on Linux/macOS; Windows via WSL2 is supported.
-- CLI is intuitive, guides the user, and fails safely with actionable messages.
-- Pipelines can run fully offline except for optional LLM calls.
-- The implementation supports enterprise governance: secrets, audit logs, deterministic outputs.
+### Create a new project
+```bash
+pm-assist init
+```
 
-## Required deliverables for MVP
-- CLI binary (recommended: Go) that orchestrates Python pipelines in a managed venv
-- Installer script (`curl | sh`)
-- LLM integration (optional, gated by explicit opt-in; OpenAI/Anthropic/Gemini/Ollama)
-- Template-based notebook and report generation
-- Data validation + QA checks
-- Extensible skill library (`.codex/skills/…`) used by Codex while coding, and optionally by the product for runtime guidance
+### Run a guided workflow
+```bash
+pm-assist connect
+pm-assist ingest
+pm-assist prepare
+pm-assist mine
+pm-assist report
+```
 
-## Where to start
-Read these files in order:
-1. `project-files/PRD.md`
-2. `project-files/ARCHITECTURE.md`
-3. `project-files/CLI_SPEC.md`
-4. `project-files/STARTUP_SCREEN.md`
-4. `project-files/INSTALLATION_AND_RELEASE.md`
-5. `project-files/OPENAI_INTEGRATION.md`
-6. `project-files/WORKFLOWS.md`
-7. `.codex/agent.md` and `.codex/skills/*/skill.md`
+## How It Works
 
----
+PM Assist is a local CLI that orchestrates Python-based skills. It creates a project scaffold, registers data sources, and builds a notebook as you confirm each step. The CLI uses AI only where it adds value (summaries, interpretation, and intent translation), and relies on deterministic Python scripts for data processing.
 
-## Notes on your existing assets
-You already have an end-to-end pm4py notebook and guidance content. The agent should extract reusable code blocks and convert them into modular pipeline steps (see `project-files/WORKFLOWS.md` and `project-files/NOTEBOOK_AND_REPORTS.md`). 
+Core flow:
+1. **Initialize**: create project layout and profiles.
+2. **Connect**: register read-only data sources.
+3. **Ingest**: load and validate data.
+4. **Prepare**: clean and transform event logs.
+5. **Mine**: run discovery, conformance, performance, and variant analysis.
+6. **Report**: generate narrative insights and artifacts.
+7. **Review**: automated QA checks and audit summary.
+
+## Example Scenarios
+
+### Scenario 1: Procurement bottlenecks
+You are asked to identify bottlenecks in the procurement process.
+1. `pm-assist init` creates a project and asks about your role, experience level, and target business.
+2. `pm-assist connect` asks how to access procurement data (ERP, CSV exports, database).
+3. `pm-assist ingest` validates tables and schema.
+4. `pm-assist prepare` cleans timestamps, filters invalid rows, and normalizes activity names.
+5. `pm-assist mine` highlights the longest waiting steps and most frequent rework loops.
+6. `pm-assist report` creates a summary report and appends all code to the notebook.
+
+### Scenario 2: Duplicate events in a dataset
+You want to check a data extract for duplicates.
+1. `pm-assist connect` registers the CSV.
+2. `pm-assist ingest` previews rows and verifies schema.
+3. `pm-assist prepare` scans duplicates and proposes a fix.
+4. You approve, and the notebook is updated with the exact code used.
+
+### Scenario 3: Executive-ready report
+You need a short executive summary for leadership.
+1. Run your mining steps.
+2. `pm-assist report` generates a concise Markdown report.
+3. If AI is enabled, it drafts a narrative aligned to your industry.
+
+## Configuration and Profiles
+- **User profiles**: stored in `.profiles/` as YAML.
+- **Business profiles**: stored in `.business/` as YAML.
+- **Project config**: `pm-assist.yaml` in the project root.
+
+The CLI uses these profiles to tailor prompts, defaults, and recommendations.
+
+## Security & Privacy
+- Credentials are never stored in plaintext; use environment variables.
+- Connectors are read-only by default.
+- AI use is optional and policy-controlled.
+- All outputs are local, deterministic, and audit-friendly.
+
+## Repository Layout
+- `cmd/` and `internal/`: Go CLI source code.
+- `python/`: Python workflows and scripts.
+- `.codex/skills/cli-tool-skills/`: minimum skills library.
+- `project-files/`: product specs and architecture docs.
+- `scripts/`: installer and packaging scripts.
+
+## Development
+```bash
+go build ./cmd/pm-assist
+./pm-assist version
+```
+
+## License
+Proprietary. Do not distribute without permission.

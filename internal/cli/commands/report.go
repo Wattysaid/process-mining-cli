@@ -8,6 +8,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
+	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/notebook"
 	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/policy"
@@ -48,6 +49,23 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 				fmt.Println("[WARN] Offline-only policy is enabled; ensure local data sources are used.")
 			}
 
+			manifestManager, err := initRunManifest(runID, outputPath, cfg)
+			if err != nil {
+				return err
+			}
+			defer logging.CloseRunLog()
+			stepName := "report"
+			if err := manifestManager.StartStep(stepName); err != nil {
+				return err
+			}
+			stepSuccess := false
+			defer func() {
+				if !stepSuccess {
+					_ = manifestManager.FailStep(stepName, "report failed")
+					_ = manifestManager.SetStatus("failed")
+				}
+			}()
+
 			reportName, err := prompt.AskString("Report filename", "process_mining_report.md", true)
 			if err != nil {
 				return err
@@ -57,6 +75,8 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			if !confirm {
+				_ = manifestManager.CompleteStep(stepName)
+				_ = manifestManager.SetStatus("completed")
 				fmt.Println("[INFO] Report generation canceled by user.")
 				return nil
 			}
@@ -74,6 +94,7 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 			reportScript := paths.SkillPath(skillsRoot, "pm-10-reporting", "scripts", "08_report.py")
 			argsList := []string{"--output", outputPath, "--report", reportName}
 			fmt.Println("[INFO] Generating report...")
+			logging.Info("generating report", map[string]any{"script": reportScript, "report": reportName})
 			if err := venvRunner.RunScript(reportScript, argsList, nil); err != nil {
 				return err
 			}
@@ -83,6 +104,17 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 			if err := notebook.AppendStep(nbPath, "Report", "## Report\nWe generated the report artefact.", code); err != nil {
 				return err
 			}
+
+			if err := manifestManager.AddOutputs([]string{outputPath}); err != nil {
+				return err
+			}
+			if err := manifestManager.CompleteStep(stepName); err != nil {
+				return err
+			}
+			if err := manifestManager.SetStatus("completed"); err != nil {
+				return err
+			}
+			stepSuccess = true
 
 			fmt.Println("[SUCCESS] Report generated.")
 			return nil

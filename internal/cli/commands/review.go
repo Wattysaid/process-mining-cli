@@ -8,6 +8,8 @@ import (
 
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
+	"github.com/pm-assist/pm-assist/internal/config"
+	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/qa"
 	"github.com/spf13/cobra"
 )
@@ -35,6 +37,28 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 			if err := os.MkdirAll(outputPath, 0o755); err != nil {
 				return err
 			}
+
+			cfg, err := config.Load(global.ConfigPath)
+			if err != nil {
+				return err
+			}
+
+			manifestManager, err := initRunManifest(runID, outputPath, cfg)
+			if err != nil {
+				return err
+			}
+			defer logging.CloseRunLog()
+			stepName := "review"
+			if err := manifestManager.StartStep(stepName); err != nil {
+				return err
+			}
+			stepSuccess := false
+			defer func() {
+				if !stepSuccess {
+					_ = manifestManager.FailStep(stepName, "review failed")
+					_ = manifestManager.SetStatus("failed")
+				}
+			}()
 
 			inputPath, err := prompt.AskString("Input log path", filepath.Join(outputPath, "stage_03_clean_filter", "filtered_log.csv"), true)
 			if err != nil {
@@ -79,6 +103,10 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 
+			if err := manifestManager.AddInputs([]string{inputPath}); err != nil {
+				return err
+			}
+
 			results, backlog, err := qa.RunCSV(inputPath, caseCol, activityCol, timestampCol, timestampFormat, thresholds)
 			if err != nil {
 				return err
@@ -90,6 +118,8 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 			if len(results.BlockingIssues) > 0 {
 				fmt.Printf("[WARN] Blocking issues detected: %v\n", results.BlockingIssues)
 				if global.NonInteractive {
+					_ = manifestManager.FailStep(stepName, "blocking QA issues detected")
+					_ = manifestManager.SetStatus("failed")
 					return fmt.Errorf("blocking QA issues detected")
 				}
 				proceed, err := prompt.AskBool("Proceed despite blocking issues?", false)
@@ -97,9 +127,22 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 					return err
 				}
 				if !proceed {
+					_ = manifestManager.FailStep(stepName, "review halted by user")
+					_ = manifestManager.SetStatus("failed")
 					return fmt.Errorf("review halted due to blocking issues")
 				}
 			}
+
+			if err := manifestManager.AddOutputs([]string{outputPath}); err != nil {
+				return err
+			}
+			if err := manifestManager.CompleteStep(stepName); err != nil {
+				return err
+			}
+			if err := manifestManager.SetStatus("completed"); err != nil {
+				return err
+			}
+			stepSuccess = true
 
 			fmt.Println("[SUCCESS] QA review completed.")
 			return nil
