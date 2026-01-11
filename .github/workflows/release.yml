@@ -43,6 +43,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Make Scripts executable
+        run: chmod +x scripts/*.sh
+
       - name: Package resources
         run: scripts/package_resources.sh .codex/skills/cli-tool-skills resources/cli-tool-skills
 
