@@ -71,6 +71,7 @@ What would you like to do?
   2) Continue an existing project
   3) Run environment diagnostics (doctor)
   4) Configure LLM integration
+  5) Manage user or business profiles
   5) Exit
 
 Select an option (1–5):
@@ -96,6 +97,7 @@ Continue? (Y/n):
 Questions:
 - Name and role
 - Aptitude level (beginner/intermediate/expert)
+- Business profile (select existing or create new)
 - Default workspace directory
 - Default output formats (notebook, html report, both)
 - Whether LLM features should be enabled by default
@@ -103,6 +105,7 @@ Questions:
 Creates:
 - `~/.config/pm-assist/config.yaml`
 - `.profiles/<name>.yaml` in the project directory
+- `.business/<name>.yaml` in the project directory (if created)
 - Example project scaffold (optional, user-approved)
 
 ## 4. Existing project detection
@@ -176,6 +179,7 @@ Menu options must map to commands:
 - Continue project -> guided pipeline command
 - Doctor -> `pm-assist doctor`
 - Configure LLM -> `pm-assist agent setup` (or similar)
+- Manage profiles -> `pm-assist profile` and `pm-assist business`
 
 ## 7. Implementation guidance (Go)
 
