@@ -1,23 +1,21 @@
 module github.com/pm-assist/pm-assist
 
-go 1.23.0
-
-toolchain go1.24.11
+go 1.22
 
 require (
-	cloud.google.com/go/bigquery v1.66.2
+	cloud.google.com/go/bigquery v1.61.0
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/lib/pq v1.10.9
 	github.com/russross/blackfriday/v2 v2.1.0
 	github.com/snowflakedb/gosnowflake v1.13.1
 	github.com/spf13/cobra v1.8.1
-	google.golang.org/api v0.230.0
+	google.golang.org/api v0.195.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	cloud.google.com/go v0.121.0 // indirect
+	cloud.google.com/go v0.119.0 // indirect
 	cloud.google.com/go/auth v0.16.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
