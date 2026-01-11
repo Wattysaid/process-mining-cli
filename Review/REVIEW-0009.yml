@@ -1,7 +1,7 @@
 id: REVIEW-0009
 title: "Startup status uses hardcoded version"
 owner_role: cli
-status: needs-review
+status: resolved
 priority: P3
 depends_on: []
 scope:
@@ -22,3 +22,4 @@ quality_gates:
   - "go test ./... passes"
 notes:
   context: "Startup screen prints 'Version: 0.1.0' regardless of build metadata."
+  update: "Centralized version/commit in buildinfo and reused in startup."

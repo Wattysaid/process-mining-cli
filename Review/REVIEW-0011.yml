@@ -1,7 +1,7 @@
 id: REVIEW-0011
 title: "Doctor command does not validate Python dependencies"
 owner_role: cli
-status: needs-review
+status: resolved
 priority: P3
 depends_on:
   - "TASK-0021"
@@ -25,3 +25,4 @@ quality_gates:
   - "go test ./... passes"
 notes:
   context: "Doctor currently checks python and graphviz only."
+  update: "Doctor now checks venv path and imports core Python dependencies."

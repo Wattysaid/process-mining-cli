@@ -1,7 +1,7 @@
 id: REVIEW-0008
 title: "Agent command lacks guided workflow"
 owner_role: ai
-status: needs-review
+status: resolved
 priority: P2
 depends_on:
   - "TASK-0033"
@@ -24,3 +24,4 @@ quality_gates:
   - "go test ./... passes"
 notes:
   context: "Current agent command only exposes setup and no guidance flow."
+  update: "Added guided workflow to pm-assist agent with profile-aware prompts."

@@ -1,7 +1,7 @@
 id: REVIEW-0012
 title: "Startup Python readiness ignores venv and core imports"
 owner_role: cli
-status: needs-review
+status: resolved
 priority: P3
 depends_on:
   - "TASK-0021"
@@ -25,3 +25,4 @@ quality_gates:
   - "go test ./... passes"
 notes:
   context: "Startup currently marks Python ready if any python executable exists."
+  update: "Startup now checks venv and import readiness per spec."

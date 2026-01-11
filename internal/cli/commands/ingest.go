@@ -86,11 +86,11 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			var (
-				filePath string
-				format   string
-				encoding string
+				filePath  string
+				format    string
+				encoding  string
 				delimiter string
-				sheet    string
+				sheet     string
 				jsonLines bool
 				zipMember string
 			)

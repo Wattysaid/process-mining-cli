@@ -1,7 +1,7 @@
 id: REVIEW-0010
 title: "Startup LLM status ignores policy settings"
 owner_role: security
-status: needs-review
+status: resolved
 priority: P3
 depends_on:
   - "TASK-0006"
@@ -23,3 +23,4 @@ quality_gates:
   - "go test ./... passes"
 notes:
   context: "Startup currently infers LLM status from env vars only."
+  update: "Startup now reflects policy and provider configuration."

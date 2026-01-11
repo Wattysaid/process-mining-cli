@@ -1,7 +1,7 @@
 id: REVIEW-0007
 title: "Ingest command only supports file connectors"
 owner_role: data
-status: needs-review
+status: resolved
 priority: P2
 depends_on:
   - "TASK-0005"
@@ -24,3 +24,4 @@ quality_gates:
   - "go test ./... passes"
 notes:
   context: "Current ingest returns an error for non-file connectors."
+  update: "Added database extraction to CSV and ingestion for supported drivers."
