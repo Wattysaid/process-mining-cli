@@ -8,6 +8,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/profile"
+	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/spf13/cobra"
 )
 
@@ -56,10 +57,6 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			if err := os.MkdirAll(filepath.Join(projectPath, "docs"), 0o755); err != nil {
 				return err
 			}
-			if err := os.MkdirAll(filepath.Join(projectPath, ".venv"), 0o755); err != nil {
-				return err
-			}
-
 			configPath := filepath.Join(projectPath, "pm-assist.yaml")
 			if _, err := os.Stat(configPath); os.IsNotExist(err) {
 				content := fmt.Sprintf("project:\n  name: %s\nprofiles:\n  active: %s\n", projectName, userName)
@@ -75,6 +72,19 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 				PromptDepth: promptDepth,
 			})
 			if err != nil {
+				return err
+			}
+
+			installDeps, err := prompt.AskBool("Install Python dependencies now? (requires network)", false)
+			if err != nil {
+				return err
+			}
+			skillRequirements := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-99-utils-and-standards", "requirements.txt")
+			if !installDeps {
+				skillRequirements = ""
+			}
+			venvRunner := &runner.Runner{ProjectPath: projectPath}
+			if err := venvRunner.EnsureVenv(skillRequirements); err != nil {
 				return err
 			}
 
