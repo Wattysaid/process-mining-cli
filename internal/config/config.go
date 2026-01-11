@@ -38,7 +38,12 @@ type BusinessConfig struct {
 }
 
 type LLMConfig struct {
-	Provider string `yaml:"provider"`
+	Provider    string  `yaml:"provider"`
+	Model       string  `yaml:"model,omitempty"`
+	Endpoint    string  `yaml:"endpoint,omitempty"`
+	MaxTokens   int     `yaml:"max_tokens,omitempty"`
+	TokenBudget int     `yaml:"token_budget,omitempty"`
+	CostCapUSD  float64 `yaml:"cost_cap_usd,omitempty"`
 }
 
 type PolicyConfig struct {

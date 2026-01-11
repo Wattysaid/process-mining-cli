@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/pm-assist/pm-assist/internal/app"
@@ -24,14 +25,25 @@ func NewDoctorCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			policies := policy.FromConfig(cfg)
-			pythonPath, pythonErr := exec.LookPath("python3")
-			if pythonErr != nil {
-				pythonPath, pythonErr = exec.LookPath("python")
+			projectPath := global.ProjectPath
+			if projectPath == "" {
+				cwd, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+				projectPath = cwd
 			}
+
+			pythonPath, pythonErr := resolvePythonPath(projectPath)
 			if pythonErr != nil {
 				fmt.Println("[ERROR] Python not found")
 			} else {
 				fmt.Printf("[SUCCESS] Python found: %s\n", pythonPath)
+				if err := checkPythonDeps(pythonPath); err != nil {
+					fmt.Printf("[WARN] Python dependencies missing or failed to import: %v\n", err)
+				} else {
+					fmt.Println("[SUCCESS] Python dependencies imported successfully.")
+				}
 			}
 
 			dotPath, dotErr := exec.LookPath("dot")
@@ -100,8 +112,23 @@ func NewDoctorCmd(global *app.GlobalFlags) *cobra.Command {
 						} else {
 							fmt.Printf("[SUCCESS] SQL Server connector %s reachable.\n", connector.Name)
 						}
-					case "snowflake", "bigquery":
-						fmt.Printf("[WARN] Connector %s uses %s; reachability checks not supported yet.\n", connector.Name, driver)
+					case "snowflake":
+						dsn, err := db.SnowflakeDSN(connector.Database.Host, connector.Database.User, password, connector.Database.DBName, connector.Database.Schema)
+						if err != nil {
+							fmt.Printf("[ERROR] Snowflake connector %s failed: %v\n", connector.Name, err)
+							continue
+						}
+						if err := db.TestSnowflakeReadOnly(dsn); err != nil {
+							fmt.Printf("[ERROR] Snowflake connector %s failed: %v\n", connector.Name, err)
+						} else {
+							fmt.Printf("[SUCCESS] Snowflake connector %s reachable.\n", connector.Name)
+						}
+					case "bigquery":
+						if err := db.TestBigQueryReadOnly(connector.Database.DBName, password); err != nil {
+							fmt.Printf("[ERROR] BigQuery connector %s failed: %v\n", connector.Name, err)
+						} else {
+							fmt.Printf("[SUCCESS] BigQuery connector %s reachable.\n", connector.Name)
+						}
 					default:
 						fmt.Printf("[WARN] Connector %s uses unsupported driver %s.\n", connector.Name, driver)
 					}
@@ -118,4 +145,23 @@ func NewDoctorCmd(global *app.GlobalFlags) *cobra.Command {
 		Example: "  pm-assist doctor",
 	}
 	return cmd
+}
+
+func resolvePythonPath(projectPath string) (string, error) {
+	candidate := filepath.Join(projectPath, ".venv", "bin", "python")
+	if _, err := os.Stat(candidate); err == nil {
+		return candidate, nil
+	}
+	pythonPath, err := exec.LookPath("python3")
+	if err == nil {
+		return pythonPath, nil
+	}
+	return exec.LookPath("python")
+}
+
+func checkPythonDeps(pythonPath string) error {
+	cmd := exec.Command(pythonPath, "-c", "import pm4py, pandas, numpy, matplotlib, yaml, openpyxl, pyarrow")
+	cmd.Stdout = nil
+	cmd.Stderr = nil
+	return cmd.Run()
 }

@@ -1,12 +1,18 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
+	"strings"
 
+	"github.com/pm-assist/pm-assist/internal/buildinfo"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
+	"github.com/pm-assist/pm-assist/internal/config"
+	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/spf13/cobra"
 )
 
@@ -41,8 +47,7 @@ func runStartup(cmdRoot *cobra.Command) error {
 	case "1":
 		return dispatchCommand(cmdRoot, "init")
 	case "2":
-		fmt.Println("[INFO] Continue project flow is not implemented yet.")
-		return nil
+		return continueProjectFlow(cmdRoot)
 	case "3":
 		return dispatchCommand(cmdRoot, "doctor")
 	case "4":
@@ -62,6 +67,107 @@ func runStartup(cmdRoot *cobra.Command) error {
 	default:
 		return fmt.Errorf("invalid selection")
 	}
+}
+
+type runManifest struct {
+	RunID       string `json:"run_id"`
+	Status      string `json:"status"`
+	StartedAt   string `json:"started_at"`
+	CompletedAt string `json:"completed_at"`
+	Steps       []struct {
+		Name   string `json:"name"`
+		Status string `json:"status"`
+	} `json:"steps"`
+}
+
+func continueProjectFlow(cmdRoot *cobra.Command) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	manifestPath, manifest, err := findLatestManifest(filepath.Join(cwd, "outputs"))
+	if err != nil {
+		return err
+	}
+	if manifest == nil {
+		confirm, err := prompt.AskBool("No previous runs found. Start a new run now?", true)
+		if err != nil {
+			return err
+		}
+		if confirm {
+			return dispatchCommand(cmdRoot, "connect")
+		}
+		return nil
+	}
+
+	fmt.Printf("[INFO] Latest run: %s (%s)\n", manifest.RunID, manifest.Status)
+	if manifest.CompletedAt != "" {
+		fmt.Printf("[INFO] Completed at: %s\n", manifest.CompletedAt)
+	} else if manifest.StartedAt != "" {
+		fmt.Printf("[INFO] Started at: %s\n", manifest.StartedAt)
+	}
+	fmt.Printf("[INFO] Manifest: %s\n", manifestPath)
+
+	nextStep := nextRecommendedStep(manifest)
+	if nextStep == "" {
+		fmt.Println("[INFO] All pipeline steps appear complete for the latest run.")
+		return nil
+	}
+	confirm, err := prompt.AskBool(fmt.Sprintf("Continue with next step (%s)?", nextStep), true)
+	if err != nil {
+		return err
+	}
+	if confirm {
+		return dispatchCommand(cmdRoot, nextStep)
+	}
+	return nil
+}
+
+func findLatestManifest(outputsPath string) (string, *runManifest, error) {
+	pattern := filepath.Join(outputsPath, "*", "run_manifest.json")
+	candidates, err := filepath.Glob(pattern)
+	if err != nil {
+		return "", nil, err
+	}
+	if len(candidates) == 0 {
+		return "", nil, nil
+	}
+	sort.Slice(candidates, func(i, j int) bool {
+		infoI, errI := os.Stat(candidates[i])
+		infoJ, errJ := os.Stat(candidates[j])
+		if errI != nil || errJ != nil {
+			return candidates[i] < candidates[j]
+		}
+		return infoI.ModTime().After(infoJ.ModTime())
+	})
+	latest := candidates[0]
+	data, err := os.ReadFile(latest)
+	if err != nil {
+		return "", nil, err
+	}
+	var manifest runManifest
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		return "", nil, err
+	}
+	return latest, &manifest, nil
+}
+
+func nextRecommendedStep(manifest *runManifest) string {
+	if manifest == nil {
+		return ""
+	}
+	pipeline := []string{"ingest", "map", "prepare", "mine", "report", "review"}
+	statusByStep := make(map[string]string)
+	for _, step := range manifest.Steps {
+		statusByStep[step.Name] = step.Status
+	}
+	for _, step := range pipeline {
+		status := statusByStep[step]
+		if status == "" || status == "failed" || status == "started" {
+			return step
+		}
+	}
+	return ""
 }
 
 func dispatchCommand(cmdRoot *cobra.Command, name string, args ...string) error {
@@ -106,21 +212,13 @@ func printBanner() {
 }
 
 func printStatus() {
-	pythonStatus := "missing"
-	if _, err := lookupPath("python3"); err == nil {
-		pythonStatus = "ready"
-	} else if _, err := lookupPath("python"); err == nil {
-		pythonStatus = "ready"
-	}
-	llmStatus := "not configured"
-	if hasEnv("OPENAI_API_KEY") || hasEnv("ANTHROPIC_API_KEY") || hasEnv("GEMINI_API_KEY") || hasEnv("GOOGLE_API_KEY") || hasEnv("OLLAMA_HOST") {
-		llmStatus = "configured"
-	}
+	pythonStatus := resolvePythonStatus()
+	llmStatus := resolveLLMStatus()
 	graphvizStatus := "missing"
 	if _, err := lookupPath("dot"); err == nil {
 		graphvizStatus = "ready"
 	}
-	fmt.Printf("\nVersion: 0.1.0 | Python: %s | LLM: %s | Graphviz: %s\n", pythonStatus, llmStatus, graphvizStatus)
+	fmt.Printf("\nVersion: %s | Python: %s | LLM: %s | Graphviz: %s\n", buildinfo.Version, pythonStatus, llmStatus, graphvizStatus)
 
 	if hasProjectConfig() {
 		fmt.Println("[INFO] Project detected in current directory.")
@@ -146,4 +244,62 @@ func lookupPath(binary string) (string, error) {
 
 var execLookPath = func(binary string) (string, error) {
 	return exec.LookPath(binary)
+}
+
+func resolvePythonStatus() string {
+	pythonPath := ""
+	if hasProjectConfig() {
+		cwd, err := os.Getwd()
+		if err == nil {
+			candidate := filepath.Join(cwd, ".venv", "bin", "python")
+			if _, err := os.Stat(candidate); err == nil {
+				pythonPath = candidate
+			}
+		}
+	}
+	if pythonPath == "" {
+		if path, err := lookupPath("python3"); err == nil {
+			pythonPath = path
+		} else if path, err := lookupPath("python"); err == nil {
+			pythonPath = path
+		}
+	}
+	if pythonPath == "" {
+		return "missing"
+	}
+	if err := checkPythonImports(pythonPath); err != nil {
+		return "deps missing"
+	}
+	return "ready"
+}
+
+func checkPythonImports(pythonPath string) error {
+	cmd := exec.Command(pythonPath, "-c", "import pm4py, pandas, numpy, matplotlib, yaml, openpyxl, pyarrow")
+	cmd.Stdout = nil
+	cmd.Stderr = nil
+	return cmd.Run()
+}
+
+func resolveLLMStatus() string {
+	cfg, err := config.Load("")
+	if err != nil {
+		return "not configured"
+	}
+	policies := policy.FromConfig(cfg)
+	if policies.LLMEnabled != nil && !*policies.LLMEnabled {
+		return "disabled by policy"
+	}
+	if policies.OfflineOnly && cfg.LLM.Provider != "" && strings.ToLower(cfg.LLM.Provider) != "ollama" && strings.ToLower(cfg.LLM.Provider) != "none" {
+		return "disabled by policy"
+	}
+	if strings.ToLower(cfg.LLM.Provider) == "ollama" {
+		if hasEnv("OLLAMA_HOST") {
+			return "configured"
+		}
+		return "not configured"
+	}
+	if hasEnv("OPENAI_API_KEY") || hasEnv("ANTHROPIC_API_KEY") || hasEnv("GEMINI_API_KEY") || hasEnv("GOOGLE_API_KEY") {
+		return "configured"
+	}
+	return "not configured"
 }

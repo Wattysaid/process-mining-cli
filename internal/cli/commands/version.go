@@ -4,12 +4,8 @@ import (
 	"fmt"
 
 	"github.com/pm-assist/pm-assist/internal/app"
+	"github.com/pm-assist/pm-assist/internal/buildinfo"
 	"github.com/spf13/cobra"
-)
-
-const (
-	version = "0.1.0"
-	commit  = "dev"
 )
 
 // NewVersionCmd returns the version command.
@@ -19,7 +15,7 @@ func NewVersionCmd(global *app.GlobalFlags) *cobra.Command {
 		Short: "Print version and build metadata",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			_ = global
-			fmt.Printf("pm-assist %s (%s)\n", version, commit)
+			fmt.Printf("pm-assist %s (%s)\n", buildinfo.Version, buildinfo.Commit)
 			return nil
 		},
 		Example: "  pm-assist version",

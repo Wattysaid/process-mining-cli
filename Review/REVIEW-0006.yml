@@ -1,7 +1,7 @@
 id: REVIEW-0006
 title: "Cloud warehouse connector validation not implemented"
 owner_role: data
-status: needs-review
+status: resolved
 priority: P2
 depends_on:
   - "TASK-0024"
@@ -24,3 +24,4 @@ quality_gates:
   - "go test ./... passes"
 notes:
   context: "Current code explicitly warns that validation is not supported for these drivers."
+  update: "Added Snowflake/BigQuery validation and catalog support in connect/doctor."

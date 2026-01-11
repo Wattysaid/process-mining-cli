@@ -184,9 +184,6 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if driver == "snowflake" || driver == "bigquery" {
-				fmt.Printf("[WARN] %s connectors are captured for auditing but reachability checks are not supported yet.\n", driver)
-			}
 			if !policies.AllowsConnector(driver) {
 				return fmt.Errorf("connector driver blocked by policy: %s", driver)
 			}
@@ -229,10 +226,6 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 			testNow, err := resolveBool(flagTest, "Test read-only connection now?", true)
 			if err != nil {
 				return err
-			}
-			if testNow && (driver == "snowflake" || driver == "bigquery") {
-				fmt.Printf("[WARN] %s validation is not supported yet; skipping connection test.\n", driver)
-				testNow = false
 			}
 			if testNow {
 				password := os.Getenv(credEnv)
@@ -280,8 +273,32 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 							return err
 						}
 					}
-				case "snowflake", "bigquery":
-					fmt.Printf("[WARN] %s validation is not supported yet; skipping connection test.\n", driver)
+				case "snowflake":
+					dsn, err := db.SnowflakeDSN(host, user, password, dbName, schema)
+					if err != nil {
+						return err
+					}
+					fmt.Println("[INFO] Testing Snowflake connection...")
+					if err := db.TestSnowflakeReadOnly(dsn); err != nil {
+						return fmt.Errorf("read-only test failed: %w", err)
+					}
+					fmt.Println("[SUCCESS] Snowflake connection validated.")
+					if listCatalog {
+						if err := printCatalog(func() ([]string, error) { return db.ListSchemasSnowflake(dsn) }, func(schema string) ([]string, error) { return db.ListTablesSnowflake(dsn, schema) }); err != nil {
+							return err
+						}
+					}
+				case "bigquery":
+					fmt.Println("[INFO] Testing BigQuery connection...")
+					if err := db.TestBigQueryReadOnly(dbName, password); err != nil {
+						return fmt.Errorf("read-only test failed: %w", err)
+					}
+					fmt.Println("[SUCCESS] BigQuery connection validated.")
+					if listCatalog {
+						if err := printCatalog(func() ([]string, error) { return db.ListSchemasBigQuery(dbName, password) }, func(schema string) ([]string, error) { return db.ListTablesBigQuery(dbName, schema, password) }); err != nil {
+							return err
+						}
+					}
 				default:
 					fmt.Printf("[WARN] %s validation is not supported yet; skipping connection test.\n", driver)
 				}

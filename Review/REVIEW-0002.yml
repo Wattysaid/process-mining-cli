@@ -1,7 +1,7 @@
 id: REVIEW-0002
 title: "Startup screen lacks continue-project flow"
 owner_role: cli
-status: needs-review
+status: resolved
 priority: P2
 depends_on:
   - "TASK-0020"
@@ -24,3 +24,4 @@ quality_gates:
   - "go test ./... passes"
 notes:
   context: "Currently prints a not implemented message and exits."
+  update: "Added latest run detection, recommended step selection, and continue prompt."

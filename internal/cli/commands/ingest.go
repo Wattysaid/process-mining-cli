@@ -7,6 +7,7 @@ import (
 
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/config"
+	"github.com/pm-assist/pm-assist/internal/db"
 	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/notebook"
 	"github.com/pm-assist/pm-assist/internal/paths"
@@ -29,6 +30,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 		flagSheet     string
 		flagJSONLines string
 		flagZipMember string
+		flagQuery     string
 		flagConfirm   string
 	)
 	cmd := &cobra.Command{
@@ -74,13 +76,96 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			if !policies.AllowsConnector(selected.Type) {
 				return fmt.Errorf("connector type blocked by policy: %s", selected.Type)
 			}
-			if selected.Type != "file" || selected.File == nil || len(selected.File.Paths) == 0 {
-				return fmt.Errorf("only file connectors are supported in ingest for now")
-			}
 
-			filePath := selected.File.Paths[0]
-			if flagFile != "" {
-				filePath = flagFile
+			runID := global.RunID
+			if runID == "" {
+				runID = defaultRunID()
+			}
+			outputPath := filepath.Join(projectPath, "outputs", runID)
+			if err := os.MkdirAll(outputPath, 0o755); err != nil {
+				return err
+			}
+			var (
+				filePath string
+				format   string
+				encoding string
+				delimiter string
+				sheet    string
+				jsonLines bool
+				zipMember string
+			)
+			if selected.Type == "file" {
+				if selected.File == nil || len(selected.File.Paths) == 0 {
+					return fmt.Errorf("file connector missing paths")
+				}
+				filePath = selected.File.Paths[0]
+				if flagFile != "" {
+					filePath = flagFile
+				}
+				format = selected.File.Format
+				delimiter = selected.File.Delimiter
+				if delimiter == "" {
+					delimiter = ","
+				}
+				encoding = selected.File.Encoding
+				if encoding == "" {
+					encoding = "utf-8"
+				}
+				sheet = selected.File.Sheet
+				jsonLines = selected.File.JSONLines
+				zipMember = selected.File.ZipMember
+			} else if selected.Type == "database" {
+				if selected.Database == nil || selected.Options == nil {
+					return fmt.Errorf("database connector missing config")
+				}
+				query, err := resolveString(flagQuery, "SQL query (read-only)", "", true)
+				if err != nil {
+					return err
+				}
+				credEnv := selected.Options.CredentialEnv
+				password := os.Getenv(credEnv)
+				if password == "" {
+					return fmt.Errorf("credential env var %s is not set", credEnv)
+				}
+				extractDir := filepath.Join(outputPath, "stage_00_extract")
+				if err := os.MkdirAll(extractDir, 0o755); err != nil {
+					return err
+				}
+				extractPath := filepath.Join(extractDir, "source_extract.csv")
+				driver := selected.Database.Driver
+				fmt.Printf("[INFO] Extracting data using %s...\n", driver)
+				var rows int64
+				switch driver {
+				case "postgres":
+					dsn := fmt.Sprintf("host=%s port=%d dbname=%s user=%s password=%s sslmode=%s", selected.Database.Host, selected.Database.Port, selected.Database.DBName, selected.Database.User, password, selected.Database.SSLMode)
+					rows, err = db.ExtractQueryToCSV("postgres", dsn, query, extractPath)
+				case "mysql":
+					dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", selected.Database.User, password, selected.Database.Host, selected.Database.Port, selected.Database.DBName)
+					rows, err = db.ExtractQueryToCSV("mysql", dsn, query, extractPath)
+				case "mssql":
+					dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%d?database=%s", selected.Database.User, password, selected.Database.Host, selected.Database.Port, selected.Database.DBName)
+					rows, err = db.ExtractQueryToCSV("sqlserver", dsn, query, extractPath)
+				case "snowflake":
+					dsn, dsnErr := db.SnowflakeDSN(selected.Database.Host, selected.Database.User, password, selected.Database.DBName, selected.Database.Schema)
+					if dsnErr != nil {
+						return dsnErr
+					}
+					rows, err = db.ExtractQueryToCSV("snowflake", dsn, query, extractPath)
+				case "bigquery":
+					rows, err = db.ExtractBigQueryToCSV(selected.Database.DBName, password, query, extractPath)
+				default:
+					return fmt.Errorf("database driver not supported for ingest: %s", driver)
+				}
+				if err != nil {
+					return err
+				}
+				fmt.Printf("[SUCCESS] Extracted %d rows to %s\n", rows, extractPath)
+				filePath = extractPath
+				format = "csv"
+				delimiter = ","
+				encoding = "utf-8"
+			} else {
+				return fmt.Errorf("unsupported connector type: %s", selected.Type)
 			}
 			caseCol, err := resolveString(flagCase, "Case ID column", "case_id", true)
 			if err != nil {
@@ -98,25 +183,15 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			delimiter := selected.File.Delimiter
-			if delimiter == "" {
-				delimiter = ","
-			}
 			if flagDelimiter != "" {
 				delimiter = flagDelimiter
-			}
-			encoding := selected.File.Encoding
-			if encoding == "" {
-				encoding = "utf-8"
 			}
 			if flagEncoding != "" {
 				encoding = flagEncoding
 			}
-			sheet := selected.File.Sheet
 			if flagSheet != "" {
 				sheet = flagSheet
 			}
-			jsonLines := selected.File.JSONLines
 			if flagJSONLines != "" {
 				value, err := resolveBool(flagJSONLines, "JSON lines format?", jsonLines)
 				if err != nil {
@@ -124,18 +199,8 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 				jsonLines = value
 			}
-			zipMember := selected.File.ZipMember
 			if flagZipMember != "" {
 				zipMember = flagZipMember
-			}
-
-			runID := global.RunID
-			if runID == "" {
-				runID = defaultRunID()
-			}
-			outputPath := filepath.Join(projectPath, "outputs", runID)
-			if err := os.MkdirAll(outputPath, 0o755); err != nil {
-				return err
 			}
 
 			manifestManager, err := initRunManifest(runID, outputPath, cfg)
@@ -187,22 +252,22 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			scriptPath := paths.SkillPath(skillsRoot, "pm-02-ingest-profile", "scripts", "01_ingest.py")
 			argsList := []string{
 				"--file", filePath,
-				"--format", selected.File.Format,
+				"--format", format,
 				"--case", caseCol,
 				"--activity", activityCol,
 				"--timestamp", timestampCol,
 				"--output", outputPath,
 			}
-			if selected.File.Format == "csv" || selected.File.Format == "zip-csv" {
+			if format == "csv" || format == "zip-csv" {
 				argsList = append(argsList, "--delimiter", delimiter, "--encoding", encoding)
 			}
-			if selected.File.Format == "xlsx" && sheet != "" {
+			if format == "xlsx" && sheet != "" {
 				argsList = append(argsList, "--sheet", sheet)
 			}
-			if selected.File.Format == "json" && jsonLines {
+			if format == "json" && jsonLines {
 				argsList = append(argsList, "--json-lines")
 			}
-			if selected.File.Format == "zip-csv" && zipMember != "" {
+			if format == "zip-csv" && zipMember != "" {
 				argsList = append(argsList, "--zip-member", zipMember)
 			}
 			if resourceCol != "" {
@@ -217,17 +282,17 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 
 			nbPath := filepath.Join(outputPath, "analysis_notebook.ipynb")
 			markdown := "## Ingest\nWe ingested the source file and normalized the log."
-			code := fmt.Sprintf("!python %s --file %s --format %s --case %s --activity %s --timestamp %s --output %s", scriptPath, filePath, selected.File.Format, caseCol, activityCol, timestampCol, outputPath)
-			if selected.File.Format == "csv" || selected.File.Format == "zip-csv" {
+			code := fmt.Sprintf("!python %s --file %s --format %s --case %s --activity %s --timestamp %s --output %s", scriptPath, filePath, format, caseCol, activityCol, timestampCol, outputPath)
+			if format == "csv" || format == "zip-csv" {
 				code += fmt.Sprintf(" --delimiter %s --encoding %s", delimiter, encoding)
 			}
-			if selected.File.Format == "xlsx" && sheet != "" {
+			if format == "xlsx" && sheet != "" {
 				code += fmt.Sprintf(" --sheet %s", sheet)
 			}
-			if selected.File.Format == "json" && jsonLines {
+			if format == "json" && jsonLines {
 				code += " --json-lines"
 			}
-			if selected.File.Format == "zip-csv" && zipMember != "" {
+			if format == "zip-csv" && zipMember != "" {
 				code += fmt.Sprintf(" --zip-member %s", zipMember)
 			}
 			if resourceCol != "" {
@@ -264,6 +329,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagSheet, "sheet", "", "Excel sheet name")
 	cmd.Flags().StringVar(&flagJSONLines, "json-lines", "", "JSON lines format (true|false)")
 	cmd.Flags().StringVar(&flagZipMember, "zip-member", "", "Zip member name")
+	cmd.Flags().StringVar(&flagQuery, "query", "", "SQL query for database connectors")
 	cmd.Flags().StringVar(&flagConfirm, "confirm", "", "Run ingest now (true|false)")
 	return cmd
 }

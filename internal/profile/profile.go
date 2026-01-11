@@ -5,14 +5,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Profile represents a user profile stored in YAML.
 type Profile struct {
-	Name        string
-	Role        string
-	Aptitude    string
-	PromptDepth string
+	Name        string `yaml:"name"`
+	Role        string `yaml:"role"`
+	Aptitude    string `yaml:"aptitude"`
+	PromptDepth string `yaml:"prompt_depth"`
 }
 
 // Save writes the profile to .profiles/<name>.yaml.
@@ -30,6 +32,35 @@ func Save(projectPath string, profile Profile) (string, error) {
 		return "", err
 	}
 	return path, nil
+}
+
+// Load reads a profile from .profiles/<name>.yaml.
+func Load(projectPath string, name string) (*Profile, error) {
+	if name == "" {
+		return nil, errors.New("profile name is required")
+	}
+	path := filepath.Join(projectPath, ".profiles", sanitizeFileName(name)+".yaml")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var parsed struct {
+		Name        string `yaml:"name"`
+		Role        string `yaml:"role"`
+		Aptitude    string `yaml:"aptitude"`
+		Preferences struct {
+			PromptDepth string `yaml:"prompt_depth"`
+		} `yaml:"preferences"`
+	}
+	if err := yaml.Unmarshal(data, &parsed); err != nil {
+		return nil, err
+	}
+	return &Profile{
+		Name:        parsed.Name,
+		Role:        parsed.Role,
+		Aptitude:    parsed.Aptitude,
+		PromptDepth: parsed.Preferences.PromptDepth,
+	}, nil
 }
 
 func sanitizeFileName(name string) string {

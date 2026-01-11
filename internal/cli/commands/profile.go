@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/pm-assist/pm-assist/internal/app"
+	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/profile"
 	"github.com/spf13/cobra"
 )
@@ -86,12 +87,33 @@ func newProfileSetCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "set",
 		Short: "Set active profile name in config",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_ = global
+			projectPath := global.ProjectPath
+			if projectPath == "" {
+				cwd, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+				projectPath = cwd
+			}
 			if name == "" {
 				return fmt.Errorf("profile name is required")
 			}
-			fmt.Printf("[INFO] Requested active profile: %s\n", name)
-			fmt.Println("[INFO] Profile selection is not implemented yet.")
+			path := filepath.Join(projectPath, ".profiles", name+".yaml")
+			if _, err := os.Stat(path); err != nil {
+				return fmt.Errorf("profile not found: %s", name)
+			}
+			cfg, err := config.Load(global.ConfigPath)
+			if err != nil {
+				return err
+			}
+			if cfg.Path == "" {
+				cfg.Path = filepath.Join(projectPath, "pm-assist.yaml")
+			}
+			cfg.Profiles.Active = name
+			if err := cfg.Save(); err != nil {
+				return err
+			}
+			fmt.Printf("[SUCCESS] Active profile set to %s\n", name)
 			return nil
 		},
 		Example: "  pm-assist profile set --name jane-doe",

@@ -1,7 +1,7 @@
 id: REVIEW-0004
 title: "Business set command is not implemented"
 owner_role: cli
-status: needs-review
+status: resolved
 priority: P2
 depends_on:
   - "TASK-0034"
@@ -24,3 +24,4 @@ quality_gates:
   - "go test ./... passes"
 notes:
   context: "Command currently logs 'not implemented yet'."
+  update: "Implemented active business selection with config update and existence checks."

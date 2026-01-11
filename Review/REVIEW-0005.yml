@@ -1,7 +1,7 @@
 id: REVIEW-0005
 title: "Agent setup stops after provider selection"
 owner_role: ai
-status: needs-review
+status: resolved
 priority: P2
 depends_on:
   - "TASK-0009"
@@ -25,3 +25,4 @@ quality_gates:
   - "go test ./... passes"
 notes:
   context: "Command currently prints a not implemented message."
+  update: "Completed provider setup, config persistence, and next-step guidance."
