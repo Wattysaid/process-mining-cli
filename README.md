@@ -34,7 +34,7 @@ notebooks, and keeps an immutable trail of what was run.
 ### Install (Linux / macOS / WSL2)
 
 ``` bash
-curl -fsSL https://YOUR_RELEASES_HOST/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/Wattysaid/process-mining-cli/main/scripts/install.sh | sh
 ```
 
 > The installer downloads the latest release tarball and verifies
