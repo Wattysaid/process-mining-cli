@@ -94,6 +94,10 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				jsonLines bool
 				zipMember string
 			)
+			driver := ""
+			if selected.Type == "database" && selected.Database != nil {
+				driver = selected.Database.Driver
+			}
 			if selected.Type == "file" {
 				if selected.File == nil || len(selected.File.Paths) == 0 {
 					return fmt.Errorf("file connector missing paths")
@@ -118,13 +122,13 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				if selected.Database == nil || selected.Options == nil {
 					return fmt.Errorf("database connector missing config")
 				}
-				query, err := resolveString(flagQuery, "SQL query (read-only)", "", true)
+				query, err := resolveString(flagQuery, "Query (read-only SQL)", "", true)
 				if err != nil {
 					return err
 				}
 				credEnv := selected.Options.CredentialEnv
 				password := os.Getenv(credEnv)
-				if password == "" {
+				if password == "" && driver != "bigquery" {
 					return fmt.Errorf("credential env var %s is not set", credEnv)
 				}
 				extractDir := filepath.Join(outputPath, "stage_00_extract")
@@ -132,7 +136,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 					return err
 				}
 				extractPath := filepath.Join(extractDir, "source_extract.csv")
-				driver := selected.Database.Driver
+				driver = selected.Database.Driver
 				fmt.Printf("[INFO] Extracting data using %s...\n", driver)
 				var rows int64
 				switch driver {
@@ -152,7 +156,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 					}
 					rows, err = db.ExtractQueryToCSV("snowflake", dsn, query, extractPath)
 				case "bigquery":
-					rows, err = db.ExtractBigQueryToCSV(selected.Database.DBName, password, query, extractPath)
+					rows, err = db.ExtractBigQueryToCSV(selected.Database.Host, selected.Database.User, query, extractPath)
 				default:
 					return fmt.Errorf("database driver not supported for ingest: %s", driver)
 				}

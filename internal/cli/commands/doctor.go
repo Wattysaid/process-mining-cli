@@ -124,7 +124,7 @@ func NewDoctorCmd(global *app.GlobalFlags) *cobra.Command {
 							fmt.Printf("[SUCCESS] Snowflake connector %s reachable.\n", connector.Name)
 						}
 					case "bigquery":
-						if err := db.TestBigQueryReadOnly(connector.Database.DBName, password); err != nil {
+						if err := db.TestBigQueryReadOnly(connector.Database.Host, connector.Database.User); err != nil {
 							fmt.Printf("[ERROR] BigQuery connector %s failed: %v\n", connector.Name, err)
 						} else {
 							fmt.Printf("[SUCCESS] BigQuery connector %s reachable.\n", connector.Name)
