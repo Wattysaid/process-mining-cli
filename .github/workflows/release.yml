@@ -43,14 +43,14 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Make Scripts executable
+      - name: Make scripts executable
         run: chmod +x scripts/*.sh
 
       - name: Package resources
-        run: scripts/package_resources.sh .codex/skills/cli-tool-skills resources/cli-tool-skills
+        run: ./scripts/package_resources.sh .codex/skills/cli-tool-skills resources/cli-tool-skills
 
       - name: Package wheels
-        run: scripts/package_wheels.sh .codex/skills/cli-tool-skills/pm-99-utils-and-standards/requirements.txt resources/wheels
+        run: ./scripts/package_wheels.sh .codex/skills/cli-tool-skills/pm-99-utils-and-standards/requirements.txt resources/wheels
 
       - name: Build
         env:
