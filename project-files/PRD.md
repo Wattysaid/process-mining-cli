@@ -11,7 +11,7 @@ Enterprise process mining programmes often require:
 - expensive platforms and long implementation cycles
 - fragmented tooling and non-reproducible, analyst-specific notebooks
 
-PM Assist reduces time and dependency on large teams by providing a guided, reproducible CLI workflow that produces standard artefacts (event logs, models, notebooks, reports) and uses optional LLM support for orchestration and narrative work.
+PM Assist reduces time and dependency on large teams by providing a guided, reproducible CLI workflow that produces standard artefacts (event logs, models, notebooks, reports) and uses optional LLM support for orchestration and narrative work (OpenAI, Anthropic, Gemini, or local Ollama).
 
 ## 2. Target users
 Primary:
@@ -37,11 +37,11 @@ Secondary:
 - Export to BPMN / collaboration artefacts for process teams
 
 ## 5. Non-functional requirements
-- Installability: curl installer, minimal dependencies, deterministic versions
+- Installability: curl installer, minimal dependencies, deterministic versions; first-run creates a project-local `.venv`
 - Security: secrets never logged, least privilege, auditable runs
 - Performance: handle large datasets via chunking and columnar storage
 - Portability: Linux/macOS; Windows supported via WSL2 for MVP
-- Extensibility: pipeline steps are plug-in style; new steps can be added without rewriting CLI
+- Extensibility: pipeline steps are plug-in style and backed by the `cli-tool-skills` Python library; new steps can be added without rewriting CLI
 
 ## 6. Competitive differentiation (vs Celonis/Signavio/ARIS)
 - Faster start, lower overhead, offline-capable, local-first
@@ -57,5 +57,5 @@ Secondary:
 ## 8. MVP acceptance criteria
 - A new user can run: init -> ingest -> prepare -> mine -> report
 - Outputs are produced in a run folder with a stable structure
-- OpenAI integration is optional and requires explicit credentials + opt-in per run
+- LLM integration is optional and requires explicit credentials + opt-in per run (or local Ollama)
 - QA report clearly flags data issues and model caveats

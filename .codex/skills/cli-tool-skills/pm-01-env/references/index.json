@@ -1,0 +1,93 @@
+{
+  "pack_version": "R1.00",
+  "date_created": "2026-01-08",
+  "items": [
+    {
+      "id": "ISSUE-001",
+      "title": "python: command not found (exit 127) when scripts call `python`",
+      "runbook": "issue-fixes/ISSUE-001-python-command-not-found.md",
+      "match_type": "substring_or_regex",
+      "error_signatures": [
+        "python: command not found",
+        "exit code 127",
+        "/bin/bash: line 1: python: command not found"
+      ],
+      "default_action": "apply_safe_default_remediation_then_verify"
+    },
+    {
+      "id": "ISSUE-002",
+      "title": "venv creation or dependency install times out (exit 124) on WSL or slow filesystems",
+      "runbook": "issue-fixes/ISSUE-002-venv-timeout-wsl-slow-fs.md",
+      "match_type": "substring_or_regex",
+      "error_signatures": [
+        "exit code 124",
+        "timeout while creating the venv",
+        "command exceeded 10s",
+        "timed out after"
+      ],
+      "default_action": "apply_safe_default_remediation_then_verify"
+    },
+    {
+      "id": "ISSUE-003",
+      "title": "FileNotFoundError: .venv/bin/pip missing after venv creation",
+      "runbook": "issue-fixes/ISSUE-003-missing-pip-wrapper-in-venv.md",
+      "match_type": "substring_or_regex",
+      "error_signatures": [
+        "FileNotFoundError: .venv/bin/pip",
+        ".venv/bin/pip: No such file or directory",
+        "pip was never installed inside the venv"
+      ],
+      "default_action": "apply_safe_default_remediation_then_verify"
+    },
+    {
+      "id": "ISSUE-004",
+      "title": "pip is corrupted inside the venv (pip._vendor.urllib3 ImportError)",
+      "runbook": "issue-fixes/ISSUE-004-pip-vendor-urllib3-corruption.md",
+      "match_type": "substring_or_regex",
+      "error_signatures": [
+        "ImportError: cannot import name 'exceptions' from partially initialized module 'pip._vendor.urllib3'",
+        "pip._vendor.urllib3",
+        "partially initialized module"
+      ],
+      "default_action": "apply_safe_default_remediation_then_verify"
+    },
+    {
+      "id": "ISSUE-005",
+      "title": "PEP 668: externally-managed-environment blocks system or user-site pip installs",
+      "runbook": "issue-fixes/ISSUE-005-pep668-externally-managed-environment.md",
+      "match_type": "substring_or_regex",
+      "error_signatures": [
+        "error: externally-managed-environment",
+        "PEP 668",
+        "Externally Managed Environment",
+        "pip install --user"
+      ],
+      "default_action": "apply_safe_default_remediation_then_verify"
+    },
+    {
+      "id": "ISSUE-006",
+      "title": "_distutils_hack missing or setuptools incomplete inside venv (distutils-precedence.pth)",
+      "runbook": "issue-fixes/ISSUE-006-distutils-hack-missing-setuptools-incomplete.md",
+      "match_type": "substring_or_regex",
+      "error_signatures": [
+        "No module named '_distutils_hack'",
+        "distutils-precedence.pth",
+        "_distutils_hack missing"
+      ],
+      "default_action": "apply_safe_default_remediation_then_verify"
+    },
+    {
+      "id": "ISSUE-007",
+      "title": "PEP 668: externally-managed-environment on Ubuntu 24.04+ prevents system pip installs",
+      "runbook": "issue-fixes/ISSUE-007-PEP-668-Ubuntu-Error.md",
+      "match_type": "substring_or_regex",
+      "error_signatures": [
+        "error: externally-managed-environment",
+        "PEP 668",
+        "Externally Managed Environment",
+        "This environment is externally managed"
+      ],
+      "default_action": "apply_safe_default_remediation_then_verify"
+    }
+  ]
+}

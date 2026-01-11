@@ -6,6 +6,7 @@
 - CLI is a single binary (Go recommended).
 - Release artefacts published per OS/arch.
 - Installer script downloads the correct artefact and installs it to `~/.local/bin`.
+- First run creates a project-local `.venv` unless the user chooses a shared env.
 
 ## 2. Installer requirements (curl | sh)
 The installer must:
@@ -15,7 +16,7 @@ The installer must:
 - Download and verify checksum
 - Install binary to `~/.local/bin/pm-assist`
 - Ensure PATH includes `~/.local/bin` by updating shell rc file
-- Print “next steps” including OpenAI key setup
+- Print “next steps” including LLM setup (OpenAI/Anthropic/Gemini/Ollama)
 
 Installer output conventions:
 - `[INFO]`, `[SUCCESS]`, `[WARN]`, `[ERROR]`
@@ -57,4 +58,3 @@ MVP can start with (A) and add (B) post-MVP.
 pm4py visualisations may require OS-level Graphviz.
 - Provide `pm-assist doctor` checks.
 - Provide clear OS-specific install guidance.
-

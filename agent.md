@@ -11,14 +11,14 @@ You are an AI coding agent implementing an enterprise-grade CLI and pipeline orc
   - `project-files/ARCHITECTURE.md`
   - `project-files/CLI_SPEC.md`
   - `project-files/WORKFLOWS.md`
-- Integrate optional OpenAI capability with strict cost controls and secure handling.
+- Integrate optional LLM capability (OpenAI/Anthropic/Gemini/Ollama) with strict cost controls and secure handling.
 
 ### Constraints
 - The CLI must ask the user questions before:
   - dropping or imputing data
   - selecting algorithms
   - choosing thresholds
-  - making external calls (OpenAI)
+  - making external calls (LLM providers)
 - Must be reproducible and deterministic given the same inputs.
 - Must be safe by default (offline, no secrets in logs).
 
@@ -32,7 +32,7 @@ You are an AI coding agent implementing an enterprise-grade CLI and pipeline orc
 7) Implement mine pipeline
 8) Implement notebook + report generation
 9) Implement QA pack
-10) Implement OpenAI optional narrative + agent command
+10) Implement optional LLM narrative + agent command (OpenAI/Anthropic/Gemini/Ollama)
 11) Package installer and release workflow
 12) Add tests and smoke runs
 
@@ -41,7 +41,7 @@ You are an AI coding agent implementing an enterprise-grade CLI and pipeline orc
 - `pm-assist init` creates a runnable scaffold.
 - A synthetic dataset completes the full flow producing outputs and QA summary.
 - No secrets are written to disk or logs.
-- OpenAI calls are off unless user opts-in and sets API key.
+- LLM calls are off unless user opts-in and configures a provider.
 
 ## Skill packs
 Use the skill files under `.codex/skills/` to guide implementation decisions.

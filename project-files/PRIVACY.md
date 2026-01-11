@@ -12,9 +12,9 @@
 - Do not auto-profile with third-party services.
 - Do not persist raw extracts outside the run folder unless requested.
 
-## 3. OpenAI usage
+## 3. LLM usage
 - Disabled by default.
-- When enabled:
+- When enabled (OpenAI/Anthropic/Gemini/Ollama):
   - send summaries first (schema and aggregates)
   - require explicit approval for samples
   - record a ledger of calls and prompts (redacted) for audit
@@ -22,4 +22,3 @@
 ## 4. Retention
 - Provide `pm-assist clean --run-id <id>` to remove run artefacts (post-MVP).
 - Provide retention policies via config (post-MVP).
-

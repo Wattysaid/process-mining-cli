@@ -11,14 +11,14 @@
 - Conformance: optional alignments (guarded by compute warning)
 - Notebook generation (template) and report generation (md/html)
 - QA pack
-- Optional OpenAI narrative with cost caps
+- Optional LLM narrative (OpenAI/Anthropic/Gemini/Ollama) with cost caps
 
 ## v0.2
 - DB connectors (read-only)
 - Drift analysis (time windows)
 - Better packaging: offline wheels support
 - Self-update
-- Policy controls (disable OpenAI, restrict samples)
+- Policy controls (disable LLM, restrict samples)
 
 ## v0.3
 - Predictive monitoring (remaining time, SLA risk) with model cards
@@ -29,4 +29,3 @@
 - Enterprise installer variants
 - Signed releases, audit-grade manifests
 - Pluggable connectors and step marketplace
-

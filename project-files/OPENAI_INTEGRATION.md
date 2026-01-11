@@ -1,24 +1,33 @@
-# OpenAI Integration: Security, cost control, and agent behaviour
+# LLM Integration: Security, cost control, and agent behaviour
 
 **Document version:** R1.00 (2026-01-11)
 
 ## 1. Principles
-- OpenAI integration is **optional** and **explicitly opted-in** by the user.
-- The default mode must be **offline** (no external calls).
+- LLM integration is **optional** and **explicitly opted-in** by the user.
+- The default mode must be **offline** (no external calls) unless a provider is configured.
 - Avoid sending raw data by default:
   - prefer aggregates, schema summaries, descriptive statistics
   - allow user to explicitly approve samples if needed
 
 ## 2. Credential handling
+Supported providers (MVP):
+- OpenAI (`OPENAI_API_KEY`)
+- Anthropic (`ANTHROPIC_API_KEY`)
+- Gemini (`GEMINI_API_KEY` or `GOOGLE_API_KEY`)
+- Ollama (local, no key; configurable via `OLLAMA_HOST`)
+
 Supported mechanisms (MVP):
-- Environment variable: `OPENAI_API_KEY`
+- Environment variables (preferred)
 - Project `.env` file (dev only; discourage for enterprise)
 
 CLI behaviour:
 - `pm-assist agent` and `pm-assist report --narrative` must:
-  - check `OPENAI_API_KEY`
+  - check provider configuration and required env vars
   - if missing, show steps:
     - `export OPENAI_API_KEY="..."` (Linux/macOS/WSL)
+    - `export ANTHROPIC_API_KEY="..."`
+    - `export GEMINI_API_KEY="..."`
+    - `export OLLAMA_HOST="http://localhost:11434"`
   - refuse to run if not set (unless user chooses offline narrative templates)
 
 Never:
@@ -66,7 +75,7 @@ When the agent needs context, provide in order:
 5. Only if explicitly approved: anonymised samples
 
 ## 6. Implementation notes for Codex
-- Use the official OpenAI SDK.
+- Use official provider SDKs where available (OpenAI, Anthropic, Google) and a simple HTTP client for Ollama.
 - Keep prompt templates in versioned files, not inline strings.
 - Build an abstraction layer:
   - `LLMClient` with:
@@ -78,5 +87,4 @@ When the agent needs context, provide in order:
 ## 7. Compliance notes
 - Provide a `SECURITY.md` and `PRIVACY.md` suitable for enterprise review.
 - Make external endpoints explicit and auditable.
-- Make it easy to disable OpenAI at build time and runtime.
-
+- Make it easy to disable LLM usage at build time and runtime.

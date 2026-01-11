@@ -53,13 +53,13 @@ Outputs:
 - `report.html`
 - pdf optional post-MVP
 
-## 4. OpenAI-assisted narrative (optional)
-When enabled, OpenAI is used only for:
+## 4. LLM-assisted narrative (optional)
+When enabled, LLMs (OpenAI/Anthropic/Gemini/Ollama) are used only for:
 - drafting executive narrative from **local computed summaries**
 - rephrasing and structuring recommendations
 - creating stakeholder-ready wording
 
-OpenAI must not be used for:
+LLMs must not be used for:
 - computing metrics
 - deciding thresholds
 - selecting algorithms without user approval
@@ -68,4 +68,3 @@ OpenAI must not be used for:
 - Save figures to `outputs/<run-id>/figures/`
 - Reference images in notebook and report
 - Support a no-figures mode for restricted environments
-

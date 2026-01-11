@@ -14,6 +14,7 @@ Use this index to navigate the instruction set.
 - `project-files/CODING_STANDARDS.md`
 
 ## CLI and workflows
+- `project-files/STARTUP_SCREEN.md`
 - `project-files/CLI_SPEC.md`
 - `project-files/WORKFLOWS.md`
 - `project-files/QA_AND_VALIDATION.md`
@@ -24,9 +25,8 @@ Use this index to navigate the instruction set.
 ## Security and privacy
 - `project-files/SECURITY_MODEL.md`
 - `project-files/PRIVACY.md`
-- `project-files/OPENAI_INTEGRATION.md`
+- `project-files/OPENAI_INTEGRATION.md` (LLM integration across OpenAI/Anthropic/Gemini/Ollama)
 
 ## Codex agent controls
-- `agent.md`
+- `.codex/agent.md`
 - `.codex/skills/*/skill.md`
-

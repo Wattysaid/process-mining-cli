@@ -9,6 +9,9 @@ Design goals:
 - “Explain like a consultant”: show trade-offs and caveats, not just outputs.
 - “Stable automation”: every command can be run non-interactively with flags for CI/CD.
 
+## 2. Startup screen (no subcommand)
+When the user runs `pm-assist` with no subcommand, show the startup screen and menu described in `project-files/STARTUP_SCREEN.md` (unless `--non-interactive` is set).
+
 ## 2. Global flags
 - `--config <path>` path to config file (default: `./pm-assist.yaml` if present)
 - `--project <path>` project root (default: current directory)
@@ -17,6 +20,7 @@ Design goals:
 - `--log-level debug|info|warn|error`
 - `--json` machine-readable output (for automation)
 - `--yes` assume “yes” for safe prompts (never for destructive prompts)
+- `--llm-provider <openai|anthropic|gemini|ollama|none>` override configured LLM provider for this run
 
 ## 3. Command tree (MVP)
 ### `pm-assist version`
@@ -32,12 +36,14 @@ Interactive:
 - Project name
 - Default folders
 - Output formats desired
+ - LLM provider preference (optional, can be skipped)
 Creates:
 - `pm-assist.yaml` template
 - `.gitignore` suggestions
 - `outputs/` folder
 - `data/` folder placeholder
 - `docs/` folder for reports
+ - `.venv/` (project-local Python environment, unless disabled)
 
 ### `pm-assist connect`
 MVP connectors:
@@ -100,7 +106,7 @@ Outputs:
 Prompts:
 - Notebook: create, execute, or create-only
 - Report: Markdown/HTML, executive vs technical depth
-- Include OpenAI narrative generation? (explicit opt-in)
+- Include LLM narrative generation? (explicit opt-in; provider set in config)
 Outputs:
 - `outputs/<run-id>/analysis_notebook.ipynb`
 - `outputs/<run-id>/report.md` and `report.html` (optional pdf post-MVP)
@@ -114,13 +120,13 @@ Outputs:
 Outputs:
 - `outputs/<run-id>/quality/qa_summary.md`
 
-## 4. `pm-assist agent` (optional, OpenAI-enabled)
+## 4. `pm-assist agent` (optional, LLM-enabled)
 Behaviour:
 - Provides guided decision support and report narrative drafting.
 Constraints:
 - Must respect token budgets and a per-run cost cap.
 - Must avoid sending raw sensitive data by default (use summaries and aggregates).
-- Must support “offline mode” with no OpenAI.
+- Must support “offline mode” with no external LLM calls.
 
 ## 5. Exit codes (standardise)
 - 0: success
@@ -130,5 +136,4 @@ Constraints:
 - 4: connector error (auth/connection)
 - 5: data validation failed (blocking)
 - 6: pipeline step failed
-- 7: OpenAI error (only if OpenAI-enabled steps executed)
-
+- 7: LLM error (only if LLM-enabled steps executed)

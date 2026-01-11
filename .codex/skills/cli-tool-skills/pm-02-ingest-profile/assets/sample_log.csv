@@ -1,0 +1,13 @@
+CaseID,Activity,Timestamp,org:resource
+C1,Start,2024-01-01 08:00:00,alice
+C1,Review,2024-01-01 09:00:00,bob
+C1,Approve,2024-01-01 10:00:00,alice
+C1,End,2024-01-01 11:00:00,carol
+C2,Start,2024-01-02 08:15:00,alice
+C2,Review,2024-01-02 09:30:00,bob
+C2,Reject,2024-01-02 10:00:00,bob
+C2,End,2024-01-02 10:10:00,carol
+C3,Start,2024-01-03 07:45:00,alice
+C3,Review,2024-01-03 08:30:00,bob
+C3,Approve,2024-01-03 09:15:00,alice
+C3,End,2024-01-03 09:45:00,carol

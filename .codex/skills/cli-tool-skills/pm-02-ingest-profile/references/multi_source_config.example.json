@@ -1,0 +1,39 @@
+{
+  "sources": [
+    {
+      "name": "salesforce",
+      "path": "data/salesforce_events.csv",
+      "format": "csv",
+      "case": "CaseId",
+      "activity": "StageName",
+      "timestamp": "CreatedDate",
+      "resource": "OwnerId",
+      "timestamp_format": "%Y-%m-%dT%H:%M:%S",
+      "column_map": {
+        "Subject": "case_subject"
+      },
+      "prefix": "sf_",
+      "event_id_columns": ["CaseId", "StageName", "CreatedDate"],
+      "event_id_delimiter": "::"
+    },
+    {
+      "name": "erp",
+      "path": "data/erp_events.csv",
+      "format": "csv",
+      "case": "OrderId",
+      "activity": "Activity",
+      "timestamp": "EventTime",
+      "resource": "UserId",
+      "timestamp_timezone": "UTC",
+      "prefix": "erp_"
+    }
+  ],
+  "merge": {
+    "strategy": "concat"
+  },
+  "case_id_strategy": {
+    "type": "concat",
+    "columns": ["CaseId", "OrderId"],
+    "delimiter": "::"
+  }
+}

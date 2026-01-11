@@ -14,7 +14,7 @@ PM Assist is a two-layer application:
 2) **Python Pipeline Library**
 - Implements data prep, event log construction, pm4py analysis, notebook/report generation
 - Designed as composable pipeline steps
-- Supports a "snippet registry" of reusable, tested components
+- Supports a "skill registry" of reusable, tested components (sourced from `cli-tool-skills`)
 
 ## 2. Why a Go CLI + Python pipelines
 - Users get a single “tool” with a reliable UX and predictable installation.
@@ -43,7 +43,7 @@ pm-assist/
   .github/workflows/
     release.yml
   project-files/                 # instructions for Codex
-  .codex/                        # agent skill packs for Codex
+  .codex/                        # agent skill packs for Codex + cli-tool-skills library
 ```
 
 ## 4. Runtime behaviour
@@ -63,7 +63,7 @@ pm-assist/
   - timestamp parsing rules and timezones
   - connector definitions (read-only)
   - pipeline step selection and parameters
-  - OpenAI settings (enabled flag, model, budget caps)
+  - LLM settings (provider, enabled flag, model, budget caps, offline policy)
   - output formats (notebook/report)
 
 ## 6. Logging and audit
@@ -86,5 +86,9 @@ pm-assist/
   - OS keychain integration (post-MVP)
   - project `.env` file (discouraged for enterprise; allowed for dev)
 - Secrets never written to disk, never logged
-- OpenAI calls can be disabled globally and per project
+- LLM calls can be disabled globally and per project
 
+
+## 9. UX entrypoint
+- When invoked without a subcommand, the CLI displays a stdout-based startup screen and menu (see `project-files/STARTUP_SCREEN.md`).
+- Menu actions must route to the same internal handlers as the equivalent commands to avoid logic drift.
