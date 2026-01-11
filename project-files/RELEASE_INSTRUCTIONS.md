@@ -84,8 +84,9 @@ build darwin arm64 darwin arm64
 Create `.github/workflows/release.yml` that:
 1) Runs on tag `v*`.
 2) Builds the four binaries.
-3) Produces the tarballs and `checksums.txt`.
-4) Creates a release and uploads assets.
+3) Packages `cli-tool-skills` into `resources/cli-tool-skills` using `scripts/package_resources.sh`.
+4) Produces the tarballs and `checksums.txt`.
+5) Creates a release and uploads assets.
 
 Minimal build matrix:
 - `linux/amd64`, `linux/arm64`
@@ -103,7 +104,14 @@ https://github.com/pm-assist/pm-assist/releases/latest/download/checksums.txt
 ```
 
 ## 7) Packaging note (Python assets)
-The current CLI executes local `cli-tool-skills` scripts from `.codex/skills/`.
-For production packaging, bundle Python assets with the release and update the CLI
-to reference bundled paths (or embed assets in the Go binary).
-This is still pending in the implementation.
+The CLI resolves skills in this order:
+1) `PM_ASSIST_SKILLS_DIR` env var
+2) `<project>/.codex/skills/cli-tool-skills`
+3) `<binary>/resources/cli-tool-skills`
+
+For releases, run:
+```bash
+scripts/package_resources.sh .codex/skills/cli-tool-skills resources/cli-tool-skills
+```
+
+Ensure the packaged `resources/` directory is shipped alongside the binary in the tarball.
