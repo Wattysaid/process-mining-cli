@@ -22,7 +22,7 @@ func bigQueryClient(projectID string, credentialsPath string) (*bigquery.Client,
 	if credentialsPath != "" {
 		return bigquery.NewClient(ctx, projectID, option.WithCredentialsFile(credentialsPath))
 	}
-	return bigquery.NewClient(ctx, projectID)
+	return bigquery.NewClient(ctx, projectID, option.WithScopes(bigquery.Scope))
 }
 
 // TestBigQueryReadOnly validates connectivity by listing datasets.
