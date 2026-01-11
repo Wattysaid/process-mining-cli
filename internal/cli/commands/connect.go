@@ -25,6 +25,9 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 		flagFormat      string
 		flagDelimiter   string
 		flagEncoding    string
+		flagSheet       string
+		flagJSONLines   string
+		flagZipMember   string
 		flagPreview     string
 		flagCountRows   string
 		flagDriver      string
@@ -80,18 +83,39 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				format, err := resolveChoice(flagFormat, "Format", []string{"csv", "parquet"}, "csv", true)
+				format, err := resolveChoice(flagFormat, "Format", []string{"csv", "parquet", "xlsx", "json", "zip-csv", "xes"}, "csv", true)
 				if err != nil {
 					return err
 				}
 				delimiter := ""
 				encoding := ""
-				if format == "csv" {
+				sheet := ""
+				jsonLines := false
+				zipMember := ""
+				if format == "csv" || format == "zip-csv" {
 					delimiter, err = resolveString(flagDelimiter, "CSV delimiter", ",", true)
 					if err != nil {
 						return err
 					}
 					encoding, err = resolveString(flagEncoding, "CSV encoding", "utf-8", true)
+					if err != nil {
+						return err
+					}
+					if format == "zip-csv" {
+						zipMember, err = resolveString(flagZipMember, "ZIP member name (optional)", "", false)
+						if err != nil {
+							return err
+						}
+					}
+				}
+				if format == "xlsx" {
+					sheet, err = resolveString(flagSheet, "Excel sheet name (optional)", "", false)
+					if err != nil {
+						return err
+					}
+				}
+				if format == "json" {
+					jsonLines, err = resolveBool(flagJSONLines, "JSON lines format?", false)
 					if err != nil {
 						return err
 					}
@@ -107,7 +131,7 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				if previewNow && format == "csv" {
+				if previewNow && (format == "csv" || format == "zip-csv") {
 					if strings.ToLower(encoding) != "utf-8" && encoding != "" {
 						fmt.Printf("[WARN] Preview skipped for encoding %s (only utf-8 supported).\n", encoding)
 					} else if len(paths) > 0 {
@@ -115,11 +139,18 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 						if err != nil {
 							return err
 						}
-						sample, err := preview.PreviewCSV(paths[0], delimiter, 5, countRows)
-						if err != nil {
-							fmt.Printf("[WARN] Preview failed: %v\n", err)
-						} else {
-							fmt.Println(preview.FormatSample(sample))
+						samplePath := paths[0]
+						if format == "zip-csv" {
+							fmt.Println("[WARN] CSV preview is skipped for zip archives.")
+							countRows = false
+						}
+						if samplePath != "" && format != "zip-csv" {
+							sample, err := preview.PreviewCSV(samplePath, delimiter, 5, countRows)
+							if err != nil {
+								fmt.Printf("[WARN] Preview failed: %v\n", err)
+							} else {
+								fmt.Println(preview.FormatSample(sample))
+							}
 						}
 					}
 				}
@@ -132,6 +163,9 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 						Format:    format,
 						Delimiter: delimiter,
 						Encoding:  encoding,
+						Sheet:     sheet,
+						JSONLines: jsonLines,
+						ZipMember: zipMember,
 					},
 					Options: &config.ExtraConfig{ReadOnly: true},
 				})
@@ -278,9 +312,12 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagType, "type", "", "Connector type (file|database)")
 	cmd.Flags().StringVar(&flagName, "name", "", "Connector name")
 	cmd.Flags().StringVar(&flagPaths, "paths", "", "File paths (comma-separated)")
-	cmd.Flags().StringVar(&flagFormat, "format", "", "File format (csv|parquet)")
+	cmd.Flags().StringVar(&flagFormat, "format", "", "File format (csv|parquet|xlsx|json|zip-csv|xes)")
 	cmd.Flags().StringVar(&flagDelimiter, "delimiter", "", "CSV delimiter")
 	cmd.Flags().StringVar(&flagEncoding, "encoding", "", "CSV encoding")
+	cmd.Flags().StringVar(&flagSheet, "sheet", "", "Excel sheet name")
+	cmd.Flags().StringVar(&flagJSONLines, "json-lines", "", "JSON lines format (true|false)")
+	cmd.Flags().StringVar(&flagZipMember, "zip-member", "", "Zip member name")
 	cmd.Flags().StringVar(&flagPreview, "preview", "", "Preview CSV headers and sample rows (true|false)")
 	cmd.Flags().StringVar(&flagCountRows, "count-rows", "", "Count total rows when previewing (true|false)")
 	cmd.Flags().StringVar(&flagDriver, "driver", "", "Database driver (postgres|mysql|mssql|snowflake|bigquery|other)")

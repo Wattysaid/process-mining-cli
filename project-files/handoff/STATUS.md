@@ -7,6 +7,7 @@
 - Startup splash + first-run bootstrap
 - User profiles and business profiles
 - File connectors + CSV preview
+- File ingestion supports CSV/Parquet/XLSX/JSON/ZIP-CSV/XES
 - DB connectors for Postgres/MySQL/MSSQL (read-only validation + schema/table listing)
 - Notebook append per confirmed step
 - QA pack outputs (md/json/csv)

@@ -58,7 +58,7 @@ Creates:
 
 ### `pm-assist connect`
 MVP connectors:
-- `file` (CSV/Parquet)
+- `file` (CSV/Parquet/XLSX/JSON/ZIP-CSV/XES)
 Prompts:
 - Path(s)
 - Delimiter, encoding

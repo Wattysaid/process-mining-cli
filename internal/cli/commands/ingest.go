@@ -24,6 +24,11 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 		flagActivity  string
 		flagTimestamp string
 		flagResource  string
+		flagDelimiter string
+		flagEncoding  string
+		flagSheet     string
+		flagJSONLines string
+		flagZipMember string
 		flagConfirm   string
 	)
 	cmd := &cobra.Command{
@@ -93,6 +98,36 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			delimiter := selected.File.Delimiter
+			if delimiter == "" {
+				delimiter = ","
+			}
+			if flagDelimiter != "" {
+				delimiter = flagDelimiter
+			}
+			encoding := selected.File.Encoding
+			if encoding == "" {
+				encoding = "utf-8"
+			}
+			if flagEncoding != "" {
+				encoding = flagEncoding
+			}
+			sheet := selected.File.Sheet
+			if flagSheet != "" {
+				sheet = flagSheet
+			}
+			jsonLines := selected.File.JSONLines
+			if flagJSONLines != "" {
+				value, err := resolveBool(flagJSONLines, "JSON lines format?", jsonLines)
+				if err != nil {
+					return err
+				}
+				jsonLines = value
+			}
+			zipMember := selected.File.ZipMember
+			if flagZipMember != "" {
+				zipMember = flagZipMember
+			}
 
 			runID := global.RunID
 			if runID == "" {
@@ -158,6 +193,18 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				"--timestamp", timestampCol,
 				"--output", outputPath,
 			}
+			if selected.File.Format == "csv" || selected.File.Format == "zip-csv" {
+				argsList = append(argsList, "--delimiter", delimiter, "--encoding", encoding)
+			}
+			if selected.File.Format == "xlsx" && sheet != "" {
+				argsList = append(argsList, "--sheet", sheet)
+			}
+			if selected.File.Format == "json" && jsonLines {
+				argsList = append(argsList, "--json-lines")
+			}
+			if selected.File.Format == "zip-csv" && zipMember != "" {
+				argsList = append(argsList, "--zip-member", zipMember)
+			}
 			if resourceCol != "" {
 				argsList = append(argsList, "--resource", resourceCol)
 			}
@@ -171,6 +218,18 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			nbPath := filepath.Join(outputPath, "analysis_notebook.ipynb")
 			markdown := "## Ingest\nWe ingested the source file and normalized the log."
 			code := fmt.Sprintf("!python %s --file %s --format %s --case %s --activity %s --timestamp %s --output %s", scriptPath, filePath, selected.File.Format, caseCol, activityCol, timestampCol, outputPath)
+			if selected.File.Format == "csv" || selected.File.Format == "zip-csv" {
+				code += fmt.Sprintf(" --delimiter %s --encoding %s", delimiter, encoding)
+			}
+			if selected.File.Format == "xlsx" && sheet != "" {
+				code += fmt.Sprintf(" --sheet %s", sheet)
+			}
+			if selected.File.Format == "json" && jsonLines {
+				code += " --json-lines"
+			}
+			if selected.File.Format == "zip-csv" && zipMember != "" {
+				code += fmt.Sprintf(" --zip-member %s", zipMember)
+			}
 			if resourceCol != "" {
 				code += fmt.Sprintf(" --resource %s", resourceCol)
 			}
@@ -200,6 +259,11 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd.Flags().StringVar(&flagActivity, "activity", "", "Activity column")
 	cmd.Flags().StringVar(&flagTimestamp, "timestamp", "", "Timestamp column")
 	cmd.Flags().StringVar(&flagResource, "resource", "", "Resource column")
+	cmd.Flags().StringVar(&flagDelimiter, "delimiter", "", "CSV delimiter")
+	cmd.Flags().StringVar(&flagEncoding, "encoding", "", "CSV encoding")
+	cmd.Flags().StringVar(&flagSheet, "sheet", "", "Excel sheet name")
+	cmd.Flags().StringVar(&flagJSONLines, "json-lines", "", "JSON lines format (true|false)")
+	cmd.Flags().StringVar(&flagZipMember, "zip-member", "", "Zip member name")
 	cmd.Flags().StringVar(&flagConfirm, "confirm", "", "Run ingest now (true|false)")
 	return cmd
 }
