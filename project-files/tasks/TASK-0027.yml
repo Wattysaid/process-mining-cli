@@ -1,0 +1,27 @@
+id: TASK-0027
+title: "Add predictive monitoring modules"
+owner_role: data
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0007"
+scope:
+  in:
+    - "Remaining time prediction"
+    - "SLA breach risk estimation"
+    - "Model cards and validation summaries"
+  out:
+    - "No automated operational deployment"
+acceptance_criteria:
+  - "Predictive outputs are generated when enabled"
+  - "Model cards include assumptions and validation metrics"
+  - "User approves training and evaluation steps"
+files_expected:
+  - "python/"
+  - "project-files/WORKFLOWS.md"
+contracts:
+  - "project-files/WORKFLOWS.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Predictive monitoring is valuable but must be transparent."

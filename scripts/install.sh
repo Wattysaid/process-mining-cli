@@ -5,6 +5,9 @@ PM_ASSIST_VERSION="${PM_ASSIST_VERSION:-latest}"
 PM_ASSIST_BASE_URL="${PM_ASSIST_BASE_URL:-https://github.com/pm-assist/pm-assist/releases}"
 INSTALL_DIR="${PM_ASSIST_INSTALL_DIR:-$HOME/.local/bin}"
 SELF_UPDATE="false"
+VERIFY_SIGNATURES="${PM_ASSIST_VERIFY_SIGNATURES:-false}"
+PUBLIC_KEY_PATH="${PM_ASSIST_PUBLIC_KEY_PATH:-}"
+PUBLIC_KEY_URL="${PM_ASSIST_PUBLIC_KEY_URL:-}"
 
 usage() {
   cat <<USAGE
@@ -14,6 +17,9 @@ Environment variables:
   PM_ASSIST_VERSION   Version to install (default: latest)
   PM_ASSIST_BASE_URL  Base release URL (default: GitHub releases)
   PM_ASSIST_INSTALL_DIR Install directory (default: ~/.local/bin)
+  PM_ASSIST_VERIFY_SIGNATURES Verify checksums signature with cosign (true|false)
+  PM_ASSIST_PUBLIC_KEY_PATH Path to cosign public key
+  PM_ASSIST_PUBLIC_KEY_URL URL to cosign public key
 USAGE
 }
 
@@ -52,6 +58,13 @@ require_cmd() {
 
 require_cmd curl
 require_cmd tar
+if [[ "$VERIFY_SIGNATURES" == "true" ]]; then
+  require_cmd cosign
+  if [[ -z "$PUBLIC_KEY_PATH" && -z "$PUBLIC_KEY_URL" ]]; then
+    log_error "Signature verification requires PM_ASSIST_PUBLIC_KEY_PATH or PM_ASSIST_PUBLIC_KEY_URL"
+    exit 1
+  fi
+fi
 
 if command -v sha256sum >/dev/null 2>&1; then
   SHA256="sha256sum"
@@ -91,6 +104,17 @@ log_info "Downloading $ASSET"
 curl -fsSL "$BASE_URL/$ASSET" -o "$TMP_DIR/$ASSET"
 log_info "Downloading checksums"
 curl -fsSL "$BASE_URL/$CHECKSUMS" -o "$TMP_DIR/$CHECKSUMS"
+if [[ "$VERIFY_SIGNATURES" == "true" ]]; then
+  log_info "Downloading checksums signature"
+  curl -fsSL "$BASE_URL/$CHECKSUMS.sig" -o "$TMP_DIR/$CHECKSUMS.sig"
+  if [[ -n "$PUBLIC_KEY_URL" ]]; then
+    log_info "Downloading public key"
+    curl -fsSL "$PUBLIC_KEY_URL" -o "$TMP_DIR/checksums.pub"
+    PUBLIC_KEY_PATH="$TMP_DIR/checksums.pub"
+  fi
+  log_info "Verifying signature"
+  cosign verify-blob --key "$PUBLIC_KEY_PATH" --signature "$TMP_DIR/$CHECKSUMS.sig" "$TMP_DIR/$CHECKSUMS"
+fi
 
 EXPECTED=$(grep " $ASSET" "$TMP_DIR/$CHECKSUMS" | awk '{print $1}')
 if [[ -z "$EXPECTED" ]]; then

@@ -22,13 +22,16 @@ func runStartup(cmdRoot *cobra.Command) error {
 			return dispatchCommand(cmdRoot, "init")
 		}
 	}
-	fmt.Println("\nWhat would you like to do?\n")
+	fmt.Println()
+	fmt.Println("What would you like to do?")
+	fmt.Println()
 	fmt.Println("  1) Start a new process mining project")
 	fmt.Println("  2) Continue an existing project")
 	fmt.Println("  3) Run environment diagnostics (doctor)")
 	fmt.Println("  4) Configure LLM integration")
 	fmt.Println("  5) Manage user or business profiles")
-	fmt.Println("  6) Exit\n")
+	fmt.Println("  6) Exit")
+	fmt.Println()
 	choice, err := prompt.AskChoice("Select an option", []string{"1", "2", "3", "4", "5", "6"}, "1", true)
 	if err != nil {
 		return err

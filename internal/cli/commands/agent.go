@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/pm-assist/pm-assist/internal/app"
-	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/spf13/cobra"
@@ -21,7 +20,8 @@ func NewAgentCmd(global *app.GlobalFlags) *cobra.Command {
 }
 
 func newAgentSetupCmd(global *app.GlobalFlags) *cobra.Command {
-	return &cobra.Command{
+	var flagProvider string
+	cmd := &cobra.Command{
 		Use:   "setup",
 		Short: "Configure LLM provider settings",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -33,7 +33,7 @@ func newAgentSetupCmd(global *app.GlobalFlags) *cobra.Command {
 			if policies.LLMEnabled != nil && !*policies.LLMEnabled {
 				return fmt.Errorf("LLM is disabled by policy")
 			}
-			provider, err := prompt.AskChoice("LLM provider", []string{"openai", "anthropic", "gemini", "ollama", "none"}, "none", true)
+			provider, err := resolveChoice(flagProvider, "LLM provider", []string{"openai", "anthropic", "gemini", "ollama", "none"}, "none", true)
 			if err != nil {
 				return err
 			}
@@ -46,4 +46,6 @@ func newAgentSetupCmd(global *app.GlobalFlags) *cobra.Command {
 		},
 		Example: "  pm-assist agent setup",
 	}
+	cmd.Flags().StringVar(&flagProvider, "provider", "", "LLM provider (openai|anthropic|gemini|ollama|none)")
+	return cmd
 }

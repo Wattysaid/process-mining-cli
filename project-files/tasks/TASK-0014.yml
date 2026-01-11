@@ -1,0 +1,28 @@
+id: TASK-0014
+title: "Add mapping command for event log schema"
+owner_role: data
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0004"
+scope:
+  in:
+    - "Implement pm-assist map for column mapping"
+    - "Support case/activity/timestamp mapping"
+    - "Persist mapping in config"
+  out:
+    - "No automated transformations in this task"
+acceptance_criteria:
+  - "Mapping step captures required fields"
+  - "Mapping persists to pm-assist.yaml"
+  - "User can review and confirm mapping"
+files_expected:
+  - "internal/cli/commands/map.go"
+  - "internal/config/config.go"
+  - "project-files/WORKFLOWS.md"
+contracts:
+  - "project-files/WORKFLOWS.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Explicit mapping reduces schema confusion and errors."

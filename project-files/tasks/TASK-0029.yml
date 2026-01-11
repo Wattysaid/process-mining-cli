@@ -1,0 +1,27 @@
+id: TASK-0029
+title: "Add signed releases and verification"
+owner_role: security
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0001"
+scope:
+  in:
+    - "Sign release artifacts"
+    - "Verify signatures during install"
+    - "Document verification steps"
+  out:
+    - "No enterprise PKI integration"
+acceptance_criteria:
+  - "Release artifacts are signed"
+  - "Installer verifies signatures before install"
+  - "Verification instructions are documented"
+files_expected:
+  - "scripts/install.sh"
+  - "project-files/INSTALLATION_AND_RELEASE.md"
+contracts:
+  - "project-files/SECURITY_MODEL.md"
+quality_gates:
+  - "release verification passes"
+notes:
+  context: "Signed releases protect against tampering."

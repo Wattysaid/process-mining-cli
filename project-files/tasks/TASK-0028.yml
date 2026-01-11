@@ -1,0 +1,27 @@
+id: TASK-0028
+title: "Add simulation and what-if analysis"
+owner_role: data
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0007"
+scope:
+  in:
+    - "Bounded what-if simulations"
+    - "Explicit assumptions and parameter inputs"
+    - "Report scenario comparisons"
+  out:
+    - "No real-time optimization"
+acceptance_criteria:
+  - "Simulation results are reproducible"
+  - "Assumptions are captured and approved"
+  - "Scenario outputs are included in reports"
+files_expected:
+  - "python/"
+  - "project-files/WORKFLOWS.md"
+contracts:
+  - "project-files/WORKFLOWS.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "What-if analysis supports decision planning."

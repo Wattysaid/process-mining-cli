@@ -1,0 +1,27 @@
+id: TASK-0022
+title: "Add PDF report generation and reproducibility checklist"
+owner_role: data
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0007"
+scope:
+  in:
+    - "Generate PDF report output"
+    - "Include reproducibility checklist in run bundle"
+    - "Expose output options in config"
+  out:
+    - "No custom report branding in this task"
+acceptance_criteria:
+  - "PDF export is generated when enabled"
+  - "Checklist is included in outputs"
+  - "Report exports are deterministic"
+files_expected:
+  - "project-files/NOTEBOOK_AND_REPORTS.md"
+  - "python/"
+contracts:
+  - "project-files/NOTEBOOK_AND_REPORTS.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Executives often require PDF deliverables."

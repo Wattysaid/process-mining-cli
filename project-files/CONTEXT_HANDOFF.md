@@ -8,6 +8,8 @@
 - Venv runner executes `cli-tool-skills` scripts only after explicit user confirmation.
 - Notebook appends each confirmed step with Markdown + runnable command.
 - Config is YAML (`pm-assist.yaml`) with connectors, profiles, business, and LLM provider.
+- Run manifests and structured logs are written under `outputs/<run-id>/`.
+- Column mapping (`pm-assist map`) stores mappings in config.
 
 ## Key Paths
 - CLI root: `internal/cli/root.go`
@@ -25,6 +27,5 @@
 - Config model: `internal/config/config.go`
 
 ## Current Gaps
-- Snowflake/BigQuery connectors
-- Structured logging + run manifest
-- Non-interactive flags
+- Snowflake/BigQuery live connectivity checks
+- Smoke run automation

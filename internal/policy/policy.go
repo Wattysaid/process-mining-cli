@@ -1,6 +1,9 @@
 package policy
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type Policy struct {
 	LLMEnabled        *bool
@@ -37,4 +40,19 @@ func (p Policy) AllowsConnector(connector string) bool {
 	}
 	_, ok := allow[key]
 	return ok
+}
+
+// ValidateLLMProvider enforces LLM policy constraints.
+func (p Policy) ValidateLLMProvider(provider string) error {
+	key := strings.ToLower(strings.TrimSpace(provider))
+	if key == "" {
+		return nil
+	}
+	if p.LLMEnabled != nil && !*p.LLMEnabled && key != "none" {
+		return fmt.Errorf("LLM provider %s is blocked by policy", provider)
+	}
+	if p.OfflineOnly && key != "none" && key != "ollama" {
+		return fmt.Errorf("offline-only policy blocks external LLM provider %s", provider)
+	}
+	return nil
 }

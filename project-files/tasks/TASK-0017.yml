@@ -1,0 +1,27 @@
+id: TASK-0017
+title: "Add LLM call ledger and prompt redaction"
+owner_role: security
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0009"
+scope:
+  in:
+    - "Record LLM calls with redacted prompts"
+    - "Store model, token usage, and timestamps"
+    - "Expose ledger in run outputs"
+  out:
+    - "No centralized audit system"
+acceptance_criteria:
+  - "Ledger records each AI call without secrets"
+  - "Ledger is written per run"
+  - "User can disable ledger via policy"
+files_expected:
+  - "internal/llm/ledger.go"
+  - "project-files/PRIVACY.md"
+contracts:
+  - "project-files/PRIVACY.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Auditability is required for AI usage in enterprises."

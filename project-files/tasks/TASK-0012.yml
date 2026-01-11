@@ -1,0 +1,27 @@
+id: TASK-0012
+title: "Add non-interactive flags and automation support"
+owner_role: cli
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0002"
+scope:
+  in:
+    - "Flags for init/connect/ingest/prepare/mine/report"
+    - "Config-driven defaults without prompts"
+    - "Exit codes suitable for CI"
+  out:
+    - "No external CI templates"
+acceptance_criteria:
+  - "All major commands can run without prompts"
+  - "Missing required flags yields actionable error"
+  - "Exit codes reflect failure modes"
+files_expected:
+  - "internal/cli/commands/*.go"
+  - "project-files/CLI_SPEC.md"
+contracts:
+  - "project-files/CLI_SPEC.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Automation is necessary for enterprise workflows."

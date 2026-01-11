@@ -1,0 +1,27 @@
+id: TASK-0009
+title: "Integrate optional AI providers"
+owner_role: ai
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0006"
+scope:
+  in:
+    - "Provider setup for OpenAI, Anthropic, Gemini, and Ollama"
+    - "Prompt templates for summaries and interpretation"
+    - "Explicit opt-in and token budgeting"
+  out:
+    - "No autonomous execution or decisions"
+acceptance_criteria:
+  - "User can select provider during setup"
+  - "AI calls are disabled when llm_enabled is false"
+  - "Prompts are logged for audit without secrets"
+files_expected:
+  - "internal/cli/commands/agent_setup.go"
+  - "project-files/OPENAI_INTEGRATION.md"
+contracts:
+  - "project-files/OPENAI_INTEGRATION.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "AI is used for narrative, not for data processing."

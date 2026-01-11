@@ -1,0 +1,28 @@
+id: TASK-0018
+title: "Implement run cleanup and retention controls"
+owner_role: cli
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0011"
+scope:
+  in:
+    - "Add pm-assist clean --run-id"
+    - "Retention policy settings in config"
+    - "Safe confirmation prompts"
+  out:
+    - "No remote storage cleanup"
+acceptance_criteria:
+  - "Clean removes run artifacts safely"
+  - "Retention policy is enforced"
+  - "Destructive actions require confirmation"
+files_expected:
+  - "internal/cli/commands/clean.go"
+  - "internal/config/config.go"
+  - "project-files/PRIVACY.md"
+contracts:
+  - "project-files/PRIVACY.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Retention controls reduce sensitive data exposure."

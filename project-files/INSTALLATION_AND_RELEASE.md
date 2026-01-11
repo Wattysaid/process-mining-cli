@@ -40,7 +40,7 @@ MVP artefacts:
     - `checksums.txt`
 - On main branch:
   - run unit tests and linting
-  - run minimal “smoke” CLI tests (doctor/version)
+  - run minimal “smoke” CLI tests (`scripts/smoke.sh`)
 
 ## 5. Update mechanism
 Provide:
@@ -48,13 +48,20 @@ Provide:
   - checks latest version
   - downloads and replaces the binary
   - re-verifies checksum
+  - optional cosign verification when `--verify-signature` is provided
 
 ## 6. Python dependency management
 Two viable approaches (Codex to choose, with rationale):
 A) CLI manages a venv and installs Python package via pip (network required)
 B) CLI ships Python wheels in release assets and installs offline (preferred for enterprise)
 
-MVP can start with (A) and add (B) post-MVP. For IP protection, prefer shipping bundled wheels or embedded assets and avoid editable source distributions.
+Current state: wheels are packaged under `resources/wheels`, and offline installs use `PM_ASSIST_WHEELS_DIR` if set.
+For IP protection, prefer shipping bundled wheels or embedded assets and avoid editable source distributions.
+
+## 7. Signature verification (optional)
+- If release signatures are published, users can set:
+  - installer: `PM_ASSIST_VERIFY_SIGNATURES=true` with `PM_ASSIST_PUBLIC_KEY_PATH` or `PM_ASSIST_PUBLIC_KEY_URL`
+  - self-update: `--verify-signature` with `--public-key` or `--public-key-url`
 
 ## 7. Graphviz dependency
 pm4py visualisations may require OS-level Graphviz.

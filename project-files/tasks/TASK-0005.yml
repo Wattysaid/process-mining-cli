@@ -1,0 +1,29 @@
+id: TASK-0005
+title: "Add read-only database connectors"
+owner_role: data
+status: ready
+priority: P1
+depends_on:
+  - "TASK-0002"
+scope:
+  in:
+    - "Support Postgres, MySQL, and MSSQL"
+    - "Validate connections in read-only mode"
+    - "List schemas and tables for selection"
+  out:
+    - "No write operations or migrations"
+acceptance_criteria:
+  - "Read-only connection test passes for each DB"
+  - "Schema/table listing is available"
+  - "Credentials are referenced via env vars only"
+files_expected:
+  - "internal/db/postgres.go"
+  - "internal/db/mysql.go"
+  - "internal/db/mssql.go"
+  - "internal/db/catalog.go"
+contracts:
+  - "project-files/SECURITY_MODEL.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "DB access must be safe and auditable by default."

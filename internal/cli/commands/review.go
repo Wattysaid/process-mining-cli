@@ -16,6 +16,18 @@ import (
 
 // NewReviewCmd returns the review command.
 func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
+	var (
+		flagInput         string
+		flagCase          string
+		flagActivity      string
+		flagTimestamp     string
+		flagTimeFormat    string
+		flagMissing       string
+		flagDuplicate     string
+		flagOrder         string
+		flagParse         string
+		flagAllowBlocking string
+	)
 	cmd := &cobra.Command{
 		Use:   "review",
 		Short: "Run QA checks and summarize issues",
@@ -60,40 +72,40 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 			}()
 
-			inputPath, err := prompt.AskString("Input log path", filepath.Join(outputPath, "stage_03_clean_filter", "filtered_log.csv"), true)
+			inputPath, err := resolveString(flagInput, "Input log path", filepath.Join(outputPath, "stage_03_clean_filter", "filtered_log.csv"), true)
 			if err != nil {
 				return err
 			}
-			caseCol, err := prompt.AskString("Case ID column", "case_id", true)
+			caseCol, err := resolveString(flagCase, "Case ID column", "case_id", true)
 			if err != nil {
 				return err
 			}
-			activityCol, err := prompt.AskString("Activity column", "activity", true)
+			activityCol, err := resolveString(flagActivity, "Activity column", "activity", true)
 			if err != nil {
 				return err
 			}
-			timestampCol, err := prompt.AskString("Timestamp column", "timestamp", true)
+			timestampCol, err := resolveString(flagTimestamp, "Timestamp column", "timestamp", true)
 			if err != nil {
 				return err
 			}
-			timestampFormat, err := prompt.AskString("Timestamp format (optional)", "", false)
+			timestampFormat, err := resolveString(flagTimeFormat, "Timestamp format (optional)", "", false)
 			if err != nil {
 				return err
 			}
 
-			missingThreshold, err := prompt.AskString("Missing value threshold", "0.05", true)
+			missingThreshold, err := resolveString(flagMissing, "Missing value threshold", "0.05", true)
 			if err != nil {
 				return err
 			}
-			duplicateThreshold, err := prompt.AskString("Duplicate threshold", "0.02", true)
+			duplicateThreshold, err := resolveString(flagDuplicate, "Duplicate threshold", "0.02", true)
 			if err != nil {
 				return err
 			}
-			orderThreshold, err := prompt.AskString("Order violation threshold", "0.02", true)
+			orderThreshold, err := resolveString(flagOrder, "Order violation threshold", "0.02", true)
 			if err != nil {
 				return err
 			}
-			parseThreshold, err := prompt.AskString("Timestamp parse failure threshold", "0.02", true)
+			parseThreshold, err := resolveString(flagParse, "Timestamp parse failure threshold", "0.02", true)
 			if err != nil {
 				return err
 			}
@@ -117,7 +129,14 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 
 			if len(results.BlockingIssues) > 0 {
 				fmt.Printf("[WARN] Blocking issues detected: %v\n", results.BlockingIssues)
+				allowBlocking, err := resolveBool(flagAllowBlocking, "Allow blocking issues?", false)
+				if err != nil {
+					return err
+				}
 				if global.NonInteractive {
+					if allowBlocking {
+						goto complete
+					}
 					_ = manifestManager.FailStep(stepName, "blocking QA issues detected")
 					_ = manifestManager.SetStatus("failed")
 					return fmt.Errorf("blocking QA issues detected")
@@ -133,6 +152,7 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 			}
 
+		complete:
 			if err := manifestManager.AddOutputs([]string{outputPath}); err != nil {
 				return err
 			}
@@ -149,6 +169,16 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 		},
 		Example: "  pm-assist review",
 	}
+	cmd.Flags().StringVar(&flagInput, "input", "", "Input log path")
+	cmd.Flags().StringVar(&flagCase, "case", "", "Case ID column")
+	cmd.Flags().StringVar(&flagActivity, "activity", "", "Activity column")
+	cmd.Flags().StringVar(&flagTimestamp, "timestamp", "", "Timestamp column")
+	cmd.Flags().StringVar(&flagTimeFormat, "timestamp-format", "", "Timestamp format")
+	cmd.Flags().StringVar(&flagMissing, "missing-threshold", "", "Missing value threshold")
+	cmd.Flags().StringVar(&flagDuplicate, "duplicate-threshold", "", "Duplicate threshold")
+	cmd.Flags().StringVar(&flagOrder, "order-threshold", "", "Order violation threshold")
+	cmd.Flags().StringVar(&flagParse, "parse-threshold", "", "Timestamp parse failure threshold")
+	cmd.Flags().StringVar(&flagAllowBlocking, "allow-blocking", "", "Proceed despite blocking issues (true|false)")
 	return cmd
 }
 

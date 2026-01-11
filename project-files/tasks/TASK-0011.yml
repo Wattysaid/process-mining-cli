@@ -1,0 +1,27 @@
+id: TASK-0011
+title: "Add structured logging and run manifest"
+owner_role: backend
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0002"
+scope:
+  in:
+    - "Structured logs for each command"
+    - "Run manifest with config snapshot and hashes"
+    - "Consistent output folder per run"
+  out:
+    - "No external log aggregation"
+acceptance_criteria:
+  - "Each run writes run.log and manifest.json"
+  - "Manifest includes config hash and timestamps"
+  - "Logs avoid secrets and PII"
+files_expected:
+  - "internal/logging/logging.go"
+  - "project-files/SECURITY_MODEL.md"
+contracts:
+  - "project-files/SECURITY_MODEL.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Auditability is required for enterprise use."

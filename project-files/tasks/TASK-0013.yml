@@ -1,0 +1,28 @@
+id: TASK-0013
+title: "Implement Define phase scope capture"
+owner_role: product
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0002"
+scope:
+  in:
+    - "Capture process scope, objectives, and KPIs"
+    - "Write scope YAML for report reuse"
+    - "Prompt for stakeholders and boundaries"
+  out:
+    - "No mining or data extraction in this task"
+acceptance_criteria:
+  - "Scope file is created and referenced in reports"
+  - "User can edit scope answers before save"
+  - "Scope includes KPIs and business questions"
+files_expected:
+  - "internal/cli/commands/init.go"
+  - "internal/scope/scope.go"
+  - "project-files/WORKFLOWS.md"
+contracts:
+  - "project-files/WORKFLOWS.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Define phase ensures project alignment before data work begins."

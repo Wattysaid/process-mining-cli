@@ -1,0 +1,27 @@
+id: TASK-0030
+title: "Integrate OS keychain for secrets storage"
+owner_role: security
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0009"
+scope:
+  in:
+    - "Store provider credentials in OS keychain"
+    - "Fallback to env vars when keychain unavailable"
+    - "Document security posture"
+  out:
+    - "No centralized secrets manager"
+acceptance_criteria:
+  - "Keys are stored and retrieved from OS keychain"
+  - "No secrets appear in config or logs"
+  - "Fallback behavior is documented"
+files_expected:
+  - "internal/secretstore/keychain.go"
+  - "project-files/SECURITY_MODEL.md"
+contracts:
+  - "project-files/SECURITY_MODEL.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Keychain integration reduces credential leakage risk."

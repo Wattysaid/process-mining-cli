@@ -1,0 +1,29 @@
+id: TASK-0001
+title: "Implement cross-platform installer and self-update"
+owner_role: infra
+status: ready
+priority: P1
+depends_on: []
+scope:
+  in:
+    - "Provide curl-based installer for Linux/macOS/WSL2"
+    - "Implement self-update command using GitHub release assets"
+    - "Verify checksums and handle PATH updates"
+  out:
+    - "No Windows MSI in this task"
+acceptance_criteria:
+  - "Installer downloads correct platform binary"
+  - "Checksums are verified before install"
+  - "Self-update replaces binary safely"
+  - "Install and update docs are included"
+files_expected:
+  - "scripts/install.sh"
+  - "internal/updater/updater.go"
+  - "internal/cli/commands/self_update.go"
+  - "project-files/INSTALLATION_AND_RELEASE.md"
+contracts:
+  - "project-files/INSTALLATION_AND_RELEASE.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Required for enterprise rollout and automated upgrades."

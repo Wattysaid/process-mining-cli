@@ -1,0 +1,27 @@
+id: TASK-0002
+title: "Create init workflow and project scaffold"
+owner_role: cli
+status: ready
+priority: P1
+depends_on: []
+scope:
+  in:
+    - "Interactive init prompts for project name and location"
+    - "Generate project layout from templates"
+    - "Write pm-assist.yaml with defaults"
+  out:
+    - "No data ingestion or analysis in this task"
+acceptance_criteria:
+  - "Init produces a consistent folder structure"
+  - "Config file is created with validated defaults"
+  - "User can select a standard template or custom layout"
+files_expected:
+  - "internal/cli/commands/init.go"
+  - "internal/config/config.go"
+  - "project-files/CLI_SPEC.md"
+contracts:
+  - "project-files/WORKFLOWS.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Init is the entry point to every engagement."

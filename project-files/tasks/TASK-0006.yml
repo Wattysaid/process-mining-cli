@@ -1,0 +1,28 @@
+id: TASK-0006
+title: "Implement policy controls for AI and connectivity"
+owner_role: security
+status: ready
+priority: P1
+depends_on:
+  - "TASK-0002"
+scope:
+  in:
+    - "Enforce llm_enabled and offline_only flags"
+    - "Connector allow/deny list enforcement"
+    - "Block external LLM when offline_only is set"
+  out:
+    - "No policy UI beyond CLI prompts"
+acceptance_criteria:
+  - "Policies are stored and validated in pm-assist.yaml"
+  - "CLI commands enforce policy restrictions"
+  - "Policy violations produce actionable errors"
+files_expected:
+  - "internal/policy/policy.go"
+  - "internal/policy/loader.go"
+  - "project-files/SECURITY_MODEL.md"
+contracts:
+  - "project-files/SECURITY_MODEL.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Enterprises require explicit policy control over AI use."

@@ -1,0 +1,28 @@
+id: TASK-0019
+title: "Add config schema versioning and validation"
+owner_role: backend
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0002"
+scope:
+  in:
+    - "Version pm-assist.yaml schema"
+    - "Validate config on load"
+    - "Provide migration hints"
+  out:
+    - "No automatic schema migration"
+acceptance_criteria:
+  - "Invalid config fails with clear error"
+  - "Schema version is recorded in config"
+  - "Validation covers required fields"
+files_expected:
+  - "internal/config/config.go"
+  - "internal/config/validation.go"
+  - "project-files/CLI_SPEC.md"
+contracts:
+  - "project-files/CLI_SPEC.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Schema validation prevents fragile workflows."

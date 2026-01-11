@@ -9,14 +9,18 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 )
 
 type Options struct {
-	BaseURL string
-	Version string
+	BaseURL          string
+	Version          string
+	VerifySignatures bool
+	PublicKeyPath    string
+	PublicKeyURL     string
 }
 
 func Update(opts Options) error {
@@ -48,6 +52,11 @@ func Update(opts Options) error {
 	checksumsPath, err := downloadFile(downloadBase+"/"+checksums, checksums)
 	if err != nil {
 		return err
+	}
+	if opts.VerifySignatures {
+		if err := verifyChecksumsSignature(downloadBase, checksumsPath, opts.PublicKeyPath, opts.PublicKeyURL); err != nil {
+			return err
+		}
 	}
 
 	expected, err := lookupChecksum(checksumsPath, asset)
@@ -112,6 +121,36 @@ func downloadFile(url string, name string) (string, error) {
 		return "", err
 	}
 	return path, nil
+}
+
+func verifyChecksumsSignature(downloadBase string, checksumsPath string, keyPath string, keyURL string) error {
+	if checksumsPath == "" {
+		return errors.New("checksums path is required for signature verification")
+	}
+	if keyPath == "" && keyURL == "" {
+		return errors.New("public key path or URL is required for signature verification")
+	}
+	if _, err := exec.LookPath("cosign"); err != nil {
+		return errors.New("cosign not found in PATH for signature verification")
+	}
+	var err error
+	if keyPath == "" && keyURL != "" {
+		keyPath, err = downloadFile(keyURL, "checksums.txt.pub")
+		if err != nil {
+			return err
+		}
+	}
+	sigPath, err := downloadFile(downloadBase+"/checksums.txt.sig", "checksums.txt.sig")
+	if err != nil {
+		return err
+	}
+	cmd := exec.Command("cosign", "verify-blob", "--key", keyPath, "--signature", sigPath, checksumsPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("signature verification failed: %w", err)
+	}
+	return nil
 }
 
 func lookupChecksum(path string, asset string) (string, error) {

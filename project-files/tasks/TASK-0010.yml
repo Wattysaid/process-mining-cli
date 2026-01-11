@@ -1,0 +1,27 @@
+id: TASK-0010
+title: "Package and resolve skills library"
+owner_role: backend
+status: ready
+priority: P2
+depends_on: []
+scope:
+  in:
+    - "Bundle cli-tool-skills with the binary"
+    - "Resolve skills path via env override or project folder"
+    - "Provide packaging script for releases"
+  out:
+    - "No skill authoring in this task"
+acceptance_criteria:
+  - "CLI locates skills in project or bundled resources"
+  - "Packaging script produces release-ready assets"
+  - "Skills path can be overridden by environment"
+files_expected:
+  - "internal/paths/skills.go"
+  - "scripts/package_resources.sh"
+  - "project-files/WORKFLOWS.md"
+contracts:
+  - "project-files/ARCHITECTURE.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Skills must be available even without a project repo."

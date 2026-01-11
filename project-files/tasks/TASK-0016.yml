@@ -1,0 +1,28 @@
+id: TASK-0016
+title: "Implement privacy controls for column exclusion and pseudonymization"
+owner_role: security
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0002"
+scope:
+  in:
+    - "Column exclusion rules in config"
+    - "Pseudonymization option for identifiers"
+    - "Apply rules during ingest and report"
+  out:
+    - "No external privacy tooling integration"
+acceptance_criteria:
+  - "Excluded columns never appear in outputs"
+  - "Pseudonymized fields are consistent per run"
+  - "Config documents applied privacy rules"
+files_expected:
+  - "internal/config/config.go"
+  - "python/"
+  - "project-files/PRIVACY.md"
+contracts:
+  - "project-files/PRIVACY.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Privacy controls are required for regulated datasets."

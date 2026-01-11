@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/pm-assist/pm-assist/internal/app"
-	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/profile"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +23,13 @@ func NewProfileCmd(global *app.GlobalFlags) *cobra.Command {
 }
 
 func newProfileInitCmd(global *app.GlobalFlags) *cobra.Command {
-	return &cobra.Command{
+	var (
+		flagName        string
+		flagRole        string
+		flagAptitude    string
+		flagPromptDepth string
+	)
+	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Create a new user profile",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -37,19 +42,19 @@ func newProfileInitCmd(global *app.GlobalFlags) *cobra.Command {
 				projectPath = cwd
 			}
 
-			name, err := prompt.AskString("Your name", "", true)
+			name, err := resolveString(flagName, "Your name", "", true)
 			if err != nil {
 				return err
 			}
-			role, err := prompt.AskString("Your role", "", true)
+			role, err := resolveString(flagRole, "Your role", "", true)
 			if err != nil {
 				return err
 			}
-			aptitude, err := prompt.AskChoice("Aptitude level", []string{"beginner", "intermediate", "expert"}, "intermediate", true)
+			aptitude, err := resolveChoice(flagAptitude, "Aptitude level", []string{"beginner", "intermediate", "expert"}, "intermediate", true)
 			if err != nil {
 				return err
 			}
-			promptDepth, err := prompt.AskChoice("Prompt depth", []string{"short", "standard", "detailed"}, "standard", true)
+			promptDepth, err := resolveChoice(flagPromptDepth, "Prompt depth", []string{"short", "standard", "detailed"}, "standard", true)
 			if err != nil {
 				return err
 			}
@@ -68,6 +73,11 @@ func newProfileInitCmd(global *app.GlobalFlags) *cobra.Command {
 		},
 		Example: "  pm-assist profile init",
 	}
+	cmd.Flags().StringVar(&flagName, "name", "", "Profile name")
+	cmd.Flags().StringVar(&flagRole, "role", "", "Profile role")
+	cmd.Flags().StringVar(&flagAptitude, "aptitude", "", "Aptitude level (beginner|intermediate|expert)")
+	cmd.Flags().StringVar(&flagPromptDepth, "prompt-depth", "", "Prompt depth (short|standard|detailed)")
+	return cmd
 }
 
 func newProfileSetCmd(global *app.GlobalFlags) *cobra.Command {

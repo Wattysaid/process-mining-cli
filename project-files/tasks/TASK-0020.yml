@@ -1,0 +1,27 @@
+id: TASK-0020
+title: "Implement startup screen and existing project flow"
+owner_role: cli
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0002"
+scope:
+  in:
+    - "Startup banner and status line"
+    - "First-run onboarding prompts"
+    - "Existing project detection and next-step guidance"
+  out:
+    - "No full-screen TUI"
+acceptance_criteria:
+  - "Startup screen shows only when no subcommand is provided"
+  - "Existing project is detected and presented"
+  - "Startup can be disabled via config"
+files_expected:
+  - "internal/cli/startup.go"
+  - "project-files/STARTUP_SCREEN.md"
+contracts:
+  - "project-files/STARTUP_SCREEN.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "First-run experience improves adoption and correctness."

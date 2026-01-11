@@ -14,8 +14,13 @@ type Runner struct {
 	VenvPath    string
 }
 
+type VenvOptions struct {
+	Offline    bool
+	WheelsPath string
+}
+
 // EnsureVenv creates a project-local venv and installs requirements when needed.
-func (r *Runner) EnsureVenv(requirementsPath string) error {
+func (r *Runner) EnsureVenv(requirementsPath string, options VenvOptions) error {
 	if r.ProjectPath == "" {
 		return errors.New("project path is required")
 	}
@@ -38,7 +43,18 @@ func (r *Runner) EnsureVenv(requirementsPath string) error {
 		if _, err := os.Stat(pipPath); err != nil {
 			return fmt.Errorf("pip not found in venv: %w", err)
 		}
-		if err := runCommand(pipPath, []string{"install", "-r", requirementsPath}); err != nil {
+		args := []string{"install"}
+		if options.WheelsPath != "" {
+			args = append(args, "--find-links", options.WheelsPath)
+		}
+		if options.Offline {
+			if options.WheelsPath == "" {
+				return errors.New("offline mode requires bundled wheels")
+			}
+			args = append(args, "--no-index")
+		}
+		args = append(args, "-r", requirementsPath)
+		if err := runCommand(pipPath, args); err != nil {
 			return fmt.Errorf("failed to install requirements: %w", err)
 		}
 	}

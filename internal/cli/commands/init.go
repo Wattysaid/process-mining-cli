@@ -7,8 +7,9 @@ import (
 
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/business"
-	"github.com/pm-assist/pm-assist/internal/cli/prompt"
+	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/paths"
+	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/profile"
 	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/pm-assist/pm-assist/internal/scaffold"
@@ -17,6 +18,23 @@ import (
 
 // NewInitCmd returns the init command.
 func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
+	var (
+		flagProjectName    string
+		flagUserName       string
+		flagRole           string
+		flagAptitude       string
+		flagPromptDepth    string
+		flagTemplate       string
+		flagCustomFolders  string
+		flagLLMProvider    string
+		flagAllowLLM       string
+		flagOfflineOnly    string
+		flagCreateBusiness string
+		flagBusinessName   string
+		flagBusinessInd    string
+		flagBusinessRegion string
+		flagInstallDeps    string
+	)
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Create a new PM Assist project scaffold",
@@ -30,47 +48,47 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 				projectPath = cwd
 			}
 
-			projectName, err := prompt.AskString("Project name", filepath.Base(projectPath), true)
+			projectName, err := resolveString(flagProjectName, "Project name", filepath.Base(projectPath), true)
 			if err != nil {
 				return err
 			}
-			userName, err := prompt.AskString("Your name", "", true)
+			userName, err := resolveString(flagUserName, "Your name", "", true)
 			if err != nil {
 				return err
 			}
-			role, err := prompt.AskString("Your role", "", true)
+			role, err := resolveString(flagRole, "Your role", "", true)
 			if err != nil {
 				return err
 			}
-			aptitude, err := prompt.AskChoice("Aptitude level", []string{"beginner", "intermediate", "expert"}, "intermediate", true)
+			aptitude, err := resolveChoice(flagAptitude, "Aptitude level", []string{"beginner", "intermediate", "expert"}, "intermediate", true)
 			if err != nil {
 				return err
 			}
-			promptDepth, err := prompt.AskChoice("Prompt depth", []string{"short", "standard", "detailed"}, "standard", true)
+			promptDepth, err := resolveChoice(flagPromptDepth, "Prompt depth", []string{"short", "standard", "detailed"}, "standard", true)
 			if err != nil {
 				return err
 			}
-			templateChoice, err := prompt.AskChoice("Project layout", []string{"standard", "minimal", "consulting", "custom"}, "standard", true)
+			templateChoice, err := resolveChoice(flagTemplate, "Project layout", []string{"standard", "minimal", "consulting", "custom"}, "standard", true)
 			if err != nil {
 				return err
 			}
 			customFolders := []string{}
 			if templateChoice == "custom" {
-				folderInput, err := prompt.AskString("Folder list (comma-separated)", "data, outputs, docs", true)
+				folderInput, err := resolveString(flagCustomFolders, "Folder list (comma-separated)", "data, outputs, docs", true)
 				if err != nil {
 					return err
 				}
 				customFolders = scaffold.ParseCustomFolders(folderInput)
 			}
-			llmProvider, err := prompt.AskChoice("LLM provider", []string{"openai", "anthropic", "gemini", "ollama", "none"}, "none", true)
+			llmProvider, err := resolveChoice(flagLLMProvider, "LLM provider", []string{"openai", "anthropic", "gemini", "ollama", "none"}, "none", true)
 			if err != nil {
 				return err
 			}
-			allowLLM, err := prompt.AskBool("Allow LLM features?", true)
+			allowLLM, err := resolveBool(flagAllowLLM, "Allow LLM features?", true)
 			if err != nil {
 				return err
 			}
-			offlineOnly, err := prompt.AskBool("Enable offline-only policy?", false)
+			offlineOnly, err := resolveBool(flagOfflineOnly, "Enable offline-only policy?", false)
 			if err != nil {
 				return err
 			}
@@ -78,7 +96,7 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 				fmt.Println("[WARN] Offline-only mode blocks external LLM providers. Setting provider to none.")
 				llmProvider = "none"
 			}
-			createBusiness, err := prompt.AskBool("Create a business profile now?", true)
+			createBusiness, err := resolveBool(flagCreateBusiness, "Create a business profile now?", true)
 			if err != nil {
 				return err
 			}
@@ -86,15 +104,15 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			businessIndustry := ""
 			businessRegion := ""
 			if createBusiness {
-				businessName, err = prompt.AskString("Business name", "", true)
+				businessName, err = resolveString(flagBusinessName, "Business name", "", true)
 				if err != nil {
 					return err
 				}
-				businessIndustry, err = prompt.AskString("Business industry", "", true)
+				businessIndustry, err = resolveString(flagBusinessInd, "Business industry", "", true)
 				if err != nil {
 					return err
 				}
-				businessRegion, err = prompt.AskString("Business region", "", true)
+				businessRegion, err = resolveString(flagBusinessRegion, "Business region", "", true)
 				if err != nil {
 					return err
 				}
@@ -116,8 +134,22 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 			configPath := filepath.Join(projectPath, "pm-assist.yaml")
 			if _, err := os.Stat(configPath); os.IsNotExist(err) {
-				content := fmt.Sprintf("project:\n  name: %s\nprofiles:\n  active: %s\nbusiness:\n  active: %s\nllm:\n  provider: %s\npolicy:\n  llm_enabled: %t\n  offline_only: %t\n", projectName, userName, businessName, llmProvider, allowLLM, offlineOnly)
-				if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
+				llmEnabled := allowLLM
+				cfg := config.Config{
+					Path:    configPath,
+					Version: config.CurrentSchemaVersion,
+					Project: config.ProjectConfig{Name: projectName},
+					Profiles: config.ProfilesConfig{
+						Active: userName,
+					},
+					Business: config.BusinessConfig{Active: businessName},
+					LLM:      config.LLMConfig{Provider: llmProvider},
+					Policy: config.PolicyConfig{
+						LLMEnabled:  &llmEnabled,
+						OfflineOnly: offlineOnly,
+					},
+				}
+				if err := cfg.Save(); err != nil {
 					return err
 				}
 			}
@@ -146,7 +178,7 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			gitignorePath := filepath.Join(projectPath, ".gitignore")
 			_ = scaffold.EnsureGitignore(gitignorePath, []string{"outputs/", ".venv/", ".profiles/", ".business/", "*.pyc"})
 
-			installDeps, err := prompt.AskBool("Install Python dependencies now? (requires network)", false)
+			installDeps, err := resolveBool(flagInstallDeps, "Install Python dependencies now? (requires network)", false)
 			if err != nil {
 				return err
 			}
@@ -158,8 +190,15 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			if !installDeps {
 				skillRequirements = ""
 			}
+			options := runner.VenvOptions{}
+			if installDeps {
+				options, err = resolveVenvOptions(projectPath, policy.Policy{OfflineOnly: offlineOnly})
+				if err != nil {
+					return err
+				}
+			}
 			venvRunner := &runner.Runner{ProjectPath: projectPath}
-			if err := venvRunner.EnsureVenv(skillRequirements); err != nil {
+			if err := venvRunner.EnsureVenv(skillRequirements, options); err != nil {
 				return err
 			}
 
@@ -168,5 +207,20 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 		},
 		Example: "  pm-assist init",
 	}
+	cmd.Flags().StringVar(&flagProjectName, "project-name", "", "Project name")
+	cmd.Flags().StringVar(&flagUserName, "user-name", "", "User name")
+	cmd.Flags().StringVar(&flagRole, "role", "", "User role")
+	cmd.Flags().StringVar(&flagAptitude, "aptitude", "", "Aptitude level (beginner|intermediate|expert)")
+	cmd.Flags().StringVar(&flagPromptDepth, "prompt-depth", "", "Prompt depth (short|standard|detailed)")
+	cmd.Flags().StringVar(&flagTemplate, "template", "", "Project layout (standard|minimal|consulting|custom)")
+	cmd.Flags().StringVar(&flagCustomFolders, "custom-folders", "", "Custom folders (comma-separated)")
+	cmd.Flags().StringVar(&flagLLMProvider, "llm-provider", "", "LLM provider (openai|anthropic|gemini|ollama|none)")
+	cmd.Flags().StringVar(&flagAllowLLM, "allow-llm", "", "Allow LLM features (true|false)")
+	cmd.Flags().StringVar(&flagOfflineOnly, "offline-only", "", "Enable offline-only policy (true|false)")
+	cmd.Flags().StringVar(&flagCreateBusiness, "create-business", "", "Create a business profile now (true|false)")
+	cmd.Flags().StringVar(&flagBusinessName, "business-name", "", "Business name")
+	cmd.Flags().StringVar(&flagBusinessInd, "business-industry", "", "Business industry")
+	cmd.Flags().StringVar(&flagBusinessRegion, "business-region", "", "Business region")
+	cmd.Flags().StringVar(&flagInstallDeps, "install-deps", "", "Install Python dependencies now (true|false)")
 	return cmd
 }

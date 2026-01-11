@@ -1,0 +1,29 @@
+id: TASK-0025
+title: "Add object storage and SharePoint connectors"
+owner_role: data
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0004"
+scope:
+  in:
+    - "Read-only access for S3 and ADLS"
+    - "Read-only access for SharePoint files"
+    - "Connector config templates"
+  out:
+    - "No write or sync operations"
+acceptance_criteria:
+  - "S3/ADLS/SharePoint connectors can list and preview files"
+  - "Credentials are referenced via env vars only"
+  - "Connector selection is documented"
+files_expected:
+  - "internal/connectors/s3.go"
+  - "internal/connectors/adls.go"
+  - "internal/connectors/sharepoint.go"
+  - "project-files/PRD.md"
+contracts:
+  - "project-files/PRD.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "File-based enterprise stores are common for extracts."

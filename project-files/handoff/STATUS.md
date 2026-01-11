@@ -14,21 +14,23 @@
 - Release workflow (builds tarballs + checksums)
 - Skills path resolution with packaging fallback
 - Policy controls (LLM enable/disable, offline-only, connector allow/deny)
+- Structured logging + run manifest (config snapshot, inputs/outputs, hashes, step status)
+- HTML report export (PDF export when pandoc is available)
+- Config schema versioning + validation
+- Non-interactive flags across core commands
+- Column mapping (map command) with config persistence
+- Report bundle output (`outputs/<run-id>/bundle/report_bundle_<run-id>.zip`)
+- Config migration scaffolding (version 0 -> current)
 
 ## Partially Complete
-- Packaging of Python assets: scripts exist, but integration into release workflow needs verification and tests.
-- Policy enforcement: applied to connect + agent setup; warnings in ingest/prepare/mine/report; no hard enforcement yet.
-- Doctor command: basic env checks only, lacks connector reachability checks.
+- Packaging of Python assets: bundled skills + wheels; offline installs require wheel verification/testing.
+- Policy enforcement: applied to connect + agent setup; offline-only enforced for python deps; warnings remain in ingest/prepare/mine/report.
+- Snowflake/BigQuery connectors: config capture + explicit unsupported validation; no live connectivity checks yet.
+- Automated tests: unit tests added for config/manifest/QA; smoke run wired via `scripts/smoke.sh`.
+- Signed release verification hooks (cosign) added to installer/self-update; release workflow signs checksums when secrets are set.
 
 ## Not Started / Missing
-- Structured logging + secrets redaction
-- Run manifests with hashes, config snapshot, step status
-- Non-interactive flags for all command prompts
-- Snowflake/BigQuery connectors (capture + validation stubs)
-- Report HTML/PDF output
-- Config validation and schema versioning
-- Automated tests + smoke run
-- Signed releases + verification
+- Snowflake/BigQuery live reachability checks
 
 ## Build Notes
 - Go 1.22+ required

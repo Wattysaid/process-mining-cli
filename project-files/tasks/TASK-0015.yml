@@ -1,0 +1,27 @@
+id: TASK-0015
+title: "Generate readiness scorecard and assumptions list"
+owner_role: data
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0004"
+scope:
+  in:
+    - "Compute readiness scorecard from QA outputs"
+    - "Produce assumptions list and issues backlog"
+    - "Include in report and run bundle"
+  out:
+    - "No remediation workflows in this task"
+acceptance_criteria:
+  - "Readiness scorecard is generated per run"
+  - "Assumptions list is explicit and versioned"
+  - "Issues backlog is written to outputs"
+files_expected:
+  - "internal/qa/qa.go"
+  - "project-files/QA_AND_VALIDATION.md"
+contracts:
+  - "project-files/QA_AND_VALIDATION.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Readiness signals help users decide if analysis is safe to proceed."

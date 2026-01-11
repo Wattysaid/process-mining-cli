@@ -7,6 +7,7 @@ import (
 )
 
 const skillsEnvVar = "PM_ASSIST_SKILLS_DIR"
+const wheelsEnvVar = "PM_ASSIST_WHEELS_DIR"
 
 // SkillsRoot resolves the skills directory, preferring env override, then project, then bundled assets.
 func SkillsRoot(projectPath string) (string, error) {
@@ -43,4 +44,31 @@ func SkillPath(skillsRoot string, parts ...string) string {
 func exists(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && info.IsDir()
+}
+
+// WheelsRoot resolves the bundled wheels directory for offline installs.
+func WheelsRoot(projectPath string) (string, error) {
+	if override := os.Getenv(wheelsEnvVar); override != "" {
+		if exists(override) {
+			return override, nil
+		}
+		return "", errors.New("wheels path override not found")
+	}
+
+	if projectPath != "" {
+		candidate := filepath.Join(projectPath, "resources", "wheels")
+		if exists(candidate) {
+			return candidate, nil
+		}
+	}
+
+	exe, err := os.Executable()
+	if err == nil {
+		candidate := filepath.Join(filepath.Dir(exe), "resources", "wheels")
+		if exists(candidate) {
+			return candidate, nil
+		}
+	}
+
+	return "", errors.New("bundled wheels not found; set PM_ASSIST_WHEELS_DIR")
 }

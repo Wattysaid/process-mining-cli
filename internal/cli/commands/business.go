@@ -7,7 +7,6 @@ import (
 
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/business"
-	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +23,12 @@ func NewBusinessCmd(global *app.GlobalFlags) *cobra.Command {
 }
 
 func newBusinessInitCmd(global *app.GlobalFlags) *cobra.Command {
-	return &cobra.Command{
+	var (
+		flagName     string
+		flagIndustry string
+		flagRegion   string
+	)
+	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Create a new business profile",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -37,15 +41,15 @@ func newBusinessInitCmd(global *app.GlobalFlags) *cobra.Command {
 				projectPath = cwd
 			}
 
-			name, err := prompt.AskString("Business name", "", true)
+			name, err := resolveString(flagName, "Business name", "", true)
 			if err != nil {
 				return err
 			}
-			industry, err := prompt.AskString("Industry", "", true)
+			industry, err := resolveString(flagIndustry, "Industry", "", true)
 			if err != nil {
 				return err
 			}
-			region, err := prompt.AskString("Region", "", true)
+			region, err := resolveString(flagRegion, "Region", "", true)
 			if err != nil {
 				return err
 			}
@@ -63,6 +67,10 @@ func newBusinessInitCmd(global *app.GlobalFlags) *cobra.Command {
 		},
 		Example: "  pm-assist business init",
 	}
+	cmd.Flags().StringVar(&flagName, "name", "", "Business name")
+	cmd.Flags().StringVar(&flagIndustry, "industry", "", "Industry")
+	cmd.Flags().StringVar(&flagRegion, "region", "", "Region")
+	return cmd
 }
 
 func newBusinessSetCmd(global *app.GlobalFlags) *cobra.Command {

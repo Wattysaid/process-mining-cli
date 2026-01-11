@@ -51,7 +51,8 @@ Report structure (MVP):
 Outputs:
 - `report.md`
 - `report.html`
-- pdf optional post-MVP
+- pdf export supported when pandoc is available
+- `bundle/report_bundle_<run-id>.zip` (manifest, config snapshot, report assets)
 
 ## 4. LLM-assisted narrative (optional)
 When enabled, LLMs (OpenAI/Anthropic/Gemini/Ollama) are used only for:

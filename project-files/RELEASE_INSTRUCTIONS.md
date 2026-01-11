@@ -24,6 +24,7 @@ Example assets:
 - `pm-assist_darwin_x64.tar.gz`
 - `pm-assist_darwin_arm64.tar.gz`
 - `checksums.txt`
+- `checksums.txt.sig` (optional, for signature verification)
 
 `checksums.txt` must contain SHA256 sums in the format:
 ```
@@ -112,6 +113,12 @@ The CLI resolves skills in this order:
 For releases, run:
 ```bash
 scripts/package_resources.sh .codex/skills/cli-tool-skills resources/cli-tool-skills
+scripts/package_wheels.sh .codex/skills/cli-tool-skills/pm-99-utils-and-standards/requirements.txt resources/wheels
 ```
 
-Ensure the packaged `resources/` directory is shipped alongside the binary in the tarball.
+Ensure the packaged `resources/` directory (including `resources/wheels`) is shipped alongside the binary in the tarball.
+
+## 8) Signature verification (optional)
+If you sign releases, upload `checksums.txt.sig` and distribute the public key.
+Installers and `pm-assist self-update` can verify signatures when provided a cosign public key.
+Release workflow supports signing when `COSIGN_PRIVATE_KEY` and `COSIGN_PASSWORD` secrets are set.

@@ -1,0 +1,27 @@
+id: TASK-0007
+title: "Append notebook steps and generate reports"
+owner_role: data
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0004"
+scope:
+  in:
+    - "Append approved steps to analysis_notebook.ipynb"
+    - "Generate Markdown and HTML reports"
+    - "Store outputs under outputs/<run-id>/"
+  out:
+    - "No PDF generation in this task"
+acceptance_criteria:
+  - "Notebook appends include code cells and metadata"
+  - "Report is generated from standard template"
+  - "Outputs are written to a deterministic run folder"
+files_expected:
+  - "internal/notebook/notebook.go"
+  - "project-files/NOTEBOOK_AND_REPORTS.md"
+contracts:
+  - "project-files/NOTEBOOK_AND_REPORTS.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Users need reproducible notebooks for audit and handoff."

@@ -1,0 +1,27 @@
+id: TASK-0023
+title: "Support BPMN export for process models"
+owner_role: data
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0007"
+scope:
+  in:
+    - "Export BPMN where feasible"
+    - "Store BPMN artefacts in outputs"
+    - "Document limitations"
+  out:
+    - "No external BPMN editor integration"
+acceptance_criteria:
+  - "BPMN export is produced when selected"
+  - "Exports are logged and versioned"
+  - "Limitations are stated in report"
+files_expected:
+  - "python/"
+  - "project-files/WORKFLOWS.md"
+contracts:
+  - "project-files/WORKFLOWS.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "BPMN exports support stakeholder workshops."

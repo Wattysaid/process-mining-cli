@@ -1,0 +1,27 @@
+id: TASK-0031
+title: "Add test matrix and release validation suite"
+owner_role: qa
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0001"
+scope:
+  in:
+    - "Smoke tests for install, init, connect, report"
+    - "Cross-platform validation checklist"
+    - "Release verification steps"
+  out:
+    - "No CI pipeline overhaul"
+acceptance_criteria:
+  - "Smoke tests cover core commands"
+  - "Release checklist is documented"
+  - "Validation runs are reproducible"
+files_expected:
+  - "project-files/QA_AND_VALIDATION.md"
+  - "project-files/RELEASE_INSTRUCTIONS.md"
+contracts:
+  - "project-files/QA_AND_VALIDATION.md"
+quality_gates:
+  - "smoke test suite passes"
+notes:
+  context: "Release confidence requires repeatable validation."

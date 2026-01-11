@@ -13,5 +13,6 @@ type GlobalFlags struct {
 	Yes            bool
 	LLMProvider    string
 	ProfileName    string
+	BusinessName   string
 	Config         *config.Config
 }

@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/pm-assist/pm-assist/internal/app"
-	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/notebook"
@@ -18,6 +17,19 @@ import (
 
 // NewPrepareCmd returns the prepare command.
 func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
+	var (
+		flagInput       string
+		flagCase        string
+		flagActivity    string
+		flagTimestamp   string
+		flagResource    string
+		flagConfirm     string
+		flagFilter      string
+		flagMinFreq     string
+		flagTopVariants string
+		flagStartActs   string
+		flagEndActs     string
+	)
 	cmd := &cobra.Command{
 		Use:   "prepare",
 		Short: "Run data preparation pipeline",
@@ -66,28 +78,28 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 			}()
 
-			inputPath, err := prompt.AskString("Input log path", filepath.Join(outputPath, "stage_01_ingest_profile", "normalised_log.csv"), true)
+			inputPath, err := resolveString(flagInput, "Input log path", filepath.Join(outputPath, "stage_01_ingest_profile", "normalised_log.csv"), true)
 			if err != nil {
 				return err
 			}
-			caseCol, err := prompt.AskString("Case ID column", "case_id", true)
+			caseCol, err := resolveString(flagCase, "Case ID column", "case_id", true)
 			if err != nil {
 				return err
 			}
-			activityCol, err := prompt.AskString("Activity column", "activity", true)
+			activityCol, err := resolveString(flagActivity, "Activity column", "activity", true)
 			if err != nil {
 				return err
 			}
-			timestampCol, err := prompt.AskString("Timestamp column", "timestamp", true)
+			timestampCol, err := resolveString(flagTimestamp, "Timestamp column", "timestamp", true)
 			if err != nil {
 				return err
 			}
-			resourceCol, err := prompt.AskString("Resource column (optional)", "", false)
+			resourceCol, err := resolveString(flagResource, "Resource column (optional)", "", false)
 			if err != nil {
 				return err
 			}
 
-			confirm, err := prompt.AskBool("Run data quality checks now?", true)
+			confirm, err := resolveBool(flagConfirm, "Run data quality checks now?", true)
 			if err != nil {
 				return err
 			}
@@ -108,7 +120,11 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			reqPath := paths.SkillPath(skillsRoot, "pm-99-utils-and-standards", "requirements.txt")
-			if err := venvRunner.EnsureVenv(reqPath); err != nil {
+			options, err := resolveVenvOptions(projectPath, policies)
+			if err != nil {
+				return err
+			}
+			if err := venvRunner.EnsureVenv(reqPath, options); err != nil {
 				return err
 			}
 
@@ -140,7 +156,7 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 
-			filterChoice, err := prompt.AskChoice("Rare activity filtering", []string{"none", "min-frequency", "top-variants"}, "none", true)
+			filterChoice, err := resolveChoice(flagFilter, "Rare activity filtering", []string{"none", "min-frequency", "top-variants"}, "none", true)
 			if err != nil {
 				return err
 			}
@@ -148,22 +164,22 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 			minFreq := "0.01"
 			topVariants := ""
 			if filterChoice == "min-frequency" {
-				minFreq, err = prompt.AskString("Minimum activity frequency", "0.01", true)
+				minFreq, err = resolveString(flagMinFreq, "Minimum activity frequency", "0.01", true)
 				if err != nil {
 					return err
 				}
 				autoFilter = true
 			} else if filterChoice == "top-variants" {
-				topVariants, err = prompt.AskString("Top variants to keep", "10", true)
+				topVariants, err = resolveString(flagTopVariants, "Top variants to keep", "10", true)
 				if err != nil {
 					return err
 				}
 			}
-			startActs, err := prompt.AskString("Start activities (comma-separated, optional)", "", false)
+			startActs, err := resolveString(flagStartActs, "Start activities (comma-separated, optional)", "", false)
 			if err != nil {
 				return err
 			}
-			endActs, err := prompt.AskString("End activities (comma-separated, optional)", "", false)
+			endActs, err := resolveString(flagEndActs, "End activities (comma-separated, optional)", "", false)
 			if err != nil {
 				return err
 			}
@@ -238,5 +254,16 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 		},
 		Example: "  pm-assist prepare",
 	}
+	cmd.Flags().StringVar(&flagInput, "input", "", "Input log path")
+	cmd.Flags().StringVar(&flagCase, "case", "", "Case ID column")
+	cmd.Flags().StringVar(&flagActivity, "activity", "", "Activity column")
+	cmd.Flags().StringVar(&flagTimestamp, "timestamp", "", "Timestamp column")
+	cmd.Flags().StringVar(&flagResource, "resource", "", "Resource column")
+	cmd.Flags().StringVar(&flagConfirm, "confirm", "", "Run data quality checks now (true|false)")
+	cmd.Flags().StringVar(&flagFilter, "filter", "", "Rare activity filtering (none|min-frequency|top-variants)")
+	cmd.Flags().StringVar(&flagMinFreq, "min-frequency", "", "Minimum activity frequency")
+	cmd.Flags().StringVar(&flagTopVariants, "top-variants", "", "Top variants to keep")
+	cmd.Flags().StringVar(&flagStartActs, "start-activities", "", "Start activities (comma-separated)")
+	cmd.Flags().StringVar(&flagEndActs, "end-activities", "", "End activities (comma-separated)")
 	return cmd
 }

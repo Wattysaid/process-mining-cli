@@ -1,0 +1,29 @@
+id: TASK-0003
+title: "Implement user and business profile capture"
+owner_role: backend
+status: ready
+priority: P1
+depends_on:
+  - "TASK-0002"
+scope:
+  in:
+    - "Prompt for user name, role, and skill level"
+    - "Create business profiles with reusable org metadata"
+    - "Persist profiles as YAML under .profiles/ and .business/"
+  out:
+    - "No external identity provider integration"
+acceptance_criteria:
+  - "User profile is created and reused across sessions"
+  - "Business profile can be selected or created"
+  - "Profiles are stored as YAML and validated"
+files_expected:
+  - "internal/profile/user.go"
+  - "internal/profile/business.go"
+  - "project-files/USER_PROFILES.md"
+  - "project-files/BUSINESS_PROFILES.md"
+contracts:
+  - "project-files/USER_PROFILES.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Profiles reduce repeated data entry and tailor prompts."

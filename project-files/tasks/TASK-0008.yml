@@ -1,0 +1,28 @@
+id: TASK-0008
+title: "Implement QA review pack"
+owner_role: qa
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0004"
+scope:
+  in:
+    - "Automated QA checks for event logs"
+    - "Generate qa_summary.md and issues_backlog.csv"
+    - "Expose review command in CLI"
+  out:
+    - "No external QA dashboards in this task"
+acceptance_criteria:
+  - "Review command produces summary and JSON results"
+  - "Duplicate/invalid timestamp checks are included"
+  - "QA artifacts are stored per run"
+files_expected:
+  - "internal/qa/qa.go"
+  - "internal/cli/commands/review.go"
+  - "project-files/QA_AND_VALIDATION.md"
+contracts:
+  - "project-files/QA_AND_VALIDATION.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "QA provides quick trust signals before analysis."

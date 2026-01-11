@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/pm-assist/pm-assist/internal/app"
-	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/notebook"
@@ -18,6 +17,15 @@ import (
 
 // NewIngestCmd returns the ingest command.
 func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
+	var (
+		flagConnector string
+		flagFile      string
+		flagCase      string
+		flagActivity  string
+		flagTimestamp string
+		flagResource  string
+		flagConfirm   string
+	)
 	cmd := &cobra.Command{
 		Use:   "ingest",
 		Short: "Ingest data into a staging dataset",
@@ -44,7 +52,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				return nil
 			}
 
-			connectorName, err := prompt.AskString("Connector name", cfg.Connectors[0].Name, true)
+			connectorName, err := resolveString(flagConnector, "Connector name", cfg.Connectors[0].Name, true)
 			if err != nil {
 				return err
 			}
@@ -58,24 +66,30 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			if selected == nil {
 				return fmt.Errorf("connector not found: %s", connectorName)
 			}
+			if !policies.AllowsConnector(selected.Type) {
+				return fmt.Errorf("connector type blocked by policy: %s", selected.Type)
+			}
 			if selected.Type != "file" || selected.File == nil || len(selected.File.Paths) == 0 {
 				return fmt.Errorf("only file connectors are supported in ingest for now")
 			}
 
 			filePath := selected.File.Paths[0]
-			caseCol, err := prompt.AskString("Case ID column", "case_id", true)
+			if flagFile != "" {
+				filePath = flagFile
+			}
+			caseCol, err := resolveString(flagCase, "Case ID column", "case_id", true)
 			if err != nil {
 				return err
 			}
-			activityCol, err := prompt.AskString("Activity column", "activity", true)
+			activityCol, err := resolveString(flagActivity, "Activity column", "activity", true)
 			if err != nil {
 				return err
 			}
-			timestampCol, err := prompt.AskString("Timestamp column", "timestamp", true)
+			timestampCol, err := resolveString(flagTimestamp, "Timestamp column", "timestamp", true)
 			if err != nil {
 				return err
 			}
-			resourceCol, err := prompt.AskString("Resource column (optional)", "", false)
+			resourceCol, err := resolveString(flagResource, "Resource column (optional)", "", false)
 			if err != nil {
 				return err
 			}
@@ -106,7 +120,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 			}()
 
-			confirm, err := prompt.AskBool("Run ingest now?", true)
+			confirm, err := resolveBool(flagConfirm, "Run ingest now?", true)
 			if err != nil {
 				return err
 			}
@@ -127,7 +141,11 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			reqPath := paths.SkillPath(skillsRoot, "pm-99-utils-and-standards", "requirements.txt")
-			if err := venvRunner.EnsureVenv(reqPath); err != nil {
+			options, err := resolveVenvOptions(projectPath, policies)
+			if err != nil {
+				return err
+			}
+			if err := venvRunner.EnsureVenv(reqPath, options); err != nil {
 				return err
 			}
 
@@ -176,5 +194,12 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 		},
 		Example: "  pm-assist ingest",
 	}
+	cmd.Flags().StringVar(&flagConnector, "connector", "", "Connector name")
+	cmd.Flags().StringVar(&flagFile, "file", "", "Input file path override")
+	cmd.Flags().StringVar(&flagCase, "case", "", "Case ID column")
+	cmd.Flags().StringVar(&flagActivity, "activity", "", "Activity column")
+	cmd.Flags().StringVar(&flagTimestamp, "timestamp", "", "Timestamp column")
+	cmd.Flags().StringVar(&flagResource, "resource", "", "Resource column")
+	cmd.Flags().StringVar(&flagConfirm, "confirm", "", "Run ingest now (true|false)")
 	return cmd
 }

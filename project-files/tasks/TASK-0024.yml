@@ -1,0 +1,28 @@
+id: TASK-0024
+title: "Add Snowflake and BigQuery connectors"
+owner_role: data
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0005"
+scope:
+  in:
+    - "Read-only connection validation"
+    - "Schema and table discovery"
+    - "Config entries for cloud connectors"
+  out:
+    - "No write access or data loading"
+acceptance_criteria:
+  - "Snowflake and BigQuery connectors validate in read-only mode"
+  - "Schemas and tables are listed"
+  - "Credentials are referenced via env vars only"
+files_expected:
+  - "internal/db/snowflake.go"
+  - "internal/db/bigquery.go"
+  - "project-files/PRD.md"
+contracts:
+  - "project-files/PRD.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Cloud data warehouses are common in enterprises."

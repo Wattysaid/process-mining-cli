@@ -9,6 +9,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/logging"
+	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/spf13/cobra"
 )
 
@@ -22,6 +23,16 @@ var rootCmd = &cobra.Command{
 		}
 		cfg, err := config.Load(Global.ConfigPath)
 		if err != nil {
+			return err
+		}
+		policies := policy.FromConfig(cfg)
+		if Global.LLMProvider != "" {
+			if err := policies.ValidateLLMProvider(Global.LLMProvider); err != nil {
+				return err
+			}
+			cfg.LLM.Provider = Global.LLMProvider
+		}
+		if err := policies.ValidateLLMProvider(cfg.LLM.Provider); err != nil {
 			return err
 		}
 		Global.Config = cfg
@@ -49,6 +60,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&Global.Yes, "yes", false, "Assume yes for safe prompts")
 	rootCmd.PersistentFlags().StringVar(&Global.LLMProvider, "llm-provider", "", "Override configured LLM provider (openai|anthropic|gemini|ollama|none)")
 	rootCmd.PersistentFlags().StringVar(&Global.ProfileName, "profile", "", "Use a specific user profile from .profiles/")
+	rootCmd.PersistentFlags().StringVar(&Global.BusinessName, "business", "", "Use a specific business profile from .business/")
 
 	rootCmd.AddCommand(
 		commands.NewVersionCmd(Global),

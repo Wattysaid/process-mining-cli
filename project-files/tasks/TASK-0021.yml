@@ -1,0 +1,28 @@
+id: TASK-0021
+title: "Bootstrap Python environment and dependencies"
+owner_role: infra
+status: ready
+priority: P1
+depends_on:
+  - "TASK-0002"
+scope:
+  in:
+    - "Create project-local .venv on first run"
+    - "Install required Python packages deterministically"
+    - "Check Graphviz availability"
+  out:
+    - "No system-wide Python installation"
+acceptance_criteria:
+  - "Venv is created and reused per project"
+  - "Dependency install is repeatable and version-pinned"
+  - "Doctor command reports missing deps"
+files_expected:
+  - "internal/venv/venv.go"
+  - "internal/cli/commands/doctor.go"
+  - "project-files/INSTALLATION_AND_RELEASE.md"
+contracts:
+  - "project-files/INSTALLATION_AND_RELEASE.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Reliable environments reduce setup friction."

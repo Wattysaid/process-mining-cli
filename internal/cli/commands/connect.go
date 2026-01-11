@@ -18,6 +18,26 @@ import (
 
 // NewConnectCmd returns the connect command.
 func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
+	var (
+		flagType        string
+		flagName        string
+		flagPaths       string
+		flagFormat      string
+		flagDelimiter   string
+		flagEncoding    string
+		flagPreview     string
+		flagCountRows   string
+		flagDriver      string
+		flagHost        string
+		flagPort        string
+		flagDBName      string
+		flagSchema      string
+		flagUser        string
+		flagSSLMode     string
+		flagCredEnv     string
+		flagTest        string
+		flagListCatalog string
+	)
 	cmd := &cobra.Command{
 		Use:   "connect",
 		Short: "Register read-only data connectors",
@@ -31,7 +51,7 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				projectPath = cwd
 			}
 
-			connectorType, err := prompt.AskChoice("Connector type", []string{"file", "database"}, "file", true)
+			connectorType, err := resolveChoice(flagType, "Connector type", []string{"file", "database"}, "file", true)
 			if err != nil {
 				return err
 			}
@@ -52,26 +72,26 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				return fmt.Errorf("database connectors are blocked in offline-only mode")
 			}
 			if connectorType == "file" {
-				name, err := prompt.AskString("Connector name", "file-source", true)
+				name, err := resolveString(flagName, "Connector name", "file-source", true)
 				if err != nil {
 					return err
 				}
-				pathList, err := prompt.AskString("File paths (comma-separated)", "", true)
+				pathList, err := resolveString(flagPaths, "File paths (comma-separated)", "", true)
 				if err != nil {
 					return err
 				}
-				format, err := prompt.AskChoice("Format", []string{"csv", "parquet"}, "csv", true)
+				format, err := resolveChoice(flagFormat, "Format", []string{"csv", "parquet"}, "csv", true)
 				if err != nil {
 					return err
 				}
 				delimiter := ""
 				encoding := ""
 				if format == "csv" {
-					delimiter, err = prompt.AskString("CSV delimiter", ",", true)
+					delimiter, err = resolveString(flagDelimiter, "CSV delimiter", ",", true)
 					if err != nil {
 						return err
 					}
-					encoding, err = prompt.AskString("CSV encoding", "utf-8", true)
+					encoding, err = resolveString(flagEncoding, "CSV encoding", "utf-8", true)
 					if err != nil {
 						return err
 					}
@@ -83,7 +103,7 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 						fmt.Printf("[WARN] Could not access %s: %v\n", path, err)
 					}
 				}
-				previewNow, err := prompt.AskBool("Preview CSV headers and sample rows?", true)
+				previewNow, err := resolveBool(flagPreview, "Preview CSV headers and sample rows?", true)
 				if err != nil {
 					return err
 				}
@@ -91,7 +111,7 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 					if strings.ToLower(encoding) != "utf-8" && encoding != "" {
 						fmt.Printf("[WARN] Preview skipped for encoding %s (only utf-8 supported).\n", encoding)
 					} else if len(paths) > 0 {
-						countRows, err := prompt.AskBool("Count total rows? (may be slow)", false)
+						countRows, err := resolveBool(flagCountRows, "Count total rows? (may be slow)", false)
 						if err != nil {
 							return err
 						}
@@ -122,22 +142,25 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				return nil
 			}
 
-			name, err := prompt.AskString("Connector name", "db-source", true)
+			name, err := resolveString(flagName, "Connector name", "db-source", true)
 			if err != nil {
 				return err
 			}
-			driver, err := prompt.AskChoice("Database driver", []string{"postgres", "mysql", "mssql", "snowflake", "bigquery", "other"}, "postgres", true)
+			driver, err := resolveChoice(flagDriver, "Database driver", []string{"postgres", "mysql", "mssql", "snowflake", "bigquery", "other"}, "postgres", true)
 			if err != nil {
 				return err
+			}
+			if driver == "snowflake" || driver == "bigquery" {
+				fmt.Printf("[WARN] %s connectors are captured for auditing but reachability checks are not supported yet.\n", driver)
 			}
 			if !policies.AllowsConnector(driver) {
 				return fmt.Errorf("connector driver blocked by policy: %s", driver)
 			}
-			host, err := prompt.AskString("Host", "", true)
+			host, err := resolveString(flagHost, "Host", "", true)
 			if err != nil {
 				return err
 			}
-			portText, err := prompt.AskString("Port", "5432", true)
+			portText, err := resolveString(flagPort, "Port", "5432", true)
 			if err != nil {
 				return err
 			}
@@ -145,23 +168,23 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("invalid port: %s", portText)
 			}
-			dbName, err := prompt.AskString("Database name", "", true)
+			dbName, err := resolveString(flagDBName, "Database name", "", true)
 			if err != nil {
 				return err
 			}
-			schema, err := prompt.AskString("Schema (optional)", "", false)
+			schema, err := resolveString(flagSchema, "Schema (optional)", "", false)
 			if err != nil {
 				return err
 			}
-			user, err := prompt.AskString("Username (optional)", "", false)
+			user, err := resolveString(flagUser, "Username (optional)", "", false)
 			if err != nil {
 				return err
 			}
-			sslMode, err := prompt.AskString("SSL mode (optional)", "", false)
+			sslMode, err := resolveString(flagSSLMode, "SSL mode (optional)", "", false)
 			if err != nil {
 				return err
 			}
-			credEnv, err := prompt.AskString("Credential env var name (e.g., DB_PASSWORD)", "", true)
+			credEnv, err := resolveString(flagCredEnv, "Credential env var name (e.g., DB_PASSWORD)", "", true)
 			if err != nil {
 				return err
 			}
@@ -169,16 +192,20 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 			fmt.Println("[INFO] Credentials are never stored in config. Set the env var before connecting.")
 			fmt.Printf("[INFO] Using credential env var: %s\n", credEnv)
 
-			testNow, err := prompt.AskBool("Test read-only connection now?", true)
+			testNow, err := resolveBool(flagTest, "Test read-only connection now?", true)
 			if err != nil {
 				return err
+			}
+			if testNow && (driver == "snowflake" || driver == "bigquery") {
+				fmt.Printf("[WARN] %s validation is not supported yet; skipping connection test.\n", driver)
+				testNow = false
 			}
 			if testNow {
 				password := os.Getenv(credEnv)
 				if password == "" {
 					return fmt.Errorf("credential env var %s is not set", credEnv)
 				}
-				listCatalog, err := prompt.AskBool("List schemas and tables after validation?", false)
+				listCatalog, err := resolveBool(flagListCatalog, "List schemas and tables after validation?", false)
 				if err != nil {
 					return err
 				}
@@ -219,8 +246,10 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 							return err
 						}
 					}
+				case "snowflake", "bigquery":
+					fmt.Printf("[WARN] %s validation is not supported yet; skipping connection test.\n", driver)
 				default:
-					return fmt.Errorf("driver %s is not supported for read-only validation yet", driver)
+					fmt.Printf("[WARN] %s validation is not supported yet; skipping connection test.\n", driver)
 				}
 			}
 
@@ -246,6 +275,24 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 		},
 		Example: "  pm-assist connect",
 	}
+	cmd.Flags().StringVar(&flagType, "type", "", "Connector type (file|database)")
+	cmd.Flags().StringVar(&flagName, "name", "", "Connector name")
+	cmd.Flags().StringVar(&flagPaths, "paths", "", "File paths (comma-separated)")
+	cmd.Flags().StringVar(&flagFormat, "format", "", "File format (csv|parquet)")
+	cmd.Flags().StringVar(&flagDelimiter, "delimiter", "", "CSV delimiter")
+	cmd.Flags().StringVar(&flagEncoding, "encoding", "", "CSV encoding")
+	cmd.Flags().StringVar(&flagPreview, "preview", "", "Preview CSV headers and sample rows (true|false)")
+	cmd.Flags().StringVar(&flagCountRows, "count-rows", "", "Count total rows when previewing (true|false)")
+	cmd.Flags().StringVar(&flagDriver, "driver", "", "Database driver (postgres|mysql|mssql|snowflake|bigquery|other)")
+	cmd.Flags().StringVar(&flagHost, "host", "", "Database host")
+	cmd.Flags().StringVar(&flagPort, "port", "", "Database port")
+	cmd.Flags().StringVar(&flagDBName, "database", "", "Database name")
+	cmd.Flags().StringVar(&flagSchema, "schema", "", "Database schema")
+	cmd.Flags().StringVar(&flagUser, "user", "", "Database user")
+	cmd.Flags().StringVar(&flagSSLMode, "ssl-mode", "", "Database SSL mode")
+	cmd.Flags().StringVar(&flagCredEnv, "credential-env", "", "Credential env var name")
+	cmd.Flags().StringVar(&flagTest, "test", "", "Test read-only connection (true|false)")
+	cmd.Flags().StringVar(&flagListCatalog, "list-catalog", "", "List schemas and tables after validation (true|false)")
 	return cmd
 }
 

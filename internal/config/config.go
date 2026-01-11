@@ -22,6 +22,7 @@ type Config struct {
 	LLM        LLMConfig       `yaml:"llm"`
 	Policy     PolicyConfig    `yaml:"policy"`
 	Connectors []ConnectorSpec `yaml:"connectors"`
+	Mapping    *MappingConfig  `yaml:"mapping,omitempty"`
 }
 
 type ProjectConfig struct {
@@ -77,6 +78,16 @@ type ExtraConfig struct {
 	CredentialEnv string `yaml:"credential_env,omitempty"`
 }
 
+type MappingConfig struct {
+	InputPath       string `yaml:"input_path"`
+	CaseID          string `yaml:"case_id"`
+	Activity        string `yaml:"activity"`
+	Timestamp       string `yaml:"timestamp"`
+	Resource        string `yaml:"resource,omitempty"`
+	TimestampFormat string `yaml:"timestamp_format,omitempty"`
+	Timezone        string `yaml:"timezone,omitempty"`
+}
+
 // Load returns a Config with the resolved path if a config exists.
 func Load(path string) (*Config, error) {
 	resolved := path
@@ -90,16 +101,21 @@ func Load(path string) (*Config, error) {
 	}
 	cfg := &Config{Path: resolved}
 	if resolved == "" {
+		cfg.applyDefaults()
 		return cfg, nil
 	}
 	data, err := os.ReadFile(resolved)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
+			cfg.applyDefaults()
 			return cfg, nil
 		}
 		return nil, err
 	}
 	if err := yaml.Unmarshal(data, cfg); err != nil {
+		return nil, err
+	}
+	if err := cfg.Migrate(); err != nil {
 		return nil, err
 	}
 	cfg.applyDefaults()
@@ -127,6 +143,14 @@ func (c *Config) Validate() error {
 		}
 		if connector.Type == "file" && connector.File == nil {
 			return errors.New("file connector missing file config")
+		}
+	}
+	if c.Mapping != nil {
+		if c.Mapping.InputPath == "" {
+			return errors.New("mapping input_path is required")
+		}
+		if c.Mapping.CaseID == "" || c.Mapping.Activity == "" || c.Mapping.Timestamp == "" {
+			return errors.New("mapping requires case_id, activity, and timestamp")
 		}
 	}
 	return nil

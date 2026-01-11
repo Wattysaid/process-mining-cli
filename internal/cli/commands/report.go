@@ -4,20 +4,27 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pm-assist/pm-assist/internal/app"
-	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/notebook"
 	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/policy"
+	"github.com/pm-assist/pm-assist/internal/reporting"
 	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/spf13/cobra"
 )
 
 // NewReportCmd returns the report command.
 func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
+	var (
+		flagReport  string
+		flagConfirm string
+		flagHTML    string
+		flagPDF     string
+	)
 	cmd := &cobra.Command{
 		Use:   "report",
 		Short: "Generate notebooks and reports",
@@ -66,11 +73,11 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 			}()
 
-			reportName, err := prompt.AskString("Report filename", "process_mining_report.md", true)
+			reportName, err := resolveString(flagReport, "Report filename", "process_mining_report.md", true)
 			if err != nil {
 				return err
 			}
-			confirm, err := prompt.AskBool("Generate report now?", true)
+			confirm, err := resolveBool(flagConfirm, "Generate report now?", true)
 			if err != nil {
 				return err
 			}
@@ -80,6 +87,14 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 				fmt.Println("[INFO] Report generation canceled by user.")
 				return nil
 			}
+			exportHTML, err := resolveBool(flagHTML, "Export HTML report?", false)
+			if err != nil {
+				return err
+			}
+			exportPDF, err := resolveBool(flagPDF, "Export PDF report?", false)
+			if err != nil {
+				return err
+			}
 
 			venvRunner := &runner.Runner{ProjectPath: projectPath}
 			skillsRoot, err := paths.SkillsRoot(projectPath)
@@ -87,7 +102,11 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			reqPath := paths.SkillPath(skillsRoot, "pm-99-utils-and-standards", "requirements.txt")
-			if err := venvRunner.EnsureVenv(reqPath); err != nil {
+			options, err := resolveVenvOptions(projectPath, policies)
+			if err != nil {
+				return err
+			}
+			if err := venvRunner.EnsureVenv(reqPath, options); err != nil {
 				return err
 			}
 
@@ -103,6 +122,47 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 			code := fmt.Sprintf("!python %s --output %s --report %s", reportScript, outputPath, reportName)
 			if err := notebook.AppendStep(nbPath, "Report", "## Report\nWe generated the report artefact.", code); err != nil {
 				return err
+			}
+
+			reportPath := filepath.Join(outputPath, "stage_09_report", reportName)
+			if exportHTML {
+				htmlPath := strings.TrimSuffix(reportPath, filepath.Ext(reportPath)) + ".html"
+				if err := reporting.MarkdownToHTML(reportPath, htmlPath, "PM Assist Report"); err != nil {
+					fmt.Printf("[WARN] HTML export failed: %v\n", err)
+				} else {
+					fmt.Printf("[SUCCESS] HTML report generated: %s\n", htmlPath)
+				}
+			}
+			if exportPDF {
+				pdfPath := strings.TrimSuffix(reportPath, filepath.Ext(reportPath)) + ".pdf"
+				if err := reporting.MarkdownToPDF(reportPath, pdfPath); err != nil {
+					fmt.Printf("[WARN] PDF export failed: %v\n", err)
+				} else {
+					fmt.Printf("[SUCCESS] PDF report generated: %s\n", pdfPath)
+				}
+			}
+
+			bundlePath := filepath.Join(outputPath, "bundle", fmt.Sprintf("report_bundle_%s.zip", runID))
+			entries := map[string]string{
+				"report/report.md":                 reportPath,
+				"notebook/analysis_notebook.ipynb": nbPath,
+				"manifest/run_manifest.json":       filepath.Join(outputPath, "run_manifest.json"),
+				"manifest/config_snapshot.yaml":    filepath.Join(outputPath, "config_snapshot.yaml"),
+				"quality/qa_summary.md":            filepath.Join(outputPath, "quality", "qa_summary.md"),
+				"quality/qa_results.json":          filepath.Join(outputPath, "quality", "qa_results.json"),
+			}
+			htmlCandidate := strings.TrimSuffix(reportPath, filepath.Ext(reportPath)) + ".html"
+			pdfCandidate := strings.TrimSuffix(reportPath, filepath.Ext(reportPath)) + ".pdf"
+			if _, err := os.Stat(htmlCandidate); err == nil {
+				entries["report/report.html"] = htmlCandidate
+			}
+			if _, err := os.Stat(pdfCandidate); err == nil {
+				entries["report/report.pdf"] = pdfCandidate
+			}
+			if err := reporting.BuildReportBundle(bundlePath, entries); err != nil {
+				fmt.Printf("[WARN] Report bundle creation failed: %v\n", err)
+			} else {
+				fmt.Printf("[SUCCESS] Report bundle created: %s\n", bundlePath)
 			}
 
 			if err := manifestManager.AddOutputs([]string{outputPath}); err != nil {
@@ -121,5 +181,9 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 		},
 		Example: "  pm-assist report",
 	}
+	cmd.Flags().StringVar(&flagReport, "report", "", "Report filename")
+	cmd.Flags().StringVar(&flagConfirm, "confirm", "", "Generate report now (true|false)")
+	cmd.Flags().StringVar(&flagHTML, "html", "", "Export HTML report (true|false)")
+	cmd.Flags().StringVar(&flagPDF, "pdf", "", "Export PDF report (true|false)")
 	return cmd
 }

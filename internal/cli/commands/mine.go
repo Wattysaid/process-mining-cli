@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/pm-assist/pm-assist/internal/app"
-	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/notebook"
@@ -18,6 +17,20 @@ import (
 
 // NewMineCmd returns the mine command.
 func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
+	var (
+		flagCase           string
+		flagActivity       string
+		flagTimestamp      string
+		flagResource       string
+		flagRunEDA         string
+		flagRunDiscovery   string
+		flagRunConformance string
+		flagRunPerformance string
+		flagMiner          string
+		flagConformance    string
+		flagAdvanced       string
+		flagSLA            string
+	)
 	cmd := &cobra.Command{
 		Use:   "mine",
 		Short: "Run process mining analysis",
@@ -66,36 +79,36 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 			}()
 
-			caseCol, err := prompt.AskString("Case ID column", "case_id", true)
+			caseCol, err := resolveString(flagCase, "Case ID column", "case_id", true)
 			if err != nil {
 				return err
 			}
-			activityCol, err := prompt.AskString("Activity column", "activity", true)
+			activityCol, err := resolveString(flagActivity, "Activity column", "activity", true)
 			if err != nil {
 				return err
 			}
-			timestampCol, err := prompt.AskString("Timestamp column", "timestamp", true)
+			timestampCol, err := resolveString(flagTimestamp, "Timestamp column", "timestamp", true)
 			if err != nil {
 				return err
 			}
-			resourceCol, err := prompt.AskString("Resource column (optional)", "", false)
+			resourceCol, err := resolveString(flagResource, "Resource column (optional)", "", false)
 			if err != nil {
 				return err
 			}
 
-			runEDA, err := prompt.AskBool("Run EDA diagnostics?", true)
+			runEDA, err := resolveBool(flagRunEDA, "Run EDA diagnostics?", true)
 			if err != nil {
 				return err
 			}
-			runDiscovery, err := prompt.AskBool("Run discovery models?", true)
+			runDiscovery, err := resolveBool(flagRunDiscovery, "Run discovery models?", true)
 			if err != nil {
 				return err
 			}
-			runConformance, err := prompt.AskBool("Run conformance checks?", false)
+			runConformance, err := resolveBool(flagRunConformance, "Run conformance checks?", false)
 			if err != nil {
 				return err
 			}
-			runPerformance, err := prompt.AskBool("Run performance analysis?", true)
+			runPerformance, err := resolveBool(flagRunPerformance, "Run performance analysis?", true)
 			if err != nil {
 				return err
 			}
@@ -106,7 +119,11 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			reqPath := paths.SkillPath(skillsRoot, "pm-99-utils-and-standards", "requirements.txt")
-			if err := venvRunner.EnsureVenv(reqPath); err != nil {
+			options, err := resolveVenvOptions(projectPath, policies)
+			if err != nil {
+				return err
+			}
+			if err := venvRunner.EnsureVenv(reqPath, options); err != nil {
 				return err
 			}
 
@@ -133,7 +150,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			if runDiscovery {
-				miner, err := prompt.AskChoice("Discovery miner selection", []string{"auto", "inductive", "heuristic", "both"}, "auto", true)
+				miner, err := resolveChoice(flagMiner, "Discovery miner selection", []string{"auto", "inductive", "heuristic", "both"}, "auto", true)
 				if err != nil {
 					return err
 				}
@@ -157,7 +174,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			if runConformance {
-				method, err := prompt.AskChoice("Conformance method", []string{"alignments", "token"}, "alignments", true)
+				method, err := resolveChoice(flagConformance, "Conformance method", []string{"alignments", "token"}, "alignments", true)
 				if err != nil {
 					return err
 				}
@@ -181,11 +198,11 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			if runPerformance {
-				advanced, err := prompt.AskBool("Run advanced performance diagnostics?", false)
+				advanced, err := resolveBool(flagAdvanced, "Run advanced performance diagnostics?", false)
 				if err != nil {
 					return err
 				}
-				sla, err := prompt.AskString("SLA threshold (hours)", "72", true)
+				sla, err := resolveString(flagSLA, "SLA threshold (hours)", "72", true)
 				if err != nil {
 					return err
 				}
@@ -230,5 +247,17 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 		},
 		Example: "  pm-assist mine",
 	}
+	cmd.Flags().StringVar(&flagCase, "case", "", "Case ID column")
+	cmd.Flags().StringVar(&flagActivity, "activity", "", "Activity column")
+	cmd.Flags().StringVar(&flagTimestamp, "timestamp", "", "Timestamp column")
+	cmd.Flags().StringVar(&flagResource, "resource", "", "Resource column")
+	cmd.Flags().StringVar(&flagRunEDA, "run-eda", "", "Run EDA diagnostics (true|false)")
+	cmd.Flags().StringVar(&flagRunDiscovery, "run-discovery", "", "Run discovery models (true|false)")
+	cmd.Flags().StringVar(&flagRunConformance, "run-conformance", "", "Run conformance checks (true|false)")
+	cmd.Flags().StringVar(&flagRunPerformance, "run-performance", "", "Run performance analysis (true|false)")
+	cmd.Flags().StringVar(&flagMiner, "miner", "", "Discovery miner selection (auto|inductive|heuristic|both)")
+	cmd.Flags().StringVar(&flagConformance, "conformance-method", "", "Conformance method (alignments|token)")
+	cmd.Flags().StringVar(&flagAdvanced, "advanced-performance", "", "Run advanced performance diagnostics (true|false)")
+	cmd.Flags().StringVar(&flagSLA, "sla-hours", "", "SLA threshold (hours)")
 	return cmd
 }

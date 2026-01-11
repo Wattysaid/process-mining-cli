@@ -120,7 +120,8 @@ Prompts:
 - Include LLM narrative generation? (explicit opt-in; provider set in config)
 Outputs:
 - `outputs/<run-id>/analysis_notebook.ipynb`
-- `outputs/<run-id>/report.md` and `report.html` (optional pdf post-MVP)
+- `outputs/<run-id>/report.md` plus optional `report.html`/`report.pdf` exports
+- `outputs/<run-id>/bundle/report_bundle_<run-id>.zip`
 
 ### `pm-assist review`
 - Runs QA suite and produces a single summary:

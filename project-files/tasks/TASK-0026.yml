@@ -1,0 +1,27 @@
+id: TASK-0026
+title: "Implement drift analysis across time windows"
+owner_role: data
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0007"
+scope:
+  in:
+    - "Compare process models across time windows"
+    - "Highlight drift indicators"
+    - "Store drift outputs in run bundle"
+  out:
+    - "No automated remediation"
+acceptance_criteria:
+  - "Drift analysis outputs are produced when selected"
+  - "Window definitions are user-controlled"
+  - "Results are summarised in report"
+files_expected:
+  - "python/"
+  - "project-files/WORKFLOWS.md"
+contracts:
+  - "project-files/WORKFLOWS.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Drift detection helps detect process change over time."
