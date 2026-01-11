@@ -187,31 +187,31 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 			if !policies.AllowsConnector(driver) {
 				return fmt.Errorf("connector driver blocked by policy: %s", driver)
 			}
-	hostPrompt := "Host"
-	if driver == "bigquery" {
-		hostPrompt = "Project ID"
-	}
-	host, err := resolveString(flagHost, hostPrompt, "", true)
+			hostPrompt := "Host"
+			if driver == "bigquery" {
+				hostPrompt = "Project ID"
+			}
+			host, err := resolveString(flagHost, hostPrompt, "", true)
 			if err != nil {
 				return err
 			}
-	port := 0
-	if driver != "bigquery" {
-		portText, err := resolveString(flagPort, "Port", "5432", true)
-		if err != nil {
-			return err
-		}
-		value, err := strconv.Atoi(portText)
-		if err != nil {
-			return fmt.Errorf("invalid port: %s", portText)
-		}
-		port = value
-	}
-	dbNamePrompt := "Database name"
-	if driver == "bigquery" {
-		dbNamePrompt = "Dataset (optional)"
-	}
-	dbName, err := resolveString(flagDBName, dbNamePrompt, "", driver != "bigquery")
+			port := 0
+			if driver != "bigquery" {
+				portText, err := resolveString(flagPort, "Port", "5432", true)
+				if err != nil {
+					return err
+				}
+				value, err := strconv.Atoi(portText)
+				if err != nil {
+					return fmt.Errorf("invalid port: %s", portText)
+				}
+				port = value
+			}
+			dbNamePrompt := "Database name"
+			if driver == "bigquery" {
+				dbNamePrompt = "Dataset (optional)"
+			}
+			dbName, err := resolveString(flagDBName, dbNamePrompt, "", driver != "bigquery")
 			if err != nil {
 				return err
 			}
@@ -219,11 +219,11 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
-	userPrompt := "Username (optional)"
-	if driver == "bigquery" {
-		userPrompt = "Service account credentials JSON path (optional)"
-	}
-	user, err := resolveString(flagUser, userPrompt, "", false)
+			userPrompt := "Username (optional)"
+			if driver == "bigquery" {
+				userPrompt = "Service account credentials JSON path (optional)"
+			}
+			user, err := resolveString(flagUser, userPrompt, "", false)
 			if err != nil {
 				return err
 			}
@@ -231,22 +231,35 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			credEnv, err := resolveString(flagCredEnv, "Credential env var name (e.g., DB_PASSWORD)", "", true)
+			credEnvPrompt := "Credential env var name (e.g., DB_PASSWORD)"
+			credEnvRequired := true
+			if driver == "bigquery" {
+				credEnvPrompt = "Credential env var name (optional for BigQuery)"
+				credEnvRequired = false
+			}
+			credEnv, err := resolveString(flagCredEnv, credEnvPrompt, "", credEnvRequired)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println("[INFO] Credentials are never stored in config. Set the env var before connecting.")
-			fmt.Printf("[INFO] Using credential env var: %s\n", credEnv)
+			if credEnv != "" {
+				fmt.Println("[INFO] Credentials are never stored in config. Set the env var before connecting.")
+				fmt.Printf("[INFO] Using credential env var: %s\n", credEnv)
+			} else if driver != "bigquery" {
+				return fmt.Errorf("credential env var is required")
+			}
 
 			testNow, err := resolveBool(flagTest, "Test read-only connection now?", true)
 			if err != nil {
 				return err
 			}
 			if testNow {
-				password := os.Getenv(credEnv)
-				if password == "" {
-					return fmt.Errorf("credential env var %s is not set", credEnv)
+				password := ""
+				if credEnv != "" {
+					password = os.Getenv(credEnv)
+					if password == "" && driver != "bigquery" {
+						return fmt.Errorf("credential env var %s is not set", credEnv)
+					}
 				}
 				listCatalog, err := resolveBool(flagListCatalog, "List schemas and tables after validation?", false)
 				if err != nil {
@@ -306,12 +319,16 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 					}
 				case "bigquery":
 					fmt.Println("[INFO] Testing BigQuery connection...")
-					if err := db.TestBigQueryReadOnly(host, user); err != nil {
+					credPath := user
+					if credPath == "" {
+						credPath = password
+					}
+					if err := db.TestBigQueryReadOnly(host, credPath); err != nil {
 						return fmt.Errorf("read-only test failed: %w", err)
 					}
 					fmt.Println("[SUCCESS] BigQuery connection validated.")
 					if listCatalog {
-						if err := printCatalog(func() ([]string, error) { return db.ListSchemasBigQuery(host, user) }, func(schema string) ([]string, error) { return db.ListTablesBigQuery(host, schema, user) }); err != nil {
+						if err := printCatalog(func() ([]string, error) { return db.ListSchemasBigQuery(host, credPath) }, func(schema string) ([]string, error) { return db.ListTablesBigQuery(host, schema, credPath) }); err != nil {
 							return err
 						}
 					}

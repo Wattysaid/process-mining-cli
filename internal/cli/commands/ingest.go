@@ -127,7 +127,10 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 					return err
 				}
 				credEnv := selected.Options.CredentialEnv
-				password := os.Getenv(credEnv)
+				password := ""
+				if credEnv != "" {
+					password = os.Getenv(credEnv)
+				}
 				if password == "" && driver != "bigquery" {
 					return fmt.Errorf("credential env var %s is not set", credEnv)
 				}
@@ -156,7 +159,11 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 					}
 					rows, err = db.ExtractQueryToCSV("snowflake", dsn, query, extractPath)
 				case "bigquery":
-					rows, err = db.ExtractBigQueryToCSV(selected.Database.Host, selected.Database.User, query, extractPath)
+					credPath := selected.Database.User
+					if credPath == "" {
+						credPath = password
+					}
+					rows, err = db.ExtractBigQueryToCSV(selected.Database.Host, credPath, query, extractPath)
 				default:
 					return fmt.Errorf("database driver not supported for ingest: %s", driver)
 				}
