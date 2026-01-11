@@ -7,8 +7,10 @@ import (
 
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
+	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/notebook"
 	"github.com/pm-assist/pm-assist/internal/paths"
+	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/spf13/cobra"
 )
@@ -35,6 +37,15 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			outputPath := filepath.Join(projectPath, "outputs", runID)
 			if err := os.MkdirAll(outputPath, 0o755); err != nil {
 				return err
+			}
+
+			cfg, err := config.Load(global.ConfigPath)
+			if err != nil {
+				return err
+			}
+			policies := policy.FromConfig(cfg)
+			if policies.OfflineOnly {
+				fmt.Println("[WARN] Offline-only policy is enabled; ensure local data sources are used.")
 			}
 
 			caseCol, err := prompt.AskString("Case ID column", "case_id", true)

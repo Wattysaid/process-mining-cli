@@ -10,6 +10,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/notebook"
 	"github.com/pm-assist/pm-assist/internal/paths"
+	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/spf13/cobra"
 )
@@ -31,6 +32,10 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			cfg, err := config.Load(global.ConfigPath)
 			if err != nil {
 				return err
+			}
+			policies := policy.FromConfig(cfg)
+			if policies.OfflineOnly {
+				fmt.Println("[WARN] Offline-only policy is enabled; ensure local data sources are used.")
 			}
 
 			if len(cfg.Connectors) == 0 {
