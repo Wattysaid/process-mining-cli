@@ -1,0 +1,27 @@
+id: TASK-0035
+title: "Standardize exit codes and error handling"
+owner_role: cli
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0012"
+scope:
+  in:
+    - "Implement exit codes per CLI spec"
+    - "Map common failure types to codes"
+    - "Document codes in help output"
+  out:
+    - "No new command features"
+acceptance_criteria:
+  - "Exit codes align with CLI spec"
+  - "Errors return actionable messages"
+  - "Help output documents codes"
+files_expected:
+  - "internal/cli/root.go"
+  - "project-files/CLI_SPEC.md"
+contracts:
+  - "project-files/CLI_SPEC.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Predictable exit codes enable automation."

@@ -1,0 +1,27 @@
+id: TASK-0039
+title: "Provide enterprise installer variants"
+owner_role: infra
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0001"
+scope:
+  in:
+    - "Provide installer for air-gapped environments"
+    - "Document enterprise deployment steps"
+    - "Support preconfigured defaults"
+  out:
+    - "No SaaS installer in this task"
+acceptance_criteria:
+  - "Air-gapped install steps are documented"
+  - "Installer supports preconfigured defaults"
+  - "Enterprise deployment checklist is included"
+files_expected:
+  - "project-files/INSTALLATION_AND_RELEASE.md"
+  - "project-files/SECURITY_MODEL.md"
+contracts:
+  - "project-files/INSTALLATION_AND_RELEASE.md"
+quality_gates:
+  - "enterprise install checklist complete"
+notes:
+  context: "Enterprises require controlled installation workflows."

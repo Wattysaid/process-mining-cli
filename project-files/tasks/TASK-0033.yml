@@ -1,0 +1,28 @@
+id: TASK-0033
+title: "Implement pm-assist agent guided workflow"
+owner_role: ai
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0009"
+  - "TASK-0003"
+scope:
+  in:
+    - "Guided decision support using profile aptitude"
+    - "Clarifying questions for intent-to-action"
+    - "Summaries and next-step suggestions"
+  out:
+    - "No autonomous execution without user approval"
+acceptance_criteria:
+  - "Agent adapts prompt depth to profile level"
+  - "Agent never selects algorithms without confirmation"
+  - "Agent outputs are logged in run bundle"
+files_expected:
+  - "internal/cli/commands/agent.go"
+  - "project-files/CLI_SPEC.md"
+contracts:
+  - "project-files/CLI_SPEC.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Agent is the primary guided experience for users."

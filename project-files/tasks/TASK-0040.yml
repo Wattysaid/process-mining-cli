@@ -1,0 +1,27 @@
+id: TASK-0040
+title: "Add centralized audit sink integration"
+owner_role: security
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0011"
+scope:
+  in:
+    - "Optional export of run logs to audit sink"
+    - "Configurable endpoint and credentials"
+    - "Redaction rules applied before export"
+  out:
+    - "No mandatory external logging"
+acceptance_criteria:
+  - "Audit export is disabled by default"
+  - "Exports use redacted logs"
+  - "Failures do not block local runs"
+files_expected:
+  - "internal/logging/audit.go"
+  - "project-files/SECURITY_MODEL.md"
+contracts:
+  - "project-files/SECURITY_MODEL.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Optional audit sinks support enterprise governance."

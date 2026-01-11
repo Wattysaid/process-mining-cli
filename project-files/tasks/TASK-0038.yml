@@ -1,0 +1,28 @@
+id: TASK-0038
+title: "Implement plugin framework for steps and connectors"
+owner_role: backend
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0010"
+  - "TASK-0019"
+scope:
+  in:
+    - "Define plugin manifest format"
+    - "Discover and register plugins"
+    - "Document extension points"
+  out:
+    - "No public marketplace UI"
+acceptance_criteria:
+  - "Plugins can register new steps and connectors"
+  - "Plugin loading respects policy controls"
+  - "Manifest format is documented"
+files_expected:
+  - "internal/plugins/registry.go"
+  - "project-files/ARCHITECTURE.md"
+contracts:
+  - "project-files/ARCHITECTURE.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Extensibility enables long-term ecosystem growth."

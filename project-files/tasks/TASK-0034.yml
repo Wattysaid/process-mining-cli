@@ -1,0 +1,28 @@
+id: TASK-0034
+title: "Add profile and business command set"
+owner_role: cli
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0003"
+scope:
+  in:
+    - "Implement profile init/set/show/list"
+    - "Implement business init/set/show/list"
+    - "Add non-interactive flags"
+  out:
+    - "No external identity systems"
+acceptance_criteria:
+  - "Profiles can be created and activated"
+  - "Business profiles can be created and activated"
+  - "Commands work in non-interactive mode"
+files_expected:
+  - "internal/cli/commands/profile.go"
+  - "internal/cli/commands/business.go"
+  - "project-files/CLI_SPEC.md"
+contracts:
+  - "project-files/CLI_SPEC.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Profiles are core to personalization and reuse."

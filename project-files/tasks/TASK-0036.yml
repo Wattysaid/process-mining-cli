@@ -1,0 +1,27 @@
+id: TASK-0036
+title: "Enforce internal code protection and edit boundaries"
+owner_role: security
+status: ready
+priority: P1
+depends_on:
+  - "TASK-0010"
+scope:
+  in:
+    - "Ensure internal code is not exposed via CLI commands"
+    - "Restrict user edits to profiles and output directories"
+    - "Document protected assets and boundaries"
+  out:
+    - "No DRM or obfuscation"
+acceptance_criteria:
+  - "CLI never prints or exports internal source files"
+  - "Only .profiles/ and output directories are user-editable"
+  - "Protection boundaries are documented"
+files_expected:
+  - "project-files/SECURITY_MODEL.md"
+  - "project-files/PRIVACY.md"
+contracts:
+  - "project-files/SECURITY_MODEL.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "IP protection is required for the subscription model."

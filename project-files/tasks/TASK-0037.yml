@@ -1,0 +1,27 @@
+id: TASK-0037
+title: "Add offline wheels cache for Python dependencies"
+owner_role: infra
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0021"
+scope:
+  in:
+    - "Bundle wheel cache for offline installs"
+    - "Prefer local wheel cache when offline_only"
+    - "Document cache refresh process"
+  out:
+    - "No dependency mirroring service"
+acceptance_criteria:
+  - "Offline installs succeed without network"
+  - "Wheel cache is versioned and verified"
+  - "Docs explain how to refresh cache"
+files_expected:
+  - "scripts/package_resources.sh"
+  - "project-files/INSTALLATION_AND_RELEASE.md"
+contracts:
+  - "project-files/INSTALLATION_AND_RELEASE.md"
+quality_gates:
+  - "offline install test passes"
+notes:
+  context: "Offline support is critical for regulated environments."

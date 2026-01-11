@@ -1,0 +1,27 @@
+id: TASK-0032
+title: "Capture data lineage summary during ingest"
+owner_role: data
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0004"
+scope:
+  in:
+    - "Record source system, tables/files, and extraction time"
+    - "Write lineage summary into run bundle"
+    - "Reference lineage in report"
+  out:
+    - "No external lineage systems"
+acceptance_criteria:
+  - "Lineage summary is created for each ingest"
+  - "Summary includes source identifiers and timestamps"
+  - "Lineage is referenced in report outputs"
+files_expected:
+  - "internal/cli/commands/ingest.go"
+  - "project-files/WORKFLOWS.md"
+contracts:
+  - "project-files/WORKFLOWS.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Lineage is required for audit and reproducibility."

@@ -25,11 +25,17 @@
 - TASK-0022: Add PDF report generation and reproducibility checklist
 - TASK-0023: Support BPMN export for process models
 - TASK-0031: Add test matrix and release validation suite
+- TASK-0032: Capture data lineage summary during ingest
+- TASK-0033: Implement pm-assist agent guided workflow
+- TASK-0034: Add profile and business command set
+- TASK-0035: Standardize exit codes and error handling
+- TASK-0036: Enforce internal code protection and edit boundaries
 
 ## v0.2
 - TASK-0024: Add Snowflake and BigQuery connectors
 - TASK-0026: Implement drift analysis across time windows
 - TASK-0029: Add signed releases and verification
+- TASK-0037: Add offline wheels cache for Python dependencies
 
 ## v0.3
 - TASK-0025: Add object storage and SharePoint connectors
@@ -38,3 +44,6 @@
 
 ## v1.0
 - TASK-0030: Integrate OS keychain for secrets storage
+- TASK-0038: Implement plugin framework for steps and connectors
+- TASK-0039: Provide enterprise installer variants
+- TASK-0040: Add centralized audit sink integration
