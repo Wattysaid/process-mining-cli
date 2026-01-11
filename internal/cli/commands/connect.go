@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/pm-assist/pm-assist/internal/app"
@@ -91,8 +92,69 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				return nil
 			}
 
-			fmt.Println("[INFO] Database connectors will prompt for credentials and test read-only access.")
-			fmt.Println("[INFO] This flow is not implemented yet.")
+			name, err := prompt.AskString("Connector name", "db-source", true)
+			if err != nil {
+				return err
+			}
+			driver, err := prompt.AskChoice("Database driver", []string{"postgres", "mysql", "mssql", "snowflake", "bigquery", "other"}, "postgres", true)
+			if err != nil {
+				return err
+			}
+			host, err := prompt.AskString("Host", "", true)
+			if err != nil {
+				return err
+			}
+			portText, err := prompt.AskString("Port", "5432", true)
+			if err != nil {
+				return err
+			}
+			port, err := strconv.Atoi(portText)
+			if err != nil {
+				return fmt.Errorf("invalid port: %s", portText)
+			}
+			dbName, err := prompt.AskString("Database name", "", true)
+			if err != nil {
+				return err
+			}
+			schema, err := prompt.AskString("Schema (optional)", "", false)
+			if err != nil {
+				return err
+			}
+			user, err := prompt.AskString("Username (optional)", "", false)
+			if err != nil {
+				return err
+			}
+			sslMode, err := prompt.AskString("SSL mode (optional)", "", false)
+			if err != nil {
+				return err
+			}
+			credEnv, err := prompt.AskString("Credential env var name (e.g., DB_PASSWORD)", "", true)
+			if err != nil {
+				return err
+			}
+
+			fmt.Println("[INFO] Credentials are never stored in config. Set the env var before connecting.")
+			fmt.Printf("[INFO] Using credential env var: %s\n", credEnv)
+
+			cfg.Connectors = append(cfg.Connectors, config.ConnectorSpec{
+				Name: name,
+				Type: "database",
+				Database: &config.DBConfig{
+					Driver:  driver,
+					Host:    host,
+					Port:    port,
+					DBName:  dbName,
+					Schema:  schema,
+					User:    user,
+					SSLMode: sslMode,
+				},
+				Options: &config.ExtraConfig{ReadOnly: true},
+			})
+			if err := cfg.Save(); err != nil {
+				return err
+			}
+			fmt.Println("[SUCCESS] Database connector saved.")
+			fmt.Println("[INFO] Connection test will be available in a later release.")
 			return nil
 		},
 		Example: "  pm-assist connect",

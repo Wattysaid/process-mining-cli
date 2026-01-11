@@ -50,11 +50,13 @@ type FileConfig struct {
 }
 
 type DBConfig struct {
-	Driver string `yaml:"driver"`
-	Host   string `yaml:"host"`
-	Port   int    `yaml:"port"`
-	DBName string `yaml:"database"`
-	Schema string `yaml:"schema,omitempty"`
+	Driver  string `yaml:"driver"`
+	Host    string `yaml:"host"`
+	Port    int    `yaml:"port"`
+	DBName  string `yaml:"database"`
+	Schema  string `yaml:"schema,omitempty"`
+	User    string `yaml:"user,omitempty"`
+	SSLMode string `yaml:"ssl_mode,omitempty"`
 }
 
 type ExtraConfig struct {
