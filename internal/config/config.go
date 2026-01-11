@@ -10,7 +10,7 @@ import (
 
 // Config holds resolved configuration. Expand fields as the CLI grows.
 type Config struct {
-	Path       string `yaml:"-"`
+	Path       string          `yaml:"-"`
 	Project    ProjectConfig   `yaml:"project"`
 	Profiles   ProfilesConfig  `yaml:"profiles"`
 	Business   BusinessConfig  `yaml:"business"`

@@ -2,8 +2,14 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/pm-assist/pm-assist/internal/app"
+	"github.com/pm-assist/pm-assist/internal/cli/prompt"
+	"github.com/pm-assist/pm-assist/internal/config"
+	"github.com/pm-assist/pm-assist/internal/notebook"
+	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/spf13/cobra"
 )
 
@@ -13,8 +19,113 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "ingest",
 		Short: "Ingest data into a staging dataset",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			_ = global
-			fmt.Println("[INFO] Ingest pipeline is not implemented yet.")
+			projectPath := global.ProjectPath
+			if projectPath == "" {
+				cwd, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+				projectPath = cwd
+			}
+			cfg, err := config.Load(global.ConfigPath)
+			if err != nil {
+				return err
+			}
+
+			if len(cfg.Connectors) == 0 {
+				fmt.Println("[WARN] No connectors configured. Run `pm-assist connect` first.")
+				return nil
+			}
+
+			connectorName, err := prompt.AskString("Connector name", cfg.Connectors[0].Name, true)
+			if err != nil {
+				return err
+			}
+			var selected *config.ConnectorSpec
+			for i := range cfg.Connectors {
+				if cfg.Connectors[i].Name == connectorName {
+					selected = &cfg.Connectors[i]
+					break
+				}
+			}
+			if selected == nil {
+				return fmt.Errorf("connector not found: %s", connectorName)
+			}
+			if selected.Type != "file" || selected.File == nil || len(selected.File.Paths) == 0 {
+				return fmt.Errorf("only file connectors are supported in ingest for now")
+			}
+
+			filePath := selected.File.Paths[0]
+			caseCol, err := prompt.AskString("Case ID column", "case_id", true)
+			if err != nil {
+				return err
+			}
+			activityCol, err := prompt.AskString("Activity column", "activity", true)
+			if err != nil {
+				return err
+			}
+			timestampCol, err := prompt.AskString("Timestamp column", "timestamp", true)
+			if err != nil {
+				return err
+			}
+			resourceCol, err := prompt.AskString("Resource column (optional)", "", false)
+			if err != nil {
+				return err
+			}
+
+			runID := global.RunID
+			if runID == "" {
+				runID = defaultRunID()
+			}
+			outputPath := filepath.Join(projectPath, "outputs", runID)
+			if err := os.MkdirAll(outputPath, 0o755); err != nil {
+				return err
+			}
+
+			confirm, err := prompt.AskBool("Run ingest now?", true)
+			if err != nil {
+				return err
+			}
+			if !confirm {
+				fmt.Println("[INFO] Ingest canceled by user.")
+				return nil
+			}
+
+			venvRunner := &runner.Runner{ProjectPath: projectPath}
+			reqPath := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-99-utils-and-standards", "requirements.txt")
+			if err := venvRunner.EnsureVenv(reqPath); err != nil {
+				return err
+			}
+
+			scriptPath := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-02-ingest-profile", "scripts", "01_ingest.py")
+			argsList := []string{
+				"--file", filePath,
+				"--format", selected.File.Format,
+				"--case", caseCol,
+				"--activity", activityCol,
+				"--timestamp", timestampCol,
+				"--output", outputPath,
+			}
+			if resourceCol != "" {
+				argsList = append(argsList, "--resource", resourceCol)
+			}
+
+			fmt.Println("[INFO] Running ingest script...")
+			if err := venvRunner.RunScript(scriptPath, argsList, nil); err != nil {
+				return err
+			}
+
+			nbPath := filepath.Join(outputPath, "analysis_notebook.ipynb")
+			markdown := "## Ingest\nWe ingested the source file and normalized the log."
+			code := fmt.Sprintf("!python %s --file %s --format %s --case %s --activity %s --timestamp %s --output %s", scriptPath, filePath, selected.File.Format, caseCol, activityCol, timestampCol, outputPath)
+			if resourceCol != "" {
+				code += fmt.Sprintf(" --resource %s", resourceCol)
+			}
+			if err := notebook.AppendStep(nbPath, "Ingest", markdown, code); err != nil {
+				return err
+			}
+
+			fmt.Println("[SUCCESS] Ingest completed.")
 			return nil
 		},
 		Example: "  pm-assist ingest",
