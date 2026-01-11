@@ -124,23 +124,17 @@ def load_csv_dataframe(
     encoding: Optional[str] = None,
 ) -> pd.DataFrame:
     df = pd.read_csv(file_path, sep=delimiter, encoding=encoding or "utf-8")
-    rename_map = {
-        case_col: "case:concept:name",
-        activity_col: "concept:name",
-        timestamp_col: "time:timestamp",
-    }
-    if resource_col:
-        rename_map[resource_col] = "org:resource"
-    df = df.rename(columns=rename_map)
-    if "time:timestamp" in df.columns:
-        df["time:timestamp"] = normalize_timestamps(
-            df["time:timestamp"],
-            timestamp_format=timestamp_format,
-            dayfirst=timestamp_dayfirst,
-            utc=timestamp_utc,
-            timezone=timestamp_timezone,
-        )
-    return df
+    return normalize_dataframe_columns(
+        df,
+        case_col,
+        activity_col,
+        timestamp_col,
+        resource_col=resource_col,
+        timestamp_format=timestamp_format,
+        timestamp_dayfirst=timestamp_dayfirst,
+        timestamp_utc=timestamp_utc,
+        timestamp_timezone=timestamp_timezone,
+    )
 
 
 def load_excel_dataframe(
@@ -279,25 +273,91 @@ def load_event_log(
     timestamp_dayfirst: bool = False,
     timestamp_utc: Optional[bool] = None,
     timestamp_timezone: Optional[str] = None,
+    delimiter: str = ",",
+    encoding: Optional[str] = None,
+    sheet: Optional[str] = None,
+    json_lines: bool = False,
+    zip_member: Optional[str] = None,
 ) -> object:
-    """Load an event log from XES or CSV."""
+    """Load an event log from supported file formats."""
     require_pm4py()
-    if log_format.lower() == "xes" and xes_importer is None:
+    format_key = log_format.lower()
+    if format_key == "xes" and xes_importer is None:
         raise RuntimeError("PM4Py XES importer is unavailable in this environment.")
-    if log_format.lower() == "xes":
+    if format_key == "xes":
         return xes_importer.apply(file_path)
 
-    df = load_csv_dataframe(
-        file_path,
-        case_col,
-        activity_col,
-        timestamp_col,
-        resource_col=resource_col,
-        timestamp_format=timestamp_format,
-        timestamp_dayfirst=timestamp_dayfirst,
-        timestamp_utc=timestamp_utc,
-        timestamp_timezone=timestamp_timezone,
-    )
+    if format_key == "csv":
+        df = load_csv_dataframe(
+            file_path,
+            case_col,
+            activity_col,
+            timestamp_col,
+            resource_col=resource_col,
+            timestamp_format=timestamp_format,
+            timestamp_dayfirst=timestamp_dayfirst,
+            timestamp_utc=timestamp_utc,
+            timestamp_timezone=timestamp_timezone,
+            delimiter=delimiter,
+            encoding=encoding,
+        )
+    elif format_key == "parquet":
+        df = pd.read_parquet(file_path)
+        df = normalize_dataframe_columns(
+            df,
+            case_col,
+            activity_col,
+            timestamp_col,
+            resource_col=resource_col,
+            timestamp_format=timestamp_format,
+            timestamp_dayfirst=timestamp_dayfirst,
+            timestamp_utc=timestamp_utc,
+            timestamp_timezone=timestamp_timezone,
+        )
+    elif format_key == "xlsx":
+        df = load_excel_dataframe(
+            file_path,
+            case_col,
+            activity_col,
+            timestamp_col,
+            resource_col=resource_col,
+            timestamp_format=timestamp_format,
+            timestamp_dayfirst=timestamp_dayfirst,
+            timestamp_utc=timestamp_utc,
+            timestamp_timezone=timestamp_timezone,
+            sheet=sheet,
+        )
+    elif format_key == "json":
+        df = load_json_dataframe(
+            file_path,
+            case_col,
+            activity_col,
+            timestamp_col,
+            resource_col=resource_col,
+            timestamp_format=timestamp_format,
+            timestamp_dayfirst=timestamp_dayfirst,
+            timestamp_utc=timestamp_utc,
+            timestamp_timezone=timestamp_timezone,
+            json_lines=json_lines,
+        )
+    elif format_key == "zip-csv":
+        df = load_zip_csv_dataframe(
+            file_path,
+            case_col,
+            activity_col,
+            timestamp_col,
+            resource_col=resource_col,
+            timestamp_format=timestamp_format,
+            timestamp_dayfirst=timestamp_dayfirst,
+            timestamp_utc=timestamp_utc,
+            timestamp_timezone=timestamp_timezone,
+            delimiter=delimiter,
+            encoding=encoding,
+            zip_member=zip_member,
+        )
+    else:
+        raise ValueError(f"Unsupported log format: {log_format}")
+
     df = df.dropna(subset=["case:concept:name", "concept:name", "time:timestamp"])
     df = df.drop_duplicates()
     df = sort_log_dataframe(df)

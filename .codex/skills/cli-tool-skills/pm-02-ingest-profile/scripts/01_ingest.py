@@ -23,12 +23,17 @@ from process_mining_steps import load_event_log, log_to_dataframe, require_pm4py
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Ingest and normalize an event log.")
-    parser.add_argument("--file", required=True, help="Path to the event log file (CSV or XES).")
-    parser.add_argument("--format", choices=["csv", "xes"], required=True, help="Input file format.")
+    parser.add_argument("--file", required=True, help="Path to the event log file.")
+    parser.add_argument("--format", choices=["csv", "parquet", "xlsx", "json", "zip-csv", "xes"], required=True, help="Input file format.")
     parser.add_argument("--case", default="case:concept:name", help="Case ID column name (CSV only).")
     parser.add_argument("--activity", default="concept:name", help="Activity column name (CSV only).")
     parser.add_argument("--timestamp", default="time:timestamp", help="Timestamp column name (CSV only).")
     parser.add_argument("--resource", help="Resource column name (CSV only).")
+    parser.add_argument("--delimiter", default=",", help="CSV delimiter (CSV only).")
+    parser.add_argument("--encoding", default="utf-8", help="CSV encoding (CSV only).")
+    parser.add_argument("--sheet", help="Excel sheet name (XLSX only).")
+    parser.add_argument("--json-lines", action="store_true", help="Parse JSON lines format (JSON only).")
+    parser.add_argument("--zip-member", help="CSV member name inside zip archive (ZIP-CSV only).")
     parser.add_argument("--timestamp-format", help="Explicit timestamp format string for parsing.")
     parser.add_argument("--timestamp-dayfirst", action="store_true", help="Parse timestamps with day-first format.")
     parser.add_argument("--timestamp-utc", action="store_true", help="Parse timestamps as UTC.")
@@ -55,6 +60,11 @@ def main() -> None:
             timestamp_dayfirst=args.timestamp_dayfirst,
             timestamp_utc=args.timestamp_utc,
             timestamp_timezone=args.timestamp_timezone,
+            delimiter=args.delimiter,
+            encoding=args.encoding,
+            sheet=args.sheet,
+            json_lines=args.json_lines,
+            zip_member=args.zip_member,
         )
         df = log_to_dataframe(event_log)
         df.to_csv(os.path.join(stage_dir, "normalised_log.csv"), index=False)

@@ -61,6 +61,9 @@ type FileConfig struct {
 	Format    string   `yaml:"format"`
 	Delimiter string   `yaml:"delimiter,omitempty"`
 	Encoding  string   `yaml:"encoding,omitempty"`
+	Sheet     string   `yaml:"sheet,omitempty"`
+	JSONLines bool     `yaml:"json_lines,omitempty"`
+	ZipMember string   `yaml:"zip_member,omitempty"`
 }
 
 type DBConfig struct {
