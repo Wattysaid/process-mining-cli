@@ -13,6 +13,7 @@ Use this index to navigate the instruction set.
 - `project-files/INSTALLATION_AND_RELEASE.md`
 - `project-files/CODING_STANDARDS.md`
 - `project-files/IMPLEMENTATION_PLAN.md`
+- `project-files/RELEASE_INSTRUCTIONS.md`
 
 ## CLI and workflows
 - `project-files/STARTUP_SCREEN.md`

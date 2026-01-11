@@ -65,6 +65,18 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			allowLLM, err := prompt.AskBool("Allow LLM features?", true)
+			if err != nil {
+				return err
+			}
+			offlineOnly, err := prompt.AskBool("Enable offline-only policy?", false)
+			if err != nil {
+				return err
+			}
+			if offlineOnly && llmProvider != "ollama" && llmProvider != "none" {
+				fmt.Println("[WARN] Offline-only mode blocks external LLM providers. Setting provider to none.")
+				llmProvider = "none"
+			}
 			createBusiness, err := prompt.AskBool("Create a business profile now?", true)
 			if err != nil {
 				return err
@@ -103,7 +115,7 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 			configPath := filepath.Join(projectPath, "pm-assist.yaml")
 			if _, err := os.Stat(configPath); os.IsNotExist(err) {
-				content := fmt.Sprintf("project:\n  name: %s\nprofiles:\n  active: %s\nbusiness:\n  active: %s\nllm:\n  provider: %s\n", projectName, userName, businessName, llmProvider)
+				content := fmt.Sprintf("project:\n  name: %s\nprofiles:\n  active: %s\nbusiness:\n  active: %s\nllm:\n  provider: %s\npolicy:\n  llm_enabled: %t\n  offline_only: %t\n", projectName, userName, businessName, llmProvider, allowLLM, offlineOnly)
 				if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
 					return err
 				}

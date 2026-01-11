@@ -15,6 +15,7 @@ type Config struct {
 	Profiles   ProfilesConfig  `yaml:"profiles"`
 	Business   BusinessConfig  `yaml:"business"`
 	LLM        LLMConfig       `yaml:"llm"`
+	Policy     PolicyConfig    `yaml:"policy"`
 	Connectors []ConnectorSpec `yaml:"connectors"`
 }
 
@@ -32,6 +33,13 @@ type BusinessConfig struct {
 
 type LLMConfig struct {
 	Provider string `yaml:"provider"`
+}
+
+type PolicyConfig struct {
+	LLMEnabled        *bool    `yaml:"llm_enabled,omitempty"`
+	OfflineOnly       bool     `yaml:"offline_only,omitempty"`
+	AllowedConnectors []string `yaml:"allowed_connectors,omitempty"`
+	DeniedConnectors  []string `yaml:"denied_connectors,omitempty"`
 }
 
 type ConnectorSpec struct {

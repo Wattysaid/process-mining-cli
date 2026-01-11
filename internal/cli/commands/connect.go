@@ -11,6 +11,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/db"
+	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/preview"
 	"github.com/spf13/cobra"
 )
@@ -39,10 +40,17 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			policies := policy.FromConfig(cfg)
 			if cfg.Path == "" {
 				cfg.Path = filepath.Join(projectPath, "pm-assist.yaml")
 			}
 
+			if !policies.AllowsConnector(connectorType) {
+				return fmt.Errorf("connector type blocked by policy: %s", connectorType)
+			}
+			if policies.OfflineOnly && connectorType == "database" {
+				return fmt.Errorf("database connectors are blocked in offline-only mode")
+			}
 			if connectorType == "file" {
 				name, err := prompt.AskString("Connector name", "file-source", true)
 				if err != nil {
@@ -121,6 +129,9 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 			driver, err := prompt.AskChoice("Database driver", []string{"postgres", "mysql", "mssql", "snowflake", "bigquery", "other"}, "postgres", true)
 			if err != nil {
 				return err
+			}
+			if !policies.AllowsConnector(driver) {
+				return fmt.Errorf("connector driver blocked by policy: %s", driver)
 			}
 			host, err := prompt.AskString("Host", "", true)
 			if err != nil {

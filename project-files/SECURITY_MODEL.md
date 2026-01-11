@@ -22,6 +22,7 @@ Threats:
 - Per-run artefact manifest (hashes optional post-MVP)
 - Clear “what will be sent” prompt before LLM calls
 - “Offline mode” always available
+- Policy controls enforced via config (`policy.llm_enabled`, `policy.offline_only`, connector allow/deny lists)
 - Bundle Python assets and avoid editable source distributions
 - Only allow user edits in `.profiles/` and project data/output directories
 - Do not expose internal source files via CLI commands or logs
