@@ -1,0 +1,25 @@
+id: REVIEW-0001
+title: "Python package entrypoint is placeholder"
+owner_role: backend
+status: needs-review
+priority: P2
+depends_on: []
+scope:
+  in:
+    - "Replace placeholder python package entrypoint"
+    - "Define expected behavior for python/pm_assist module"
+  out:
+    - "No change to CLI Go entrypoint"
+acceptance_criteria:
+  - "python/pm_assist/__main__.py performs real invocation"
+  - "python/pm_assist/__init__.py reflects actual package purpose"
+  - "Entrypoint behavior is documented"
+files_expected:
+  - "python/pm_assist/__main__.py"
+  - "python/pm_assist/__init__.py"
+contracts:
+  - "project-files/ARCHITECTURE.md"
+quality_gates:
+  - "python -m pm_assist runs without placeholder text"
+notes:
+  context: "Current python package is a stub and may mislead users."

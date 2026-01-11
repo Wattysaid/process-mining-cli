@@ -1,0 +1,26 @@
+id: REVIEW-0003
+title: "Profile set command is not implemented"
+owner_role: cli
+status: needs-review
+priority: P2
+depends_on:
+  - "TASK-0034"
+scope:
+  in:
+    - "Implement profile set to update active profile"
+    - "Persist active profile in config"
+  out:
+    - "No changes to profile init"
+acceptance_criteria:
+  - "pm-assist profile set updates pm-assist.yaml"
+  - "Active profile is used by prompts"
+  - "Errors are clear when profile missing"
+files_expected:
+  - "internal/cli/commands/profile.go"
+  - "internal/config/config.go"
+contracts:
+  - "project-files/CLI_SPEC.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Command currently logs 'not implemented yet'."

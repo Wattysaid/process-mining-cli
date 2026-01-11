@@ -1,0 +1,27 @@
+id: REVIEW-0005
+title: "Agent setup stops after provider selection"
+owner_role: ai
+status: needs-review
+priority: P2
+depends_on:
+  - "TASK-0009"
+scope:
+  in:
+    - "Complete provider setup flow"
+    - "Persist provider selection and model defaults"
+    - "Collect token budget and cost caps"
+  out:
+    - "No provider-specific API key storage"
+acceptance_criteria:
+  - "pm-assist agent setup writes provider settings"
+  - "Offline-only policy is enforced"
+  - "User receives actionable next steps"
+files_expected:
+  - "internal/cli/commands/agent.go"
+  - "internal/config/config.go"
+contracts:
+  - "project-files/OPENAI_INTEGRATION.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Command currently prints a not implemented message."

@@ -1,0 +1,27 @@
+id: REVIEW-0011
+title: "Doctor command does not validate Python dependencies"
+owner_role: cli
+status: needs-review
+priority: P3
+depends_on:
+  - "TASK-0021"
+scope:
+  in:
+    - "Check project venv existence"
+    - "Validate required Python package imports"
+    - "Report actionable remediation"
+  out:
+    - "No automatic dependency installation"
+acceptance_criteria:
+  - "Doctor reports missing venv or dependencies"
+  - "Checks align with requirements used by runner"
+  - "Output includes fix instructions"
+files_expected:
+  - "internal/cli/commands/doctor.go"
+  - "project-files/STARTUP_SCREEN.md"
+contracts:
+  - "project-files/STARTUP_SCREEN.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Doctor currently checks python and graphviz only."

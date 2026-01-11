@@ -1,0 +1,24 @@
+id: REVIEW-0009
+title: "Startup status uses hardcoded version"
+owner_role: cli
+status: needs-review
+priority: P3
+depends_on: []
+scope:
+  in:
+    - "Replace hardcoded version in startup status"
+    - "Use shared version/build metadata"
+  out:
+    - "No change to version command output format"
+acceptance_criteria:
+  - "Startup screen reflects actual build version"
+  - "Version value is sourced from a single location"
+files_expected:
+  - "internal/cli/startup.go"
+  - "internal/cli/commands/version.go"
+contracts:
+  - "project-files/STARTUP_SCREEN.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Startup screen prints 'Version: 0.1.0' regardless of build metadata."

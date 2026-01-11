@@ -1,0 +1,25 @@
+id: REVIEW-0010
+title: "Startup LLM status ignores policy settings"
+owner_role: security
+status: needs-review
+priority: P3
+depends_on:
+  - "TASK-0006"
+scope:
+  in:
+    - "Reflect policy.llm_enabled and offline_only in status"
+    - "Show disabled-by-policy state when applicable"
+  out:
+    - "No change to policy semantics"
+acceptance_criteria:
+  - "Startup screen shows 'disabled by policy' when applicable"
+  - "LLM status does not imply availability when blocked"
+files_expected:
+  - "internal/cli/startup.go"
+  - "project-files/STARTUP_SCREEN.md"
+contracts:
+  - "project-files/STARTUP_SCREEN.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Startup currently infers LLM status from env vars only."

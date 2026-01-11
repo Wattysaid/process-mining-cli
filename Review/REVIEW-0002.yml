@@ -1,0 +1,26 @@
+id: REVIEW-0002
+title: "Startup screen lacks continue-project flow"
+owner_role: cli
+status: needs-review
+priority: P2
+depends_on:
+  - "TASK-0020"
+scope:
+  in:
+    - "Implement continue existing project flow"
+    - "Select next recommended step from run manifest"
+  out:
+    - "No TUI migration"
+acceptance_criteria:
+  - "Startup menu option 2 continues an existing project"
+  - "Next step recommendation is displayed"
+  - "Flow respects --non-interactive"
+files_expected:
+  - "internal/cli/startup.go"
+  - "project-files/STARTUP_SCREEN.md"
+contracts:
+  - "project-files/STARTUP_SCREEN.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Currently prints a not implemented message and exits."

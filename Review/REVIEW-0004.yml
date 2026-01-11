@@ -1,0 +1,26 @@
+id: REVIEW-0004
+title: "Business set command is not implemented"
+owner_role: cli
+status: needs-review
+priority: P2
+depends_on:
+  - "TASK-0034"
+scope:
+  in:
+    - "Implement business set to update active business"
+    - "Persist active business in config"
+  out:
+    - "No changes to business init"
+acceptance_criteria:
+  - "pm-assist business set updates pm-assist.yaml"
+  - "Active business is used by prompts"
+  - "Errors are clear when business missing"
+files_expected:
+  - "internal/cli/commands/business.go"
+  - "internal/config/config.go"
+contracts:
+  - "project-files/CLI_SPEC.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Command currently logs 'not implemented yet'."

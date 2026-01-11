@@ -1,0 +1,26 @@
+id: REVIEW-0008
+title: "Agent command lacks guided workflow"
+owner_role: ai
+status: needs-review
+priority: P2
+depends_on:
+  - "TASK-0033"
+scope:
+  in:
+    - "Implement interactive guidance in pm-assist agent"
+    - "Use profile aptitude to adapt prompt depth"
+  out:
+    - "No autonomous execution without confirmation"
+acceptance_criteria:
+  - "pm-assist agent provides guided decision support"
+  - "Agent prompts reflect profile aptitude"
+  - "Agent outputs are stored with run artifacts"
+files_expected:
+  - "internal/cli/commands/agent.go"
+  - "project-files/CLI_SPEC.md"
+contracts:
+  - "project-files/CLI_SPEC.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Current agent command only exposes setup and no guidance flow."

@@ -1,0 +1,27 @@
+id: REVIEW-0012
+title: "Startup Python readiness ignores venv and core imports"
+owner_role: cli
+status: needs-review
+priority: P3
+depends_on:
+  - "TASK-0021"
+scope:
+  in:
+    - "Detect project venv readiness"
+    - "Verify core package imports"
+    - "Align readiness states with spec"
+  out:
+    - "No changes to startup banner"
+acceptance_criteria:
+  - "Startup shows 'ready' only when venv + imports succeed"
+  - "Missing deps are reported as 'deps missing'"
+  - "Status logic matches STARTUP_SCREEN spec"
+files_expected:
+  - "internal/cli/startup.go"
+  - "project-files/STARTUP_SCREEN.md"
+contracts:
+  - "project-files/STARTUP_SCREEN.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Startup currently marks Python ready if any python executable exists."

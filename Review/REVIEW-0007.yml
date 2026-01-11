@@ -1,0 +1,26 @@
+id: REVIEW-0007
+title: "Ingest command only supports file connectors"
+owner_role: data
+status: needs-review
+priority: P2
+depends_on:
+  - "TASK-0005"
+scope:
+  in:
+    - "Enable ingest from database connectors"
+    - "Support read-only query configuration"
+  out:
+    - "No write-back to databases"
+acceptance_criteria:
+  - "Ingest can pull from a configured database connector"
+  - "Read-only access is enforced"
+  - "Lineage records source and query metadata"
+files_expected:
+  - "internal/cli/commands/ingest.go"
+  - "project-files/WORKFLOWS.md"
+contracts:
+  - "project-files/WORKFLOWS.md"
+quality_gates:
+  - "go test ./... passes"
+notes:
+  context: "Current ingest returns an error for non-file connectors."
