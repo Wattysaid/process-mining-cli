@@ -8,6 +8,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/notebook"
+	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/spf13/cobra"
 )
@@ -67,12 +68,16 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			venvRunner := &runner.Runner{ProjectPath: projectPath}
-			reqPath := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-99-utils-and-standards", "requirements.txt")
+			skillsRoot, err := paths.SkillsRoot(projectPath)
+			if err != nil {
+				return err
+			}
+			reqPath := paths.SkillPath(skillsRoot, "pm-99-utils-and-standards", "requirements.txt")
 			if err := venvRunner.EnsureVenv(reqPath); err != nil {
 				return err
 			}
 
-			qualityScript := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-03-data-quality", "scripts", "02_data_quality.py")
+			qualityScript := paths.SkillPath(skillsRoot, "pm-03-data-quality", "scripts", "02_data_quality.py")
 			qualityArgs := []string{
 				"--file", inputPath,
 				"--case", caseCol,
@@ -127,7 +132,7 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 
-			cleanScript := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-04-clean-filter", "scripts", "02_clean_filter.py")
+			cleanScript := paths.SkillPath(skillsRoot, "pm-04-clean-filter", "scripts", "02_clean_filter.py")
 			cleanInput := filepath.Join(outputPath, "stage_02_data_quality", "cleaned_log.csv")
 			cleanArgs := []string{
 				"--file", cleanInput,

@@ -8,6 +8,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/notebook"
+	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/spf13/cobra"
 )
@@ -50,12 +51,16 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			venvRunner := &runner.Runner{ProjectPath: projectPath}
-			reqPath := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-99-utils-and-standards", "requirements.txt")
+			skillsRoot, err := paths.SkillsRoot(projectPath)
+			if err != nil {
+				return err
+			}
+			reqPath := paths.SkillPath(skillsRoot, "pm-99-utils-and-standards", "requirements.txt")
 			if err := venvRunner.EnsureVenv(reqPath); err != nil {
 				return err
 			}
 
-			reportScript := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-10-reporting", "scripts", "08_report.py")
+			reportScript := paths.SkillPath(skillsRoot, "pm-10-reporting", "scripts", "08_report.py")
 			argsList := []string{"--output", outputPath, "--report", reportName}
 			fmt.Println("[INFO] Generating report...")
 			if err := venvRunner.RunScript(reportScript, argsList, nil); err != nil {

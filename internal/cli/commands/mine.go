@@ -8,6 +8,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/notebook"
+	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/spf13/cobra"
 )
@@ -71,7 +72,11 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			venvRunner := &runner.Runner{ProjectPath: projectPath}
-			reqPath := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-99-utils-and-standards", "requirements.txt")
+			skillsRoot, err := paths.SkillsRoot(projectPath)
+			if err != nil {
+				return err
+			}
+			reqPath := paths.SkillPath(skillsRoot, "pm-99-utils-and-standards", "requirements.txt")
 			if err := venvRunner.EnsureVenv(reqPath); err != nil {
 				return err
 			}
@@ -79,7 +84,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			nbPath := filepath.Join(outputPath, "analysis_notebook.ipynb")
 
 			if runEDA {
-				edaScript := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-05-eda", "scripts", "03_eda.py")
+				edaScript := paths.SkillPath(skillsRoot, "pm-05-eda", "scripts", "03_eda.py")
 				edaArgs := []string{"--use-filtered", "--output", outputPath, "--case", caseCol, "--activity", activityCol, "--timestamp", timestampCol}
 				if resourceCol != "" {
 					edaArgs = append(edaArgs, "--resource", resourceCol)
@@ -102,7 +107,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				discoverScript := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-06-discovery", "scripts", "04_discover.py")
+				discoverScript := paths.SkillPath(skillsRoot, "pm-06-discovery", "scripts", "04_discover.py")
 				argsList := []string{"--use-filtered", "--output", outputPath, "--case", caseCol, "--activity", activityCol, "--timestamp", timestampCol, "--miner-selection", miner}
 				if resourceCol != "" {
 					argsList = append(argsList, "--resource", resourceCol)
@@ -125,7 +130,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				confScript := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-07-conformance", "scripts", "05_conformance.py")
+				confScript := paths.SkillPath(skillsRoot, "pm-07-conformance", "scripts", "05_conformance.py")
 				argsList := []string{"--use-filtered", "--output", outputPath, "--case", caseCol, "--activity", activityCol, "--timestamp", timestampCol, "--conformance-method", method}
 				if resourceCol != "" {
 					argsList = append(argsList, "--resource", resourceCol)
@@ -152,7 +157,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				perfScript := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-08-performance", "scripts", "06_performance.py")
+				perfScript := paths.SkillPath(skillsRoot, "pm-08-performance", "scripts", "06_performance.py")
 				argsList := []string{"--use-filtered", "--output", outputPath, "--case", caseCol, "--activity", activityCol, "--timestamp", timestampCol, "--sla-hours", sla}
 				if advanced {
 					argsList = append(argsList, "--advanced")

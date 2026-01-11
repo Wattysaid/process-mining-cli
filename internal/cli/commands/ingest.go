@@ -9,6 +9,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/notebook"
+	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/spf13/cobra"
 )
@@ -92,12 +93,16 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			venvRunner := &runner.Runner{ProjectPath: projectPath}
-			reqPath := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-99-utils-and-standards", "requirements.txt")
+			skillsRoot, err := paths.SkillsRoot(projectPath)
+			if err != nil {
+				return err
+			}
+			reqPath := paths.SkillPath(skillsRoot, "pm-99-utils-and-standards", "requirements.txt")
 			if err := venvRunner.EnsureVenv(reqPath); err != nil {
 				return err
 			}
 
-			scriptPath := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-02-ingest-profile", "scripts", "01_ingest.py")
+			scriptPath := paths.SkillPath(skillsRoot, "pm-02-ingest-profile", "scripts", "01_ingest.py")
 			argsList := []string{
 				"--file", filePath,
 				"--format", selected.File.Format,

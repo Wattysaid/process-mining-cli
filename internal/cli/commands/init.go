@@ -8,6 +8,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/business"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
+	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/profile"
 	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/pm-assist/pm-assist/internal/scaffold"
@@ -149,7 +150,11 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			skillRequirements := filepath.Join(projectPath, ".codex", "skills", "cli-tool-skills", "pm-99-utils-and-standards", "requirements.txt")
+			skillsRoot, err := paths.SkillsRoot(projectPath)
+			if err != nil {
+				return err
+			}
+			skillRequirements := paths.SkillPath(skillsRoot, "pm-99-utils-and-standards", "requirements.txt")
 			if !installDeps {
 				skillRequirements = ""
 			}
