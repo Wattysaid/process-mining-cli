@@ -47,4 +47,3 @@ You are an AI coding agent implementing an enterprise-grade CLI and pipeline orc
 Use the skill files under `.codex/skills/` to guide implementation decisions.
 - When a task matches a skill “when_to_use”, read that skill first.
 - Apply the “checklist” in each skill before finalising changes.
-
