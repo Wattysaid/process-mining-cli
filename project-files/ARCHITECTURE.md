@@ -5,6 +5,8 @@
 ## 1. Architecture overview
 PM Assist is a two-layer application:
 
+Status: CLI orchestration implemented; packaging of Python assets pending.
+
 1) **CLI Orchestrator (Go recommended)**
 - Handles commands, prompting, validation, configuration, logging, and run management
 - Manages a dedicated Python virtual environment for the project

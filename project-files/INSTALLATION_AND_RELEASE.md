@@ -8,6 +8,8 @@
 - Installer script downloads the correct artefact and installs it to `~/.local/bin`.
 - First run creates a project-local `.venv` unless the user chooses a shared env.
 
+Status: Installer script and release workflow exist; packaging validation pending.
+
 ## 2. Installer requirements (curl | sh)
 The installer must:
 - Detect platform (`uname -s`, `uname -m`)

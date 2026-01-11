@@ -5,6 +5,8 @@
 ## 1. Engagement workflow (consulting-style)
 PM Assist should guide the user through the same phases a mature process mining team would follow, using the `cli-tool-skills` Python steps as the minimum capability baseline. The assistant must stay decision-neutral and ask the user to confirm choices, adapting prompt depth to the active user profile (beginner/intermediate/expert).
 
+Status: Workflow steps implemented; non-interactive automation coverage pending.
+
 AI usage rules:
 - Use AI to interpret user intent, ask for missing connection parameters, and explain results.
 - Do not use AI to compute metrics, scan raw datasets, or make decisions without user confirmation.

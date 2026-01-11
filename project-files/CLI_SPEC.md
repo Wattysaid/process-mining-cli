@@ -25,6 +25,7 @@ When the user runs `pm-assist` with no subcommand, show the startup screen and m
 - `--business <name>` use a specific business profile from `.business/`
 
 ## 3. Command tree (MVP)
+Status: Core commands implemented; non-interactive flags and some connector types pending.
 ### `pm-assist version`
 - Prints version, build metadata, python runtime status.
 

@@ -25,6 +25,6 @@
 - Config model: `internal/config/config.go`
 
 ## Current Gaps
-- DB connector validation for non-Postgres drivers
-- Installer + self-update workflow
-- Policy controls and license enforcement
+- Snowflake/BigQuery connectors
+- Structured logging + run manifest
+- Non-interactive flags

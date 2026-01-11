@@ -27,6 +27,8 @@ Threats:
 - Only allow user edits in `.profiles/` and project data/output directories
 - Do not expose internal source files via CLI commands or logs
 
+Status: Policy gating implemented; structured logging and manifests still pending.
+
 ## 3. Enterprise controls (post-MVP)
 - OS keychain integration for secrets
 - Signed releases and signature verification
