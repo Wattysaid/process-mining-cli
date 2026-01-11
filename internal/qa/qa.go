@@ -36,7 +36,7 @@ type BacklogIssue struct {
 	Fix      string `json:"suggested_fix"`
 }
 
-func RunCSV(path string, caseCol string, activityCol string, timestampCol string, thresholds Thresholds) (Results, []BacklogIssue, error) {
+func RunCSV(path string, caseCol string, activityCol string, timestampCol string, timestampFormat string, thresholds Thresholds) (Results, []BacklogIssue, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return Results{}, nil, err
@@ -113,7 +113,7 @@ func RunCSV(path string, caseCol string, activityCol string, timestampCol string
 		}
 
 		if strings.TrimSpace(tsVal) != "" {
-			parsed, err := time.Parse(time.RFC3339, tsVal)
+			parsed, err := parseTimestamp(tsVal, timestampFormat)
 			if err != nil {
 				parseFailures++
 			} else {
@@ -255,4 +255,26 @@ func getValue(record []string, idx int) string {
 		return ""
 	}
 	return record[idx]
+}
+
+func parseTimestamp(value string, explicitFormat string) (time.Time, error) {
+	if explicitFormat != "" {
+		return time.Parse(explicitFormat, value)
+	}
+	formats := []string{
+		time.RFC3339,
+		"2006-01-02 15:04:05",
+		"2006-01-02",
+		"01/02/2006 15:04:05",
+		"01/02/2006",
+		"02/01/2006 15:04:05",
+		"02/01/2006",
+	}
+	for _, format := range formats {
+		parsed, err := time.Parse(format, value)
+		if err == nil {
+			return parsed, nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("unrecognized timestamp format")
 }

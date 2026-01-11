@@ -10,6 +10,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/profile"
 	"github.com/pm-assist/pm-assist/internal/runner"
+	"github.com/pm-assist/pm-assist/internal/scaffold"
 	"github.com/spf13/cobra"
 )
 
@@ -48,6 +49,18 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			templateChoice, err := prompt.AskChoice("Project layout", []string{"standard", "custom"}, "standard", true)
+			if err != nil {
+				return err
+			}
+			customFolders := []string{}
+			if templateChoice == "custom" {
+				folderInput, err := prompt.AskString("Folder list (comma-separated)", "data, outputs, docs", true)
+				if err != nil {
+					return err
+				}
+				customFolders = scaffold.ParseCustomFolders(folderInput)
+			}
 			llmProvider, err := prompt.AskChoice("LLM provider", []string{"openai", "anthropic", "gemini", "ollama", "none"}, "none", true)
 			if err != nil {
 				return err
@@ -74,14 +87,15 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 			}
 
-			if err := os.MkdirAll(filepath.Join(projectPath, "outputs"), 0o755); err != nil {
-				return err
-			}
-			if err := os.MkdirAll(filepath.Join(projectPath, "data"), 0o755); err != nil {
-				return err
-			}
-			if err := os.MkdirAll(filepath.Join(projectPath, "docs"), 0o755); err != nil {
-				return err
+			if templateChoice == "custom" {
+				template := scaffold.Template{Name: "custom", Folders: customFolders}
+				if err := scaffold.ApplyTemplate(projectPath, template); err != nil {
+					return err
+				}
+			} else {
+				if err := scaffold.ApplyTemplate(projectPath, scaffold.StandardTemplate); err != nil {
+					return err
+				}
 			}
 			configPath := filepath.Join(projectPath, "pm-assist.yaml")
 			if _, err := os.Stat(configPath); os.IsNotExist(err) {
@@ -111,6 +125,9 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 					return err
 				}
 			}
+
+			gitignorePath := filepath.Join(projectPath, ".gitignore")
+			_ = scaffold.EnsureGitignore(gitignorePath, []string{"outputs/", ".venv/", ".profiles/", ".business/", "*.pyc"})
 
 			installDeps, err := prompt.AskBool("Install Python dependencies now? (requires network)", false)
 			if err != nil {

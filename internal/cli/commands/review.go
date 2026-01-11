@@ -52,6 +52,10 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			timestampFormat, err := prompt.AskString("Timestamp format (optional)", "", false)
+			if err != nil {
+				return err
+			}
 
 			missingThreshold, err := prompt.AskString("Missing value threshold", "0.05", true)
 			if err != nil {
@@ -75,7 +79,7 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 
-			results, backlog, err := qa.RunCSV(inputPath, caseCol, activityCol, timestampCol, thresholds)
+			results, backlog, err := qa.RunCSV(inputPath, caseCol, activityCol, timestampCol, timestampFormat, thresholds)
 			if err != nil {
 				return err
 			}

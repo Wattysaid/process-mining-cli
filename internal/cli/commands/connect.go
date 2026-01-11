@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/pm-assist/pm-assist/internal/app"
+	"github.com/pm-assist/pm-assist/internal/db"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/spf13/cobra"
@@ -136,6 +137,27 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 			fmt.Println("[INFO] Credentials are never stored in config. Set the env var before connecting.")
 			fmt.Printf("[INFO] Using credential env var: %s\n", credEnv)
 
+			testNow, err := prompt.AskBool("Test read-only connection now?", true)
+			if err != nil {
+				return err
+			}
+			if testNow {
+				password := os.Getenv(credEnv)
+				if password == "" {
+					return fmt.Errorf("credential env var %s is not set", credEnv)
+				}
+				if driver == "postgres" {
+					dsn := fmt.Sprintf("host=%s port=%d dbname=%s user=%s password=%s sslmode=%s", host, port, dbName, user, password, sslMode)
+					fmt.Println("[INFO] Testing Postgres read-only connection...")
+					if err := db.TestPostgresReadOnly(dsn); err != nil {
+						return fmt.Errorf("read-only test failed: %w", err)
+					}
+					fmt.Println("[SUCCESS] Read-only connection validated.")
+				} else {
+					return fmt.Errorf("driver %s is not supported for read-only validation yet", driver)
+				}
+			}
+
 			cfg.Connectors = append(cfg.Connectors, config.ConnectorSpec{
 				Name: name,
 				Type: "database",
@@ -148,13 +170,12 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 					User:    user,
 					SSLMode: sslMode,
 				},
-				Options: &config.ExtraConfig{ReadOnly: true},
+				Options: &config.ExtraConfig{ReadOnly: true, CredentialEnv: credEnv},
 			})
 			if err := cfg.Save(); err != nil {
 				return err
 			}
 			fmt.Println("[SUCCESS] Database connector saved.")
-			fmt.Println("[INFO] Connection test will be available in a later release.")
 			return nil
 		},
 		Example: "  pm-assist connect",

@@ -60,7 +60,8 @@ type DBConfig struct {
 }
 
 type ExtraConfig struct {
-	ReadOnly bool `yaml:"read_only"`
+	ReadOnly      bool   `yaml:"read_only"`
+	CredentialEnv string `yaml:"credential_env,omitempty"`
 }
 
 // Load returns a Config with the resolved path if a config exists.
