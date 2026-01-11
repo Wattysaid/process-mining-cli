@@ -27,6 +27,6 @@ Use this index to navigate the instruction set.
 - `project-files/OPENAI_INTEGRATION.md`
 
 ## Codex agent controls
-- `.codex/agent.md`
+- `agent.md`
 - `.codex/skills/*/skill.md`
 

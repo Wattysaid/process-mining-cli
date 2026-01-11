@@ -63,7 +63,7 @@ Read these files in order:
 4. `project-files/INSTALLATION_AND_RELEASE.md`
 5. `project-files/OPENAI_INTEGRATION.md`
 6. `project-files/WORKFLOWS.md`
-7. `.codex/agent.md` and `.codex/skills/*/skill.md`
+7. `agent.md` and `.codex/skills/*/skill.md`
 
 ---
 
