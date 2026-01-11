@@ -63,6 +63,7 @@ func init() {
 		commands.NewAgentCmd(Global),
 		commands.NewProfileCmd(Global),
 		commands.NewBusinessCmd(Global),
+		commands.NewSelfUpdateCmd(Global),
 	)
 }
 

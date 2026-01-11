@@ -33,6 +33,10 @@ When the user runs `pm-assist` with no subcommand, show the startup screen and m
   - Python, venv, required OS deps (graphviz), disk space
   - connector reachability (if configured)
 
+### `pm-assist self-update`
+- Downloads and replaces the `pm-assist` binary
+- Verifies checksums before swapping the executable
+
 ### `pm-assist init`
 Interactive:
 - Project name
