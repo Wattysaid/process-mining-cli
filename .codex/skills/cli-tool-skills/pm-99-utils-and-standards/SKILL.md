@@ -29,12 +29,12 @@ Examples:
 
 - None directly
 - Standards references live in:
-  - `.codex/skills/pm-99-utils-and-standards/references/interaction-patterns.md`
-  - `.codex/skills/pm-99-utils-and-standards/references/artefact-and-manifest-standard.md`
-  - `.codex/skills/pm-99-utils-and-standards/references/interaction-examples.md`
-  - `.codex/skills/pm-99-utils-and-standards/references/improved_prompt.md`
-  - `.codex/skills/pm-99-utils-and-standards/references/notebook-snippets/`
-  - `.codex/skills/pm-99-utils-and-standards/scripts/block_templates.py`
+  - `.codex/skills/cli-tool-skills/pm-99-utils-and-standards/references/interaction-patterns.md`
+  - `.codex/skills/cli-tool-skills/pm-99-utils-and-standards/references/artefact-and-manifest-standard.md`
+  - `.codex/skills/cli-tool-skills/pm-99-utils-and-standards/references/interaction-examples.md`
+  - `.codex/skills/cli-tool-skills/pm-99-utils-and-standards/references/improved_prompt.md`
+  - `.codex/skills/cli-tool-skills/pm-99-utils-and-standards/references/notebook-snippets/`
+  - `.codex/skills/cli-tool-skills/pm-99-utils-and-standards/scripts/block_templates.py`
 
 ## Workflow
 

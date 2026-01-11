@@ -2,7 +2,7 @@
 
 **Document version:** R1.00 (2026-01-11)  
 **Audience:** Engineering team (Codex), product, security, delivery  
-**Goal:** Build an enterprise-grade CLI that enables a single practitioner to run an end-to-end process mining engagement (data engineering through mining through reporting), with guided workflows and optional LLM-powered assistance (OpenAI, Anthropic, Gemini, or local Ollama) that is token-cost controlled.
+**Goal:** Build an enterprise-grade CLI assistant that enables a single practitioner to run an end-to-end process mining engagement (data engineering through mining through reporting), with guided workflows and optional LLM-powered assistance (OpenAI, Anthropic, Gemini, or local Ollama) that is token-cost controlled.
 
 ## What this repo provides (instructions only)
 This repository folder contains **MD instruction files** that an AI coding agent can use to implement the application. The `cli-tool-skills` library under `.codex/skills/` contains the minimum Python-backed capabilities the CLI must orchestrate.
@@ -16,6 +16,7 @@ PM Assist is a CLI-based process mining copilot that competes with Celonis, Sign
 - **Enterprise hygiene**: secure secret handling, audit logs, data minimisation, read-only connectors by default.
 - **Cost control**: LLM usage is optional, measurable, capped, and used mainly for orchestration and narrative generation, not heavy computation.
 - **Composable pipelines**: pipelines are built from reusable Python snippets and modules (data science + process mining).
+- **Assistant-first**: the CLI adapts to user aptitude (beginner/intermediate/expert) and stores profiles in `.profiles/` to tailor prompts and defaults.
 
 ## High-level workflow (happy path)
 1. `pm-assist init` creates a project scaffold.

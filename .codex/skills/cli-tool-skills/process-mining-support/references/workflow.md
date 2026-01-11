@@ -41,7 +41,7 @@ We map raw columns to process mining schema and generate a normalized log.
 
 Code cell (script-based):
 ```
-!python .codex/skills/pm-02-ingest-profile/scripts/01_ingest.py \
+!python .codex/skills/cli-tool-skills/pm-02-ingest-profile/scripts/01_ingest.py \
   --file data/your_log.csv --format csv \
   --case <case_col> --activity <activity_col> --timestamp <timestamp_col> \
   --resource <resource_col> --output output
@@ -60,7 +60,7 @@ We assess missing values, duplicates, and ordering issues.
 
 Code cell:
 ```
-!python .codex/skills/pm-03-data-quality/scripts/02_data_quality.py \
+!python .codex/skills/cli-tool-skills/pm-03-data-quality/scripts/02_data_quality.py \
   --file output/stage_01_ingest_profile/normalised_log.csv \
   --case <case_col> --activity <activity_col> --timestamp <timestamp_col> \
   --resource <resource_col> --output output
@@ -79,7 +79,7 @@ We apply agreed filtering rules for rare activities and constraints.
 
 Code cell:
 ```
-!python .codex/skills/pm-04-clean-filter/scripts/02_clean_filter.py \
+!python .codex/skills/cli-tool-skills/pm-04-clean-filter/scripts/02_clean_filter.py \
   --file output/stage_01_ingest_profile/normalised_log.csv --format csv \
   --case <case_col> --activity <activity_col> --timestamp <timestamp_col> \
   --resource <resource_col> --output output \
@@ -99,7 +99,7 @@ We profile variants, arrivals, and activity distributions.
 
 Code cell:
 ```
-!python .codex/skills/pm-05-eda/scripts/03_eda.py \
+!python .codex/skills/cli-tool-skills/pm-05-eda/scripts/03_eda.py \
   --use-filtered --output output --advanced
 ```
 
@@ -116,7 +116,7 @@ We discover process models and compare metrics.
 
 Code cell:
 ```
-!python .codex/skills/pm-06-discovery/scripts/04_discover.py \
+!python .codex/skills/cli-tool-skills/pm-06-discovery/scripts/04_discover.py \
   --use-filtered --output output --miner-selection auto
 ```
 
@@ -133,7 +133,7 @@ We evaluate fitness and deviations using alignments.
 
 Code cell:
 ```
-!python .codex/skills/pm-07-conformance/scripts/05_conformance.py \
+!python .codex/skills/cli-tool-skills/pm-07-conformance/scripts/05_conformance.py \
   --use-filtered --output output --conformance-method alignments
 ```
 
@@ -150,7 +150,7 @@ We analyze case durations and activity waiting times.
 
 Code cell:
 ```
-!python .codex/skills/pm-08-performance/scripts/06_performance.py \
+!python .codex/skills/cli-tool-skills/pm-08-performance/scripts/06_performance.py \
   --use-filtered --output output --advanced --sla-hours 72
 ```
 
@@ -167,7 +167,7 @@ We analyze handovers between resources/agents.
 
 Code cell:
 ```
-!python .codex/skills/pm-09-org-mining/scripts/07_org_mining.py \
+!python .codex/skills/cli-tool-skills/pm-09-org-mining/scripts/07_org_mining.py \
   --use-filtered --output output
 ```
 
@@ -184,7 +184,7 @@ We compile narrative insights and link to artifacts.
 
 Code cell:
 ```
-!python .codex/skills/pm-10-reporting/scripts/08_report.py --output output
+!python .codex/skills/cli-tool-skills/pm-10-reporting/scripts/08_report.py --output output
 ```
 
 Decision prompt:

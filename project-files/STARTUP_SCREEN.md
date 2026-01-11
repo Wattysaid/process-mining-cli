@@ -94,12 +94,15 @@ Continue? (Y/n):
 ```
 
 Questions:
+- Name and role
+- Aptitude level (beginner/intermediate/expert)
 - Default workspace directory
 - Default output formats (notebook, html report, both)
 - Whether LLM features should be enabled by default
 
 Creates:
 - `~/.config/pm-assist/config.yaml`
+- `.profiles/<name>.yaml` in the project directory
 - Example project scaffold (optional, user-approved)
 
 ## 4. Existing project detection

@@ -22,7 +22,7 @@ Examples:
 - Input file path and format
 - CSV mappings for case, activity, timestamp, and optional resource
 - Optional multi-source config for heterogeneous datasets
-- Example config: `.codex/skills/pm-02-ingest-profile/references/multi_source_config.example.json`
+- Example config: `.codex/skills/cli-tool-skills/pm-02-ingest-profile/references/multi_source_config.example.json`
 - Output directory
 - Optional config file
 
@@ -91,8 +91,8 @@ Impact:
 
 ## Commands
 
-- `python .codex/skills/pm-02-ingest-profile/scripts/01_ingest.py --file <path> --format <csv|xes> --case <col> --activity <col> --timestamp <col> --output <dir>`
-- `python .codex/skills/pm-02-ingest-profile/scripts/01_ingest_multi.py --config .codex/skills/pm-02-ingest-profile/references/multi_source_config.example.json --output <dir>`
+- `python .codex/skills/cli-tool-skills/pm-02-ingest-profile/scripts/01_ingest.py --file <path> --format <csv|xes> --case <col> --activity <col> --timestamp <col> --output <dir>`
+- `python .codex/skills/cli-tool-skills/pm-02-ingest-profile/scripts/01_ingest_multi.py --config .codex/skills/cli-tool-skills/pm-02-ingest-profile/references/multi_source_config.example.json --output <dir>`
 
 ## Validations
 

@@ -21,6 +21,7 @@ When the user runs `pm-assist` with no subcommand, show the startup screen and m
 - `--json` machine-readable output (for automation)
 - `--yes` assume “yes” for safe prompts (never for destructive prompts)
 - `--llm-provider <openai|anthropic|gemini|ollama|none>` override configured LLM provider for this run
+- `--profile <name>` use a specific user profile from `.profiles/`
 
 ## 3. Command tree (MVP)
 ### `pm-assist version`
@@ -36,14 +37,16 @@ Interactive:
 - Project name
 - Default folders
 - Output formats desired
- - LLM provider preference (optional, can be skipped)
+- LLM provider preference (optional, can be skipped)
+- User profile setup (name, role, aptitude level, preferred depth)
 Creates:
 - `pm-assist.yaml` template
 - `.gitignore` suggestions
 - `outputs/` folder
 - `data/` folder placeholder
 - `docs/` folder for reports
- - `.venv/` (project-local Python environment, unless disabled)
+- `.venv/` (project-local Python environment, unless disabled)
+- `.profiles/<name>.yaml` (user profile)
 
 ### `pm-assist connect`
 MVP connectors:
@@ -120,13 +123,34 @@ Outputs:
 Outputs:
 - `outputs/<run-id>/quality/qa_summary.md`
 
+### `pm-assist agent setup`
+- Guides the user through LLM provider configuration
+Prompts:
+- Provider: OpenAI, Anthropic, Gemini, Ollama, or none
+- Model selection (provider-specific defaults)
+- Token budget and cost caps
+- Offline mode preference
+Outputs:
+- Updates `pm-assist.yaml` (provider + model, never store API keys)
+
+### `pm-assist profile`
+- Create or update user profiles stored in `.profiles/`
+Subcommands:
+- `pm-assist profile init` (interactive setup)
+- `pm-assist profile set --name <name>` (activate profile)
+- `pm-assist profile show --name <name>`
+Profile fields:
+- name, role, aptitude (beginner|intermediate|expert), preferences (prompt depth, defaults)
+
 ## 4. `pm-assist agent` (optional, LLM-enabled)
 Behaviour:
 - Provides guided decision support and report narrative drafting.
+ - Asks clarifying questions to gauge user aptitude and goals.
 Constraints:
 - Must respect token budgets and a per-run cost cap.
 - Must avoid sending raw sensitive data by default (use summaries and aggregates).
 - Must support “offline mode” with no external LLM calls.
+- Must always ask for analytical decisions; never auto-select algorithms, thresholds, or destructive actions.
 
 ## 5. Exit codes (standardise)
 - 0: success

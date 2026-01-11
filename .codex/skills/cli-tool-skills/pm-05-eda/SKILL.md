@@ -58,8 +58,8 @@ Impact:
 
 ## Commands
 
-- `python .codex/skills/pm-05-eda/scripts/03_eda.py --use-filtered --output <dir>`
-- `python .codex/skills/pm-05-eda/scripts/03_eda.py --output <dir> --advanced` (adds variant coverage, entropy, and case length diagnostics)
+- `python .codex/skills/cli-tool-skills/pm-05-eda/scripts/03_eda.py --use-filtered --output <dir>`
+- `python .codex/skills/cli-tool-skills/pm-05-eda/scripts/03_eda.py --output <dir> --advanced` (adds variant coverage, entropy, and case length diagnostics)
 
 ## Validations
 

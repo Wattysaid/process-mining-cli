@@ -52,7 +52,7 @@ Two viable approaches (Codex to choose, with rationale):
 A) CLI manages a venv and installs Python package via pip (network required)
 B) CLI ships Python wheels in release assets and installs offline (preferred for enterprise)
 
-MVP can start with (A) and add (B) post-MVP.
+MVP can start with (A) and add (B) post-MVP. For IP protection, prefer shipping bundled wheels or embedded assets and avoid editable source distributions.
 
 ## 7. Graphviz dependency
 pm4py visualisations may require OS-level Graphviz.

@@ -11,7 +11,7 @@ Enterprise process mining programmes often require:
 - expensive platforms and long implementation cycles
 - fragmented tooling and non-reproducible, analyst-specific notebooks
 
-PM Assist reduces time and dependency on large teams by providing a guided, reproducible CLI workflow that produces standard artefacts (event logs, models, notebooks, reports) and uses optional LLM support for orchestration and narrative work (OpenAI, Anthropic, Gemini, or local Ollama).
+PM Assist reduces time and dependency on large teams by providing a guided, reproducible CLI workflow that produces standard artefacts (event logs, models, notebooks, reports) and uses optional LLM support for orchestration and narrative work (OpenAI, Anthropic, Gemini, or local Ollama). The tool never makes analytical decisions on behalf of the user; it prompts for each decision and adapts guidance to user aptitude.
 
 ## 2. Target users
 Primary:
@@ -40,8 +40,9 @@ Secondary:
 - Installability: curl installer, minimal dependencies, deterministic versions; first-run creates a project-local `.venv`
 - Security: secrets never logged, least privilege, auditable runs
 - Performance: handle large datasets via chunking and columnar storage
-- Portability: Linux/macOS; Windows supported via WSL2 for MVP
+- Portability: Linux/macOS/Windows (native where feasible; WSL2 acceptable for MVP)
 - Extensibility: pipeline steps are plug-in style and backed by the `cli-tool-skills` Python library; new steps can be added without rewriting CLI
+- IP protection: distribute as a standalone app with bundled Python assets; do not expose source or allow user edits to the tool code
 
 ## 6. Competitive differentiation (vs Celonis/Signavio/ARIS)
 - Faster start, lower overhead, offline-capable, local-first
@@ -59,3 +60,4 @@ Secondary:
 - Outputs are produced in a run folder with a stable structure
 - LLM integration is optional and requires explicit credentials + opt-in per run (or local Ollama)
 - QA report clearly flags data issues and model caveats
+- User profile is captured and used to adjust prompt depth without changing decision rules

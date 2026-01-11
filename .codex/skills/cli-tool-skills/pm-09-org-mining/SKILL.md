@@ -58,7 +58,7 @@ Impact:
 
 ## Commands
 
-- `python .codex/skills/pm-09-org-mining/scripts/07_org_mining.py --use-filtered --output <dir>`
+- `python .codex/skills/cli-tool-skills/pm-09-org-mining/scripts/07_org_mining.py --use-filtered --output <dir>`
 
 ## Validations
 

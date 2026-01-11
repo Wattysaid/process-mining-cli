@@ -164,7 +164,7 @@ def manual_setup_instructions(
     lines.append("3) Install requirements:")
     lines.append(f"   - python -m pip install -r {requirements_path}")
     lines.append("4) Re-run validation (do not use --setup-venv):")
-    lines.append("   - python .codex/skills/pm-01-env/scripts/00_validate_env.py "
+    lines.append("   - python .codex/skills/cli-tool-skills/pm-01-env/scripts/00_validate_env.py "
                  f"--output {output_dir} --venv-dir {venv_dir} "
                  f"--requirements {requirements_path} --detect-env-json {detect_env_json}")
     lines.append("5) When outputs are confirmed complete, deactivate the virtualenv:")

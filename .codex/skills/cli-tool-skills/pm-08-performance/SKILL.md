@@ -58,8 +58,8 @@ Impact:
 
 ## Commands
 
-- `python .codex/skills/pm-08-performance/scripts/06_performance.py --use-filtered --output <dir>`
-- `python .codex/skills/pm-08-performance/scripts/06_performance.py --output <dir> --advanced --sla-hours <hours>` (adds waiting time stats and SLA breach summary)
+- `python .codex/skills/cli-tool-skills/pm-08-performance/scripts/06_performance.py --use-filtered --output <dir>`
+- `python .codex/skills/cli-tool-skills/pm-08-performance/scripts/06_performance.py --output <dir> --advanced --sla-hours <hours>` (adds waiting time stats and SLA breach summary)
 
 ## Validations
 

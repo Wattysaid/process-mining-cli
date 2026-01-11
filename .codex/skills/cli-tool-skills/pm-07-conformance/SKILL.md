@@ -69,7 +69,7 @@ Impact:
 
 ## Commands
 
-- `python .codex/skills/pm-07-conformance/scripts/05_conformance.py --use-filtered --output <dir> --conformance-method <token|alignments>`
+- `python .codex/skills/cli-tool-skills/pm-07-conformance/scripts/05_conformance.py --use-filtered --output <dir> --conformance-method <token|alignments>`
 
 ## Validations
 

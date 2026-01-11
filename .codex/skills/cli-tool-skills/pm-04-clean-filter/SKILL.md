@@ -85,7 +85,7 @@ Impact:
 
 ## Commands
 
-- `python .codex/skills/pm-04-clean-filter/scripts/02_clean_filter.py --output <dir> --auto-filter-rare-activities <true|false> --min-activity-frequency <value>`
+- `python .codex/skills/cli-tool-skills/pm-04-clean-filter/scripts/02_clean_filter.py --output <dir> --auto-filter-rare-activities <true|false> --min-activity-frequency <value>`
 
 ## Validations
 

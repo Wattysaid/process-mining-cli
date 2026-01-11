@@ -89,7 +89,7 @@ Impact:
 
 ## Commands
 
-- `python .codex/skills/pm-03-data-quality/scripts/02_data_quality.py --output <dir> --missing-value-threshold <value> --timestamp-parse-threshold <value> --duplicate-threshold <value> --order-violation-threshold <value> --fail-on-order-violations`
+- `python .codex/skills/cli-tool-skills/pm-03-data-quality/scripts/02_data_quality.py --output <dir> --missing-value-threshold <value> --timestamp-parse-threshold <value> --duplicate-threshold <value> --order-violation-threshold <value> --fail-on-order-violations`
 
 ## Validations
 

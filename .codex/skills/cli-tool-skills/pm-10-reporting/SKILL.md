@@ -72,8 +72,8 @@ Impact:
 
 ## Commands
 
-- `python .codex/skills/pm-10-reporting/scripts/08_report.py --output <dir>`
-- `python .codex/skills/pm-10-reporting/scripts/export_artifacts.py --output <dir>`
+- `python .codex/skills/cli-tool-skills/pm-10-reporting/scripts/08_report.py --output <dir>`
+- `python .codex/skills/cli-tool-skills/pm-10-reporting/scripts/export_artifacts.py --output <dir>`
 
 ## Validations
 

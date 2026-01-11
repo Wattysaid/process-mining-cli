@@ -76,10 +76,10 @@ Impact:
 ## Commands
 
 - End-to-end pipeline:
-  - `python .codex/skills/pm-00-orchestrator/scripts/run_pipeline.py --file <path> --format <csv|xes> --output <dir>`
+  - `python .codex/skills/cli-tool-skills/pm-00-orchestrator/scripts/run_pipeline.py --file <path> --format <csv|xes> --output <dir>`
 - Resume from stage (manual sequence):
-  - `python .codex/skills/pm-01-env/scripts/00_detect_env.py --output <dir>`
-  - `python .codex/skills/pm-01-env/scripts/00_validate_env.py --output <dir> --setup-venv --venv-dir .venv --requirements .codex/skills/pm-99-utils-and-standards/requirements.txt`
+  - `python .codex/skills/cli-tool-skills/pm-01-env/scripts/00_detect_env.py --output <dir>`
+  - `python .codex/skills/cli-tool-skills/pm-01-env/scripts/00_validate_env.py --output <dir> --setup-venv --venv-dir .venv --requirements .codex/skills/cli-tool-skills/pm-99-utils-and-standards/requirements.txt`
   - Follow phase skills in order with their command patterns.
 
 ## Validations

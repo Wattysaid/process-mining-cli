@@ -21,7 +21,7 @@ Examples:
 
 - Output directory path
 - Virtual environment directory (default `.venv`)
-- Requirements file path (default `.codex/skills/pm-99-utils-and-standards/requirements.txt`)
+- Requirements file path (default `.codex/skills/cli-tool-skills/pm-99-utils-and-standards/requirements.txt`)
 
 ## Outputs produced
 
@@ -59,8 +59,8 @@ Impact:
 
 ## Commands
 
-- `python .codex/skills/pm-01-env/scripts/00_detect_env.py --output <dir>`
-- `python .codex/skills/pm-01-env/scripts/00_validate_env.py --output <dir> --setup-venv --venv-dir .venv --requirements .codex/skills/pm-99-utils-and-standards/requirements.txt --detect-env-json output/stage_00_detect_env/detect_env.json`
+- `python .codex/skills/cli-tool-skills/pm-01-env/scripts/00_detect_env.py --output <dir>`
+- `python .codex/skills/cli-tool-skills/pm-01-env/scripts/00_validate_env.py --output <dir> --setup-venv --venv-dir .venv --requirements .codex/skills/cli-tool-skills/pm-99-utils-and-standards/requirements.txt --detect-env-json output/stage_00_detect_env/detect_env.json`
 
 ## Validations
 
@@ -78,7 +78,7 @@ Impact:
 
 - Missing packages: install from `requirements.txt` inside the venv and re-run validation.
 - Version conflicts: record in manifest and resolve before proceeding.
-- PEP 668 environment error on Ubuntu: follow `.codex/skills/pm-01-env/references/issue-fixes/ISSUE-007-PEP-668-Ubuntu-Error.md`.
+- PEP 668 environment error on Ubuntu: follow `.codex/skills/cli-tool-skills/pm-01-env/references/issue-fixes/ISSUE-007-PEP-668-Ubuntu-Error.md`.
 - Virtual environment creation failure: verify permissions and Python venv support, then re-run.
 - Manual recovery: provide OS/shell-specific activation steps, reinstall requirements, re-run validation without `--setup-venv`, and deactivate with `deactivate` once finished.
 

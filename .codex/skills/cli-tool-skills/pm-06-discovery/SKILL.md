@@ -58,7 +58,7 @@ Impact:
 
 ## Commands
 
-- `python .codex/skills/pm-06-discovery/scripts/04_discover.py --use-filtered --output <dir> --miner-selection <auto|inductive|heuristic>`
+- `python .codex/skills/cli-tool-skills/pm-06-discovery/scripts/04_discover.py --use-filtered --output <dir> --miner-selection <auto|inductive|heuristic>`
 
 ## Validations
 

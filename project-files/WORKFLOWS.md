@@ -3,7 +3,7 @@
 **Document version:** R1.00 (2026-01-11)
 
 ## 1. Engagement workflow (consulting-style)
-PM Assist should guide the user through the same phases a mature process mining team would follow.
+PM Assist should guide the user through the same phases a mature process mining team would follow, using the `cli-tool-skills` Python steps as the minimum capability baseline. The assistant must stay decision-neutral and ask the user to confirm choices, adapting prompt depth to the active user profile (beginner/intermediate/expert).
 
 ### Phase A: Define
 - Confirm business process scope and boundaries
@@ -118,4 +118,3 @@ Prompt design:
 - show defaults
 - provide “learn more” text
 - allow the user to override via flags for automation
-

@@ -10,6 +10,7 @@ PM Assist is a two-layer application:
 - Manages a dedicated Python virtual environment for the project
 - Calls into Python modules for heavy lifting
 - Provides a stable interface for enterprise deployment
+- Maintains user profiles in `.profiles/` and adapts prompts to user aptitude
 
 2) **Python Pipeline Library**
 - Implements data prep, event log construction, pm4py analysis, notebook/report generation
@@ -44,6 +45,7 @@ pm-assist/
     release.yml
   project-files/                 # instructions for Codex
   .codex/                        # agent skill packs for Codex + cli-tool-skills library
+  .profiles/                     # user profiles (YAML, user-editable)
 ```
 
 ## 4. Runtime behaviour
@@ -55,6 +57,7 @@ pm-assist/
 - The CLI runs a Python module entrypoint, passing:
   - run id, paths, config, and redacted secrets via environment variables
 - Python writes outputs; CLI surfaces progress and summarises results.
+- Assistant-driven edits are limited to `.profiles/` and output artefacts; the tool code and bundled Python assets are not modified at runtime.
 
 ## 5. Configuration
 - Human-readable YAML (`pm-assist.yaml`)
@@ -65,6 +68,7 @@ pm-assist/
   - pipeline step selection and parameters
   - LLM settings (provider, enabled flag, model, budget caps, offline policy)
   - output formats (notebook/report)
+  - profile preferences (prompt level, defaults, UI hints)
 
 ## 6. Logging and audit
 - CLI logs: structured, levels, no secrets
@@ -79,6 +83,8 @@ pm-assist/
   - validate prerequisites
   - execute steps in order
 - New steps can be added without changing core CLI logic.
+- The initial registry should map to the bundled `cli-tool-skills` Python scripts to guarantee minimum capability coverage.
+- The Python assets should be bundled with the CLI and executed as packaged modules to avoid exposing editable source code.
 
 ## 8. Security boundaries
 - Secrets only read from:

@@ -13,6 +13,7 @@ Threats:
 - credential leakage (console output, saved config)
 - unauthorised access to outputs
 - tampering with run outputs
+- reverse engineering or modification of tool code
 
 ## 2. Security controls (MVP)
 - Secrets redaction in logs
@@ -21,6 +22,9 @@ Threats:
 - Per-run artefact manifest (hashes optional post-MVP)
 - Clear “what will be sent” prompt before LLM calls
 - “Offline mode” always available
+- Bundle Python assets and avoid editable source distributions
+- Only allow user edits in `.profiles/` and project data/output directories
+- Do not expose internal source files via CLI commands or logs
 
 ## 3. Enterprise controls (post-MVP)
 - OS keychain integration for secrets

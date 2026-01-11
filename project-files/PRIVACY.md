@@ -22,3 +22,8 @@
 ## 4. Retention
 - Provide `pm-assist clean --run-id <id>` to remove run artefacts (post-MVP).
 - Provide retention policies via config (post-MVP).
+
+## 5. User profiles
+- Profiles are stored in `.profiles/` as YAML.
+- Store only user-provided metadata (name, role, aptitude, preferences).
+- Avoid storing secrets or external credentials in profiles.

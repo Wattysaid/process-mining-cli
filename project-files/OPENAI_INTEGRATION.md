@@ -20,6 +20,10 @@ Supported mechanisms (MVP):
 - Environment variables (preferred)
 - Project `.env` file (dev only; discourage for enterprise)
 
+Config keys (stored in `pm-assist.yaml`):
+- `llm.provider`, `llm.model`, `llm.enabled`, `llm.offline`
+- `llm.endpoint` (for Ollama or custom gateways)
+
 CLI behaviour:
 - `pm-assist agent` and `pm-assist report --narrative` must:
   - check provider configuration and required env vars
