@@ -3,12 +3,12 @@ package commands
 import (
 	"fmt"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/spf13/cobra"
 )
 
 // NewMapCmd returns the map command.
-func NewMapCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewMapCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "map",
 		Short: "Map columns to process mining schema",

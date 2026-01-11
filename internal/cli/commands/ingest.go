@@ -3,12 +3,12 @@ package commands
 import (
 	"fmt"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/spf13/cobra"
 )
 
 // NewIngestCmd returns the ingest command.
-func NewIngestCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ingest",
 		Short: "Ingest data into a staging dataset",

@@ -3,13 +3,13 @@ package commands
 import (
 	"fmt"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/spf13/cobra"
 )
 
 // NewAgentCmd returns the agent command.
-func NewAgentCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewAgentCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "agent",
 		Short: "LLM-assisted guidance and setup",
@@ -18,7 +18,7 @@ func NewAgentCmd(global *cli.GlobalFlags) *cobra.Command {
 	return cmd
 }
 
-func newAgentSetupCmd(global *cli.GlobalFlags) *cobra.Command {
+func newAgentSetupCmd(global *app.GlobalFlags) *cobra.Command {
 	return &cobra.Command{
 		Use:   "setup",
 		Short: "Configure LLM provider settings",

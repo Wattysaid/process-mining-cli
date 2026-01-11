@@ -3,12 +3,12 @@ package commands
 import (
 	"fmt"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/spf13/cobra"
 )
 
 // NewMineCmd returns the mine command.
-func NewMineCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "mine",
 		Short: "Run process mining analysis",

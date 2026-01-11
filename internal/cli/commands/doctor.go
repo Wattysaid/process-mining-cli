@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/spf13/cobra"
 )
 
 // NewDoctorCmd returns the doctor command.
-func NewDoctorCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewDoctorCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "doctor",
 		Short: "Check environment readiness",

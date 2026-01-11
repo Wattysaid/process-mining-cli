@@ -3,12 +3,12 @@ package commands
 import (
 	"fmt"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/spf13/cobra"
 )
 
 // NewReviewCmd returns the review command.
-func NewReviewCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "review",
 		Short: "Run QA checks and summarize issues",

@@ -5,14 +5,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/profile"
 	"github.com/spf13/cobra"
 )
 
 // NewProfileCmd returns the profile command.
-func NewProfileCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewProfileCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "profile",
 		Short: "Manage user profiles",
@@ -23,7 +23,7 @@ func NewProfileCmd(global *cli.GlobalFlags) *cobra.Command {
 	return cmd
 }
 
-func newProfileInitCmd(global *cli.GlobalFlags) *cobra.Command {
+func newProfileInitCmd(global *app.GlobalFlags) *cobra.Command {
 	return &cobra.Command{
 		Use:   "init",
 		Short: "Create a new user profile",
@@ -55,9 +55,9 @@ func newProfileInitCmd(global *cli.GlobalFlags) *cobra.Command {
 			}
 
 			path, err := profile.Save(projectPath, profile.Profile{
-				Name:       name,
-				Role:       role,
-				Aptitude:   aptitude,
+				Name:        name,
+				Role:        role,
+				Aptitude:    aptitude,
 				PromptDepth: promptDepth,
 			})
 			if err != nil {
@@ -70,7 +70,7 @@ func newProfileInitCmd(global *cli.GlobalFlags) *cobra.Command {
 	}
 }
 
-func newProfileSetCmd(global *cli.GlobalFlags) *cobra.Command {
+func newProfileSetCmd(global *app.GlobalFlags) *cobra.Command {
 	var name string
 	cmd := &cobra.Command{
 		Use:   "set",
@@ -90,7 +90,7 @@ func newProfileSetCmd(global *cli.GlobalFlags) *cobra.Command {
 	return cmd
 }
 
-func newProfileShowCmd(global *cli.GlobalFlags) *cobra.Command {
+func newProfileShowCmd(global *app.GlobalFlags) *cobra.Command {
 	var name string
 	cmd := &cobra.Command{
 		Use:   "show",

@@ -5,14 +5,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/profile"
 	"github.com/spf13/cobra"
 )
 
 // NewInitCmd returns the init command.
-func NewInitCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Create a new PM Assist project scaffold",
@@ -62,18 +62,18 @@ func NewInitCmd(global *cli.GlobalFlags) *cobra.Command {
 
 			configPath := filepath.Join(projectPath, "pm-assist.yaml")
 			if _, err := os.Stat(configPath); os.IsNotExist(err) {
-			content := fmt.Sprintf("project:\n  name: %s\nprofiles:\n  active: %s\n", projectName, userName)
-			if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
-				return err
+				content := fmt.Sprintf("project:\n  name: %s\nprofiles:\n  active: %s\n", projectName, userName)
+				if err := os.WriteFile(configPath, []byte(content), 0o644); err != nil {
+					return err
+				}
 			}
-		}
 
-		_, err = profile.Save(projectPath, profile.Profile{
-			Name:       userName,
-			Role:       role,
-			Aptitude:   aptitude,
-			PromptDepth: promptDepth,
-		})
+			_, err = profile.Save(projectPath, profile.Profile{
+				Name:        userName,
+				Role:        role,
+				Aptitude:    aptitude,
+				PromptDepth: promptDepth,
+			})
 			if err != nil {
 				return err
 			}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/commands"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
@@ -29,21 +30,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// GlobalFlags stores CLI flags used across commands.
-type GlobalFlags struct {
-	ConfigPath     string
-	ProjectPath    string
-	RunID          string
-	NonInteractive bool
-	LogLevel       string
-	JSONOutput     bool
-	Yes            bool
-	LLMProvider    string
-	ProfileName    string
-	Config         *config.Config
-}
-
-var Global = &GlobalFlags{}
+var Global = &app.GlobalFlags{}
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&Global.ConfigPath, "config", "", "Path to config file (default: ./pm-assist.yaml if present)")

@@ -3,12 +3,12 @@ package commands
 import (
 	"fmt"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/spf13/cobra"
 )
 
 // NewReportCmd returns the report command.
-func NewReportCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "report",
 		Short: "Generate notebooks and reports",

@@ -9,9 +9,9 @@ import (
 
 // Profile represents a user profile stored in YAML.
 type Profile struct {
-	Name       string
-	Role       string
-	Aptitude   string
+	Name        string
+	Role        string
+	Aptitude    string
 	PromptDepth string
 }
 

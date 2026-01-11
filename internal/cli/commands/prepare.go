@@ -3,12 +3,12 @@ package commands
 import (
 	"fmt"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/spf13/cobra"
 )
 
 // NewPrepareCmd returns the prepare command.
-func NewPrepareCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "prepare",
 		Short: "Run data preparation pipeline",

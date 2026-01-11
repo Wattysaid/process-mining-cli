@@ -3,12 +3,12 @@ package commands
 import (
 	"fmt"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/spf13/cobra"
 )
 
 // NewConnectCmd returns the connect command.
-func NewConnectCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "connect",
 		Short: "Register read-only data connectors",

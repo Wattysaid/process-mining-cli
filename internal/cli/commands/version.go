@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/pm-assist/pm-assist/internal/cli"
+	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +13,7 @@ const (
 )
 
 // NewVersionCmd returns the version command.
-func NewVersionCmd(global *cli.GlobalFlags) *cobra.Command {
+func NewVersionCmd(global *app.GlobalFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "Print version and build metadata",
