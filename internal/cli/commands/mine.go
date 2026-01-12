@@ -113,6 +113,21 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 
+			totalSteps := 1
+			if runEDA {
+				totalSteps++
+			}
+			if runDiscovery {
+				totalSteps++
+			}
+			if runConformance {
+				totalSteps++
+			}
+			if runPerformance {
+				totalSteps++
+			}
+			stepIndex := 1
+
 			venvRunner := &runner.Runner{ProjectPath: projectPath}
 			skillsRoot, err := paths.SkillsRoot(projectPath)
 			if err != nil {
@@ -130,6 +145,8 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			nbPath := filepath.Join(outputPath, "analysis_notebook.ipynb")
 
 			if runEDA {
+				printStepProgress(stepIndex, totalSteps, "Running EDA diagnostics")
+				stepIndex++
 				edaScript := paths.SkillPath(skillsRoot, "pm-05-eda", "scripts", "03_eda.py")
 				edaArgs := []string{"--use-filtered", "--output", outputPath, "--case", caseCol, "--activity", activityCol, "--timestamp", timestampCol}
 				if resourceCol != "" {
@@ -150,6 +167,8 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			if runDiscovery {
+				printStepProgress(stepIndex, totalSteps, "Running discovery models")
+				stepIndex++
 				miner, err := resolveChoice(flagMiner, "Discovery miner selection", []string{"auto", "inductive", "heuristic", "both"}, "auto", true)
 				if err != nil {
 					return err
@@ -174,6 +193,8 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			if runConformance {
+				printStepProgress(stepIndex, totalSteps, "Running conformance checks")
+				stepIndex++
 				method, err := resolveChoice(flagConformance, "Conformance method", []string{"alignments", "token"}, "alignments", true)
 				if err != nil {
 					return err
@@ -198,6 +219,8 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			if runPerformance {
+				printStepProgress(stepIndex, totalSteps, "Running performance analysis")
+				stepIndex++
 				advanced, err := resolveBool(flagAdvanced, "Run advanced performance diagnostics?", false)
 				if err != nil {
 					return err
@@ -231,6 +254,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 			}
 
+			printStepProgress(stepIndex, totalSteps, "Finalizing mining outputs")
 			if err := manifestManager.AddOutputs([]string{outputPath}); err != nil {
 				return err
 			}

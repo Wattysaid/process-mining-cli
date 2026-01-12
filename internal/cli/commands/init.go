@@ -47,6 +47,11 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 				projectPath = cwd
 			}
+			fmt.Println()
+			fmt.Println("===============================================")
+			fmt.Println(" PM Assist Setup · Guided Project Initialization")
+			fmt.Println("===============================================")
+			fmt.Println()
 
 			projectName, err := resolveString(flagProjectName, "Project name", filepath.Base(projectPath), true)
 			if err != nil {
@@ -118,8 +123,19 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 			}
 
+			printWalkthrough("Setup walkthrough", []string{
+				"Create project scaffold",
+				"Write config and policy defaults",
+				"Save user profile",
+				"Save business profile (optional)",
+				"Provision Python environment",
+			})
+
+			step := 1
+			totalSteps := 5
 			if templateChoice == "custom" {
 				template := scaffold.Template{Name: "custom", Folders: customFolders}
+				printStepProgress(step, totalSteps, "Creating project scaffold (custom)")
 				if err := scaffold.ApplyTemplate(projectPath, template); err != nil {
 					return err
 				}
@@ -128,12 +144,15 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 				if !ok {
 					template = scaffold.StandardTemplate
 				}
+				printStepProgress(step, totalSteps, fmt.Sprintf("Creating project scaffold (%s)", templateChoice))
 				if err := scaffold.ApplyTemplate(projectPath, template); err != nil {
 					return err
 				}
 			}
+			step++
 			configPath := filepath.Join(projectPath, "pm-assist.yaml")
 			if _, err := os.Stat(configPath); os.IsNotExist(err) {
+				printStepProgress(step, totalSteps, "Writing config and policy defaults")
 				llmEnabled := allowLLM
 				cfg := config.Config{
 					Path:    configPath,
@@ -153,7 +172,9 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 					return err
 				}
 			}
+			step++
 
+			printStepProgress(step, totalSteps, "Saving user profile")
 			_, err = profile.Save(projectPath, profile.Profile{
 				Name:        userName,
 				Role:        role,
@@ -163,8 +184,10 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			step++
 
 			if createBusiness {
+				printStepProgress(step, totalSteps, "Saving business profile")
 				_, err = business.Save(projectPath, business.Profile{
 					Name:     businessName,
 					Industry: businessIndustry,
@@ -174,6 +197,10 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 					return err
 				}
 			}
+			if !createBusiness {
+				printStepProgress(step, totalSteps, "Skipping business profile")
+			}
+			step++
 
 			gitignorePath := filepath.Join(projectPath, ".gitignore")
 			_ = scaffold.EnsureGitignore(gitignorePath, []string{"outputs/", ".venv/", ".profiles/", ".business/", "*.pyc"})
@@ -197,6 +224,7 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 					return err
 				}
 			}
+			printStepProgress(step, totalSteps, "Provisioning Python environment")
 			venvRunner := &runner.Runner{ProjectPath: projectPath}
 			if err := venvRunner.EnsureVenv(skillRequirements, options); err != nil {
 				return err

@@ -110,6 +110,7 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				return nil
 			}
 
+			printStepProgress(1, 3, "Running data quality checks")
 			if err := manifestManager.AddInputs([]string{inputPath}); err != nil {
 				return err
 			}
@@ -210,6 +211,7 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				cleanArgs = append(cleanArgs, "--end-activities", endActs)
 			}
 
+			printStepProgress(2, 3, "Running clean and filter")
 			fmt.Println("[INFO] Running clean and filter...")
 			logging.Info("running clean and filter", map[string]any{"script": cleanScript})
 			if err := venvRunner.RunScript(cleanScript, cleanArgs, nil); err != nil {
@@ -238,6 +240,7 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 
+			printStepProgress(3, 3, "Finalizing preparation outputs")
 			if err := manifestManager.AddOutputs([]string{outputPath}); err != nil {
 				return err
 			}

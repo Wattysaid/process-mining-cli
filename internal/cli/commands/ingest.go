@@ -242,6 +242,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				return nil
 			}
 
+			printStepProgress(1, 3, "Preparing ingest inputs")
 			if err := manifestManager.AddInputs([]string{filePath}); err != nil {
 				return err
 			}
@@ -260,6 +261,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 
+			printStepProgress(2, 3, "Running ingest script")
 			scriptPath := paths.SkillPath(skillsRoot, "pm-02-ingest-profile", "scripts", "01_ingest.py")
 			argsList := []string{
 				"--file", filePath,
@@ -313,6 +315,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 
+			printStepProgress(3, 3, "Finalizing ingest outputs")
 			if err := manifestManager.AddOutputs([]string{outputPath}); err != nil {
 				return err
 			}

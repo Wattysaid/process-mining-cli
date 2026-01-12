@@ -110,6 +110,7 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 
+			printStepProgress(1, 2, "Generating report content")
 			reportScript := paths.SkillPath(skillsRoot, "pm-10-reporting", "scripts", "08_report.py")
 			argsList := []string{"--output", outputPath, "--report", reportName}
 			fmt.Println("[INFO] Generating report...")
@@ -142,6 +143,7 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 				}
 			}
 
+			printStepProgress(2, 2, "Bundling report outputs")
 			bundlePath := filepath.Join(outputPath, "bundle", fmt.Sprintf("report_bundle_%s.zip", runID))
 			entries := map[string]string{
 				"report/report.md":                 reportPath,

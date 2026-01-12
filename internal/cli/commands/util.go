@@ -81,3 +81,37 @@ func resolveVenvOptions(projectPath string, policies policy.Policy) (runner.Venv
 	}
 	return options, nil
 }
+
+func printWalkthrough(title string, steps []string) {
+	if len(steps) == 0 {
+		return
+	}
+	fmt.Println()
+	fmt.Println(title)
+	for i, step := range steps {
+		fmt.Printf("  %d) %s\n", i+1, step)
+	}
+	fmt.Println()
+}
+
+func printStepProgress(step int, total int, label string) {
+	bar := progressBar(step, total, 20)
+	fmt.Printf("[%s] %d/%d %s\n", bar, step, total, label)
+}
+
+func progressBar(step int, total int, width int) string {
+	if total <= 0 {
+		return strings.Repeat("-", width)
+	}
+	if step < 0 {
+		step = 0
+	}
+	if step > total {
+		step = total
+	}
+	filled := int(float64(step) / float64(total) * float64(width))
+	if filled > width {
+		filled = width
+	}
+	return strings.Repeat("#", filled) + strings.Repeat("-", width-filled)
+}

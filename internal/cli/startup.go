@@ -18,6 +18,7 @@ import (
 
 func runStartup(cmdRoot *cobra.Command) error {
 	printBanner()
+	printIntroPanel()
 	printStatus()
 	if !hasProjectConfig() {
 		confirm, err := prompt.AskBool("It looks like this is your first time using PM Assist. Continue setup?", true)
@@ -67,6 +68,59 @@ func runStartup(cmdRoot *cobra.Command) error {
 	default:
 		return fmt.Errorf("invalid selection")
 	}
+}
+
+func printIntroPanel() {
+	cwd, _ := os.Getwd()
+	llmProvider := "none"
+	llmModel := "n/a"
+	cfg, err := config.Load("")
+	if err == nil {
+		if cfg.LLM.Provider != "" {
+			llmProvider = cfg.LLM.Provider
+		}
+		if cfg.LLM.Model != "" {
+			llmModel = cfg.LLM.Model
+		}
+	}
+
+	lines := []string{
+		fmt.Sprintf(">_ PM Assist CLI (%s)", buildinfo.Version),
+		fmt.Sprintf("model:     %s / %s", llmProvider, llmModel),
+		fmt.Sprintf("directory: %s", cwd),
+	}
+	printBox(lines)
+
+	fmt.Println()
+	fmt.Println("To get started, choose one of these commands:")
+	fmt.Println()
+	fmt.Println("  init        - create a new project scaffold")
+	fmt.Println("  connect     - register a data source")
+	fmt.Println("  ingest      - ingest and normalize data")
+	fmt.Println("  prepare     - run data quality and cleaning")
+	fmt.Println("  mine        - run discovery and analysis")
+	fmt.Println("  report      - generate reports and bundles")
+	fmt.Println("  review      - run QA checks")
+	fmt.Println("  agent setup - configure LLM integration")
+	fmt.Println("  doctor      - check environment readiness")
+	fmt.Println()
+}
+
+func printBox(lines []string) {
+	maxLen := 0
+	for _, line := range lines {
+		if len(line) > maxLen {
+			maxLen = len(line)
+		}
+	}
+	width := maxLen + 2
+	border := "+" + strings.Repeat("-", width) + "+"
+	fmt.Println(border)
+	for _, line := range lines {
+		padding := width - len(line)
+		fmt.Printf("| %s%s|\n", line, strings.Repeat(" ", padding-1))
+	}
+	fmt.Println(border)
 }
 
 type runManifest struct {
@@ -200,14 +254,14 @@ func dispatchSubcommand(parent *cobra.Command, name string, args ...string) erro
 }
 
 func printBanner() {
-	banner := `            ____  __  __        ___              __
-  (\_/)    |  _ \|  \/  |      / _ \ ___ ___ ___/ _\___
-  ( •_•)   | |_) | |\/| |_____/ /_)/ __/ __/ _ \ \ / __|
-   />[_]   |  __/| |  | |_____/ ___/ (_| (_|  __/\ \__ \
-           |_|   |_|  |_|      \/    \___\___\___\__/___/
+	banner := `  ____  __  __        ___              __
+ |  _ \|  \/  |      / _ \ ___ ___ ___/ _\___
+ | |_) | |\/| |_____/ /_)/ __/ __/ _ \ \ / __|
+ |  __/| |  | |_____/ ___/ (_| (_|  __/\ \__ \
+ |_|   |_|  |_|      \/    \___\___\___\__/___/
 
-            PM Assist · Enterprise Process Mining CLI
-            -----------------------------------------`
+ PM Assist · Enterprise Process Mining CLI
+ -----------------------------------------`
 	fmt.Println(banner)
 }
 
