@@ -98,7 +98,7 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 					return fmt.Errorf("connector name cannot be '?'")
 				}
 				pathList := flagPaths
-				if pathList == "" {
+				if pathList == "" && isInteractiveTerminal() {
 					selectedPath, err := ui.SelectFile(projectPath)
 					if err == nil && selectedPath != "" {
 						pathList = selectedPath

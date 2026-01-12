@@ -77,6 +77,7 @@ func printCommandHelp(completed string) {
 }
 
 func printBox(lines []string) {
+	theme := ThemeDefault()
 	maxLen := 0
 	for _, line := range lines {
 		if len(line) > maxLen {
@@ -84,11 +85,12 @@ func printBox(lines []string) {
 		}
 	}
 	width := maxLen + 2
-	border := "+" + strings.Repeat("-", width) + "+"
+	border := lipgloss.NewStyle().Foreground(theme.Border).Render("+" + strings.Repeat("-", width) + "+")
 	fmt.Println(border)
 	for _, line := range lines {
 		padding := width - len(line)
-		fmt.Printf("| %s%s|\n", line, strings.Repeat(" ", padding-1))
+		content := fmt.Sprintf("| %s%s|", line, strings.Repeat(" ", padding-1))
+		fmt.Println(lipgloss.NewStyle().Foreground(theme.Border).Render(content))
 	}
 	fmt.Println(border)
 }

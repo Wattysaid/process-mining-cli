@@ -42,7 +42,7 @@ func NewStartCmd(global *app.GlobalFlags) *cobra.Command {
 				runID = defaultRunID()
 			}
 
-			steps := []string{"connect", "ingest", "prepare", "mine", "report", "review"}
+			steps := []string{"connect", "ingest", "map", "prepare", "mine", "report", "review"}
 			for i, step := range steps {
 				printStepProgress(i+1, len(steps), fmt.Sprintf("Running %s", step))
 				if err := runSubcommand(global, step, runID, projectPath); err != nil {
