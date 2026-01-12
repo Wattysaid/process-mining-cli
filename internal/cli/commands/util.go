@@ -16,6 +16,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/runner"
+	"github.com/pm-assist/pm-assist/internal/ui"
 )
 
 func defaultRunID() string {
@@ -92,6 +93,15 @@ func printDependencyNotice(options runner.VenvOptions) {
 	}
 }
 
+func ensureVenvWithSpinner(r *runner.Runner, reqPath string, options runner.VenvOptions) error {
+	if options.Quiet {
+		return ui.RunWithSpinner("Installing Python dependencies...", func() error {
+			return r.EnsureVenv(reqPath, options)
+		})
+	}
+	return r.EnsureVenv(reqPath, options)
+}
+
 func printWalkthrough(title string, steps []string) {
 	if len(steps) == 0 {
 		return
@@ -105,8 +115,12 @@ func printWalkthrough(title string, steps []string) {
 }
 
 func printStepProgress(step int, total int, label string) {
-	bar := progressBar(step, total, 20)
-	fmt.Printf("[%s] %d/%d %s\n", bar, step, total, label)
+	value := 0.0
+	if total > 0 {
+		value = float64(step) / float64(total)
+	}
+	bar := ui.RenderProgress(value)
+	fmt.Printf("%s %d/%d %s\n", bar, step, total, label)
 }
 
 func progressBar(step int, total int, width int) string {

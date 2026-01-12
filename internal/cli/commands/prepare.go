@@ -126,6 +126,16 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				fmt.Println("[INFO] Data preparation canceled by user.")
 				return nil
 			}
+			summary := []string{
+				fmt.Sprintf("Input: %s", inputPath),
+				fmt.Sprintf("Case/Activity/Timestamp: %s/%s/%s", caseCol, activityCol, timestampCol),
+			}
+			if confirmRun, err := confirmSummary("Confirm preparation settings", summary); err != nil {
+				return err
+			} else if !confirmRun {
+				fmt.Println("[INFO] Data preparation canceled by user.")
+				return nil
+			}
 
 			printStepProgress(1, 3, "Running data quality checks")
 			if err := manifestManager.AddInputs([]string{inputPath}); err != nil {
@@ -143,7 +153,7 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			printDependencyNotice(options)
-			if err := venvRunner.EnsureVenv(reqPath, options); err != nil {
+			if err := ensureVenvWithSpinner(venvRunner, reqPath, options); err != nil {
 				return err
 			}
 

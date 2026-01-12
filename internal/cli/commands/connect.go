@@ -97,7 +97,14 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				if name == "?" {
 					return fmt.Errorf("connector name cannot be '?'")
 				}
-				pathList, err := resolveString(flagPaths, "File paths (comma-separated)", "", true)
+				pathList := flagPaths
+				if pathList == "" {
+					selectedPath, err := ui.SelectFile(projectPath)
+					if err == nil && selectedPath != "" {
+						pathList = selectedPath
+					}
+				}
+				pathList, err := resolveString(pathList, "File paths (comma-separated)", "", true)
 				if err != nil {
 					return err
 				}

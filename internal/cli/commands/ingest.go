@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/pm-assist/pm-assist/internal/app"
+	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/db"
 	"github.com/pm-assist/pm-assist/internal/logging"
@@ -78,7 +79,11 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				connectorName = cfg.Connectors[0].Name
 				fmt.Printf("[INFO] Using connector: %s\n", connectorName)
 			} else if connectorName == "" {
-				connectorName, err = resolveString("", "Connector name", cfg.Connectors[0].Name, true)
+				names := make([]string, 0, len(cfg.Connectors))
+				for _, connector := range cfg.Connectors {
+					names = append(names, connector.Name)
+				}
+				connectorName, err = resolveChoice("", "Connector name", names, names[0], true)
 				if err != nil {
 					return err
 				}
@@ -145,7 +150,13 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				if selected.Database == nil || selected.Options == nil {
 					return fmt.Errorf("database connector missing config")
 				}
-				query, err := resolveString(flagQuery, "Query (read-only SQL)", "", true)
+				query := flagQuery
+				if query == "" {
+					query, err = prompt.AskTextArea("Query (read-only SQL). Alt+Enter to submit.", "")
+					if err != nil {
+						return err
+					}
+				}
 				if err != nil {
 					return err
 				}
@@ -282,6 +293,17 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				fmt.Println("[INFO] Ingest canceled by user.")
 				return nil
 			}
+			summary := []string{
+				fmt.Sprintf("Connector: %s", connectorName),
+				fmt.Sprintf("Format: %s", format),
+				fmt.Sprintf("Case/Activity/Timestamp: %s/%s/%s", caseCol, activityCol, timestampCol),
+			}
+			if confirmRun, err := confirmSummary("Confirm ingest settings", summary); err != nil {
+				return err
+			} else if !confirmRun {
+				fmt.Println("[INFO] Ingest canceled by user.")
+				return nil
+			}
 
 			printStepProgress(1, 3, "Preparing ingest inputs")
 			if err := manifestManager.AddInputs([]string{filePath}); err != nil {
@@ -299,7 +321,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			printDependencyNotice(options)
-			if err := venvRunner.EnsureVenv(reqPath, options); err != nil {
+			if err := ensureVenvWithSpinner(venvRunner, reqPath, options); err != nil {
 				return err
 			}
 

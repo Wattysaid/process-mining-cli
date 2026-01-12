@@ -262,7 +262,7 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 			printStepProgress(step, totalSteps, "Provisioning Python environment")
 			venvRunner := &runner.Runner{ProjectPath: projectPath}
-			if err := venvRunner.EnsureVenv(skillRequirements, options); err != nil {
+			if err := ensureVenvWithSpinner(venvRunner, skillRequirements, options); err != nil {
 				return err
 			}
 

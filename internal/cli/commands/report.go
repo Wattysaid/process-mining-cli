@@ -121,7 +121,7 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			printDependencyNotice(options)
-			if err := venvRunner.EnsureVenv(reqPath, options); err != nil {
+			if err := ensureVenvWithSpinner(venvRunner, reqPath, options); err != nil {
 				return err
 			}
 

@@ -55,6 +55,7 @@ func NewStatusCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			fmt.Printf("Connectors: %d\n", len(cfg.Connectors))
+			rows := [][]string{}
 			for _, connector := range cfg.Connectors {
 				status := "unknown"
 				if connector.Type == "file" && connector.File != nil && len(connector.File.Paths) > 0 {
@@ -64,7 +65,14 @@ func NewStatusCmd(global *app.GlobalFlags) *cobra.Command {
 						status = "missing"
 					}
 				}
-				fmt.Printf("  - %s (%s) [%s]\n", connector.Name, connector.Type, status)
+				rows = append(rows, []string{connector.Name, connector.Type, status})
+			}
+			if len(rows) > 0 {
+				if err := ui.RenderTable([]string{"Name", "Type", "Status"}, rows); err != nil {
+					for _, row := range rows {
+						fmt.Printf("  - %s (%s) [%s]\n", row[0], row[1], row[2])
+					}
+				}
 			}
 
 			manifest, _ := latestManifest(projectPath)
