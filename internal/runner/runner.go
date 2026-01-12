@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 // Runner handles python environment provisioning and pipeline execution.
@@ -17,6 +18,8 @@ type Runner struct {
 type VenvOptions struct {
 	Offline    bool
 	WheelsPath string
+	Quiet      bool
+	LogPath    string
 }
 
 // EnsureVenv creates a project-local venv and installs requirements when needed.
@@ -54,7 +57,15 @@ func (r *Runner) EnsureVenv(requirementsPath string, options VenvOptions) error 
 			args = append(args, "--no-index")
 		}
 		args = append(args, "-r", requirementsPath)
-		if err := runCommand(pipPath, args); err != nil {
+		if options.Quiet && options.LogPath != "" {
+			if err := runCommandToFile(pipPath, args, options.LogPath); err != nil {
+				tail := tailLog(options.LogPath, 30)
+				if tail != "" {
+					return fmt.Errorf("failed to install requirements (see %s): %w\nLast output:\n%s", options.LogPath, err, tail)
+				}
+				return fmt.Errorf("failed to install requirements (see %s): %w", options.LogPath, err)
+			}
+		} else if err := runCommand(pipPath, args); err != nil {
 			return fmt.Errorf("failed to install requirements: %w", err)
 		}
 	}
@@ -106,6 +117,34 @@ func runCommandWithEnv(binary string, args []string, env map[string]string) erro
 		cmd.Env = append(os.Environ(), formatEnv(env)...)
 	}
 	return cmd.Run()
+}
+
+func runCommandToFile(binary string, args []string, logPath string) error {
+	if err := os.MkdirAll(filepath.Dir(logPath), 0o755); err != nil {
+		return err
+	}
+	file, err := os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	cmd := exec.Command(binary, args...)
+	cmd.Stdout = file
+	cmd.Stderr = file
+	return cmd.Run()
+}
+
+func tailLog(path string, maxLines int) string {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	lines := strings.Split(string(data), "\n")
+	if len(lines) <= maxLines {
+		return strings.Join(lines, "\n")
+	}
+	return strings.Join(lines[len(lines)-maxLines:], "\n")
 }
 
 func formatEnv(env map[string]string) []string {

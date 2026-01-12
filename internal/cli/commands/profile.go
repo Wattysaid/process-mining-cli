@@ -8,6 +8,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/profile"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -34,6 +35,16 @@ func newProfileInitCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "init",
 		Short: "Create a new user profile",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:   "pm-assist profile init",
+				Purpose: "Create a user profile",
+				Writes:  []string{".profiles/<name>.yaml"},
+				Next:    "pm-assist init",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist profile init"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -70,6 +81,7 @@ func newProfileInitCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			fmt.Printf("[SUCCESS] Profile saved: %s\n", path)
+			success = true
 			return nil
 		},
 		Example: "  pm-assist profile init",

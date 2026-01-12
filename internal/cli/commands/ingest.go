@@ -13,6 +13,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/runner"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -72,13 +73,15 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				return nil
 			}
 
-			defaultConnector := cfg.Connectors[0].Name
-			if len(cfg.Connectors) == 1 {
-				defaultConnector = cfg.Connectors[0].Name
-			}
-			connectorName, err := resolveString(flagConnector, "Connector name", defaultConnector, true)
-			if err != nil {
-				return err
+			connectorName := flagConnector
+			if connectorName == "" && len(cfg.Connectors) == 1 {
+				connectorName = cfg.Connectors[0].Name
+				fmt.Printf("[INFO] Using connector: %s\n", connectorName)
+			} else if connectorName == "" {
+				connectorName, err = resolveString("", "Connector name", cfg.Connectors[0].Name, true)
+				if err != nil {
+					return err
+				}
 			}
 			var selected *config.ConnectorSpec
 			for i := range cfg.Connectors {
@@ -198,15 +201,33 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			} else {
 				return fmt.Errorf("unsupported connector type: %s", selected.Type)
 			}
-			caseCol, err := resolveString(flagCase, "Case ID column", "case_id", true)
+			defaultCase := "case_id"
+			defaultActivity := "activity"
+			defaultTimestamp := "timestamp"
+			if format == "csv" && filePath != "" {
+				headers := readCSVHeaders(filePath, delimiter)
+				if len(headers) > 0 {
+					caseGuess, activityGuess, timestampGuess := inferMapping(headers)
+					if caseGuess != "" {
+						defaultCase = caseGuess
+					}
+					if activityGuess != "" {
+						defaultActivity = activityGuess
+					}
+					if timestampGuess != "" {
+						defaultTimestamp = timestampGuess
+					}
+				}
+			}
+			caseCol, err := resolveString(flagCase, "Case ID column", defaultCase, true)
 			if err != nil {
 				return err
 			}
-			activityCol, err := resolveString(flagActivity, "Activity column", "activity", true)
+			activityCol, err := resolveString(flagActivity, "Activity column", defaultActivity, true)
 			if err != nil {
 				return err
 			}
-			timestampCol, err := resolveString(flagTimestamp, "Timestamp column", "timestamp", true)
+			timestampCol, err := resolveString(flagTimestamp, "Timestamp column", defaultTimestamp, true)
 			if err != nil {
 				return err
 			}
@@ -277,6 +298,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			printDependencyNotice(options)
 			if err := venvRunner.EnsureVenv(reqPath, options); err != nil {
 				return err
 			}
@@ -349,6 +371,8 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 			success = true
 
 			fmt.Println("[SUCCESS] Ingest completed.")
+			updated, _ := config.Load(global.ConfigPath)
+			ui.PrintSplash(updated, ui.SplashOptions{CompletedCommand: "ingest", WorkingDir: projectPath})
 			return nil
 		},
 		Example: "  pm-assist ingest",

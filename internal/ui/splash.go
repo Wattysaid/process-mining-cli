@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/pm-assist/pm-assist/internal/buildinfo"
 	"github.com/pm-assist/pm-assist/internal/config"
 )
@@ -68,7 +69,7 @@ func printCommandHelp(completed string) {
 	for _, cmd := range commands {
 		prefix := "[ ]"
 		if completed != "" && strings.HasPrefix(cmd, completed) {
-			prefix = "[OK]"
+			prefix = lipgloss.NewStyle().Foreground(lipgloss.Color("2")).Render("[OK]")
 		}
 		fmt.Printf("  %s %s\n", prefix, cmd)
 	}

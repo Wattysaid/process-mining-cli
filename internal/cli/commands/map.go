@@ -11,6 +11,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/preview"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -32,6 +33,19 @@ func NewMapCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "map",
 		Short: "Map columns to process mining schema",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:     "pm-assist map",
+				Purpose:   "Map columns to event log schema",
+				StepIndex: 3,
+				StepTotal: 7,
+				Writes:    []string{"pm-assist.yaml"},
+				Asks:      []string{"column mapping"},
+				Next:      "pm-assist prepare",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist map", Next: "pm-assist prepare"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -163,8 +177,11 @@ func NewMapCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			stepSuccess = true
+			success = true
 
 			fmt.Println("[SUCCESS] Mapping saved.")
+			updated, _ := config.Load(global.ConfigPath)
+			ui.PrintSplash(updated, ui.SplashOptions{CompletedCommand: "map", WorkingDir: projectPath})
 			return nil
 		},
 		Example: "  pm-assist map",

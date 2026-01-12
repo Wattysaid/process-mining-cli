@@ -12,6 +12,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/runner"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -35,6 +36,19 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "mine",
 		Short: "Run process mining analysis",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:     "pm-assist mine",
+				Purpose:   "Run discovery, conformance, and performance analyses",
+				StepIndex: 5,
+				StepTotal: 7,
+				Writes:    []string{"outputs/<run-id>/stage_04_discovery", "outputs/<run-id>/stage_05_conformance", "outputs/<run-id>/stage_06_performance"},
+				Asks:      []string{"analysis options"},
+				Next:      "pm-assist report",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist mine", Next: "pm-assist report"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -138,6 +152,7 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			printDependencyNotice(options)
 			if err := venvRunner.EnsureVenv(reqPath, options); err != nil {
 				return err
 			}
@@ -265,8 +280,11 @@ func NewMineCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			stepSuccess = true
+			success = true
 
 			fmt.Println("[SUCCESS] Mining steps completed.")
+			updated, _ := config.Load(global.ConfigPath)
+			ui.PrintSplash(updated, ui.SplashOptions{CompletedCommand: "mine", WorkingDir: projectPath})
 			return nil
 		},
 		Example: "  pm-assist mine",

@@ -12,6 +12,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/paths"
 	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/runner"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -34,6 +35,19 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "prepare",
 		Short: "Run data preparation pipeline",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:     "pm-assist prepare",
+				Purpose:   "Run data quality checks and cleaning",
+				StepIndex: 4,
+				StepTotal: 7,
+				Writes:    []string{"outputs/<run-id>/stage_02_data_quality", "outputs/<run-id>/stage_03_clean_filter"},
+				Asks:      []string{"input log", "filtering"},
+				Next:      "pm-assist mine",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist prepare", Next: "pm-assist mine"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -128,6 +142,7 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			printDependencyNotice(options)
 			if err := venvRunner.EnsureVenv(reqPath, options); err != nil {
 				return err
 			}
@@ -254,8 +269,11 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			stepSuccess = true
+			success = true
 
 			fmt.Println("[SUCCESS] Data preparation completed.")
+			updated, _ := config.Load(global.ConfigPath)
+			ui.PrintSplash(updated, ui.SplashOptions{CompletedCommand: "prepare", WorkingDir: projectPath})
 			return nil
 		},
 		Example: "  pm-assist prepare",

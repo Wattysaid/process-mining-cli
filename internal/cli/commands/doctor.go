@@ -11,6 +11,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/db"
 	"github.com/pm-assist/pm-assist/internal/policy"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -20,6 +21,17 @@ func NewDoctorCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "doctor",
 		Short: "Check environment readiness",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:   "pm-assist doctor",
+				Purpose: "Check environment readiness and connector access",
+				Writes:  []string{},
+				Asks:    []string{},
+				Next:    "pm-assist status",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist doctor", Next: "pm-assist status"}, success)
+			}()
 			cfg, err := config.Load(global.ConfigPath)
 			if err != nil {
 				return err
@@ -144,6 +156,7 @@ func NewDoctorCmd(global *app.GlobalFlags) *cobra.Command {
 			if pythonErr != nil {
 				return fmt.Errorf("environment check failed")
 			}
+			success = true
 			return nil
 		},
 		Example: "  pm-assist doctor",

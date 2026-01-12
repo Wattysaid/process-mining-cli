@@ -110,20 +110,10 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				sheet := ""
 				jsonLines := false
 				zipMember := ""
-				if format == "csv" || format == "zip-csv" {
-					delimiter, err = resolveString(flagDelimiter, "CSV delimiter", ",", true)
+				if format == "zip-csv" {
+					zipMember, err = resolveString(flagZipMember, "ZIP member name (optional)", "", false)
 					if err != nil {
 						return err
-					}
-					encoding, err = resolveString(flagEncoding, "CSV encoding", "utf-8", true)
-					if err != nil {
-						return err
-					}
-					if format == "zip-csv" {
-						zipMember, err = resolveString(flagZipMember, "ZIP member name (optional)", "", false)
-						if err != nil {
-							return err
-						}
 					}
 				}
 				if format == "xlsx" {
@@ -169,6 +159,21 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				for _, path := range paths {
 					if _, err := os.Stat(path); err != nil {
 						return fmt.Errorf("path not accessible: %s. If using WSL, use /mnt/<drive>/... paths", path)
+					}
+				}
+
+				if format == "csv" || format == "zip-csv" {
+					defaultDelimiter := ","
+					if len(paths) > 0 && format == "csv" {
+						defaultDelimiter = detectDelimiter(paths[0])
+					}
+					delimiter, err = resolveString(flagDelimiter, "CSV delimiter", defaultDelimiter, true)
+					if err != nil {
+						return err
+					}
+					encoding, err = resolveString(flagEncoding, "CSV encoding", "utf-8", true)
+					if err != nil {
+						return err
 					}
 				}
 				previewNow, err := resolveBool(flagPreview, "Preview CSV headers and sample rows?", true)
@@ -230,6 +235,8 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 					return err
 				}
 				fmt.Println("[SUCCESS] File connector saved.")
+				updated, _ := config.Load(cfg.Path)
+				ui.PrintSplash(updated, ui.SplashOptions{CompletedCommand: "connect", WorkingDir: projectPath})
 				success = true
 				return nil
 			}
@@ -429,6 +436,8 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			fmt.Println("[SUCCESS] Database connector saved.")
+			updated, _ := config.Load(cfg.Path)
+			ui.PrintSplash(updated, ui.SplashOptions{CompletedCommand: "connect", WorkingDir: projectPath})
 			success = true
 			return nil
 		},

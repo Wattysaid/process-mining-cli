@@ -68,6 +68,9 @@ func init() {
 	rootCmd.AddCommand(
 		commands.NewVersionCmd(Global),
 		commands.NewDoctorCmd(Global),
+		commands.NewStatusCmd(Global),
+		commands.NewStartCmd(Global),
+		commands.NewConnectorsCmd(Global),
 		commands.NewInitCmd(Global),
 		commands.NewConnectCmd(Global),
 		commands.NewIngestCmd(Global),

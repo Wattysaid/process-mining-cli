@@ -14,6 +14,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/reporting"
 	"github.com/pm-assist/pm-assist/internal/runner"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -29,6 +30,19 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "report",
 		Short: "Generate notebooks and reports",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:     "pm-assist report",
+				Purpose:   "Generate report artifacts and bundle",
+				StepIndex: 6,
+				StepTotal: 7,
+				Writes:    []string{"outputs/<run-id>/stage_09_report", "outputs/<run-id>/bundle"},
+				Asks:      []string{"report options"},
+				Next:      "pm-assist review",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist report", Next: "pm-assist review"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -106,6 +120,7 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			printDependencyNotice(options)
 			if err := venvRunner.EnsureVenv(reqPath, options); err != nil {
 				return err
 			}
@@ -177,8 +192,11 @@ func NewReportCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			stepSuccess = true
+			success = true
 
 			fmt.Println("[SUCCESS] Report generated.")
+			updated, _ := config.Load(global.ConfigPath)
+			ui.PrintSplash(updated, ui.SplashOptions{CompletedCommand: "report", WorkingDir: projectPath})
 			return nil
 		},
 		Example: "  pm-assist report",

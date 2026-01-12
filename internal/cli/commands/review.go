@@ -11,6 +11,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/logging"
 	"github.com/pm-assist/pm-assist/internal/qa"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -32,6 +33,19 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "review",
 		Short: "Run QA checks and summarize issues",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:     "pm-assist review",
+				Purpose:   "Run QA checks and produce a summary",
+				StepIndex: 7,
+				StepTotal: 7,
+				Writes:    []string{"outputs/<run-id>/quality"},
+				Asks:      []string{"thresholds"},
+				Next:      "pm-assist report",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist review", Next: "pm-assist report"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -75,6 +89,9 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 			inputPath, err := resolveString(flagInput, "Input log path", filepath.Join(outputPath, "stage_03_clean_filter", "filtered_log.csv"), true)
 			if err != nil {
 				return err
+			}
+			if _, err := os.Stat(inputPath); err != nil {
+				return formatPathError(inputPath)
 			}
 			caseCol, err := resolveString(flagCase, "Case ID column", "case_id", true)
 			if err != nil {
@@ -163,8 +180,11 @@ func NewReviewCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			stepSuccess = true
+			success = true
 
 			fmt.Println("[SUCCESS] QA review completed.")
+			updated, _ := config.Load(global.ConfigPath)
+			ui.PrintSplash(updated, ui.SplashOptions{CompletedCommand: "review", WorkingDir: projectPath})
 			return nil
 		},
 		Example: "  pm-assist review",

@@ -236,7 +236,7 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			step++
 
 			gitignorePath := filepath.Join(projectPath, ".gitignore")
-			_ = scaffold.EnsureGitignore(gitignorePath, []string{"outputs/", ".venv/", ".profiles/", ".business/", "*.pyc"})
+			_ = scaffold.EnsureGitignore(gitignorePath, []string{"outputs/", ".venv/", ".profiles/", ".business/", ".pm-assist/", "*.pyc"})
 
 			installDeps, err := resolveBool(flagInstallDeps, "Install Python dependencies now? (requires network)", false)
 			if err != nil {
@@ -256,6 +256,9 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 				if err != nil {
 					return err
 				}
+				options.Quiet = true
+				options.LogPath = filepath.Join(projectPath, ".pm-assist", "logs", "pip-install.log")
+				fmt.Printf("[INFO] Installing Python dependencies (this may take a few minutes). Logs: %s\n", options.LogPath)
 			}
 			printStepProgress(step, totalSteps, "Provisioning Python environment")
 			venvRunner := &runner.Runner{ProjectPath: projectPath}

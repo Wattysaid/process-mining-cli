@@ -8,6 +8,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/business"
 	"github.com/pm-assist/pm-assist/internal/config"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -33,6 +34,16 @@ func newBusinessInitCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "init",
 		Short: "Create a new business profile",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:   "pm-assist business init",
+				Purpose: "Create a business profile",
+				Writes:  []string{".business/<name>.yaml"},
+				Next:    "pm-assist init",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist business init"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -64,6 +75,7 @@ func newBusinessInitCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			fmt.Printf("[SUCCESS] Business profile saved: %s\n", path)
+			success = true
 			return nil
 		},
 		Example: "  pm-assist business init",
