@@ -102,6 +102,35 @@ func ensureVenvWithSpinner(r *runner.Runner, reqPath string, options runner.Venv
 	return r.EnsureVenv(reqPath, options)
 }
 
+type runManifest struct {
+	RunID       string `json:"run_id"`
+	Status      string `json:"status"`
+	StartedAt   string `json:"started_at"`
+	CompletedAt string `json:"completed_at"`
+	Steps       []struct {
+		Name   string `json:"name"`
+		Status string `json:"status"`
+	} `json:"steps"`
+}
+
+func nextRecommendedStep(manifest *runManifest) string {
+	if manifest == nil {
+		return ""
+	}
+	pipeline := []string{"ingest", "map", "prepare", "mine", "report", "review"}
+	statusByStep := map[string]string{}
+	for _, step := range manifest.Steps {
+		statusByStep[step.Name] = step.Status
+	}
+	for _, step := range pipeline {
+		status := statusByStep[step]
+		if status == "" || status == "failed" || status == "started" {
+			return step
+		}
+	}
+	return ""
+}
+
 func printWalkthrough(title string, steps []string) {
 	if len(steps) == 0 {
 		return

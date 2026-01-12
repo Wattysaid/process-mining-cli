@@ -93,17 +93,6 @@ func NewStatusCmd(global *app.GlobalFlags) *cobra.Command {
 	return cmd
 }
 
-type runManifest struct {
-	RunID       string `json:"run_id"`
-	Status      string `json:"status"`
-	StartedAt   string `json:"started_at"`
-	CompletedAt string `json:"completed_at"`
-	Steps       []struct {
-		Name   string `json:"name"`
-		Status string `json:"status"`
-	} `json:"steps"`
-}
-
 func latestManifest(projectPath string) (*runManifest, error) {
 	pattern := filepath.Join(projectPath, "outputs", "*", "run_manifest.json")
 	candidates, err := filepath.Glob(pattern)
@@ -135,22 +124,4 @@ func boolValue(value *bool) bool {
 		return false
 	}
 	return *value
-}
-
-func nextRecommendedStep(manifest *runManifest) string {
-	if manifest == nil {
-		return ""
-	}
-	pipeline := []string{"ingest", "map", "prepare", "mine", "report", "review"}
-	statusByStep := map[string]string{}
-	for _, step := range manifest.Steps {
-		statusByStep[step.Name] = step.Status
-	}
-	for _, step := range pipeline {
-		status := statusByStep[step]
-		if status == "" || status == "failed" || status == "started" {
-			return step
-		}
-	}
-	return ""
 }

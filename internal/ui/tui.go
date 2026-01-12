@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/filepicker"
-	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/spinner"
@@ -13,7 +12,6 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type TextPrompt struct {
@@ -152,7 +150,6 @@ func (i listItem) FilterValue() string { return i.title }
 
 type listModel struct {
 	list   list.Model
-	help   help.Model
 	choice string
 }
 
@@ -166,7 +163,7 @@ func newListModel(title string, items []list.Item, index int) listModel {
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.SetShowPagination(false)
-	return listModel{list: l, help: help.New()}
+	return listModel{list: l}
 }
 
 func (m listModel) Init() tea.Cmd {
@@ -192,7 +189,7 @@ func (m listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m listModel) View() string {
-	return m.list.View() + "\n" + m.help.View(m.list.KeyMap)
+	return m.list.View()
 }
 
 type textInputModel struct {
@@ -289,8 +286,8 @@ func (m filePickerModel) Init() tea.Cmd {
 func (m filePickerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.picker, cmd = m.picker.Update(msg)
-	if m.picker.Selected != "" {
-		m.path = m.picker.Selected
+	if ok, path := m.picker.DidSelectFile(msg); ok {
+		m.path = path
 		return m, tea.Quit
 	}
 	return m, cmd

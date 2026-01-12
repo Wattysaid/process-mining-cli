@@ -104,7 +104,7 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 						pathList = selectedPath
 					}
 				}
-				pathList, err := resolveString(pathList, "File paths (comma-separated)", "", true)
+				pathList, err = resolveString(pathList, "File paths (comma-separated)", "", true)
 				if err != nil {
 					return err
 				}

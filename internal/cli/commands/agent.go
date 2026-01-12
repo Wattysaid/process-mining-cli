@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/pm-assist/pm-assist/internal/app"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
@@ -144,17 +143,6 @@ func newAgentSetupCmd(global *app.GlobalFlags) *cobra.Command {
 	return cmd
 }
 
-type runManifest struct {
-	RunID       string `json:"run_id"`
-	Status      string `json:"status"`
-	StartedAt   string `json:"started_at"`
-	CompletedAt string `json:"completed_at"`
-	Steps       []struct {
-		Name   string `json:"name"`
-		Status string `json:"status"`
-	} `json:"steps"`
-}
-
 func runAgentGuide(global *app.GlobalFlags) error {
 	projectPath := global.ProjectPath
 	if projectPath == "" {
@@ -248,24 +236,6 @@ func findLatestManifest(outputsPath string) (string, *runManifest) {
 		return latest, nil
 	}
 	return latest, &manifest
-}
-
-func nextRecommendedStep(manifest *runManifest) string {
-	if manifest == nil {
-		return ""
-	}
-	pipeline := []string{"ingest", "map", "prepare", "mine", "report", "review"}
-	statusByStep := make(map[string]string)
-	for _, step := range manifest.Steps {
-		statusByStep[strings.ToLower(step.Name)] = step.Status
-	}
-	for _, step := range pipeline {
-		status := statusByStep[step]
-		if status == "" || status == "failed" || status == "started" {
-			return step
-		}
-	}
-	return ""
 }
 
 func defaultModel(provider string) string {
