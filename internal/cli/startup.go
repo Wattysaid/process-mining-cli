@@ -16,9 +16,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func runStartup(cmdRoot *cobra.Command) error {
+var splashShown bool
+
+func showSplashOnce() {
+	if splashShown {
+		return
+	}
+	splashShown = true
 	printBanner()
 	printIntroPanel()
+}
+
+func runStartup(cmdRoot *cobra.Command) error {
+	showSplashOnce()
 	printStatus()
 	if !hasProjectConfig() {
 		confirm, err := prompt.AskBool("It looks like this is your first time using PM Assist. Continue setup?", true)

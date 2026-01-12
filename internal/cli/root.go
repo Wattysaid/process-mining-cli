@@ -18,6 +18,9 @@ var rootCmd = &cobra.Command{
 	Short: "PM Assist is an enterprise process mining CLI assistant",
 	Long:  "PM Assist is an enterprise process mining CLI assistant for guided, reproducible end-to-end workflows.",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if !Global.NonInteractive && !Global.JSONOutput {
+			showSplashOnce()
+		}
 		if err := logging.Init(Global.LogLevel, Global.JSONOutput); err != nil {
 			return err
 		}
