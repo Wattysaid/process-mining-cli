@@ -99,6 +99,16 @@ func newProfileSetCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "set",
 		Short: "Set active profile name in config",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:   "pm-assist profile set",
+				Purpose: "Set the active user profile",
+				Writes:  []string{"pm-assist.yaml"},
+				Next:    "pm-assist status",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist profile set", Next: "pm-assist status"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -126,6 +136,7 @@ func newProfileSetCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			fmt.Printf("[SUCCESS] Active profile set to %s\n", name)
+			success = true
 			return nil
 		},
 		Example: "  pm-assist profile set --name jane-doe",
@@ -140,6 +151,15 @@ func newProfileShowCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "show",
 		Short: "Show a profile",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:   "pm-assist profile show",
+				Purpose: "Display a user profile",
+				Next:    "pm-assist profile set",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist profile show", Next: "pm-assist profile set"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -157,6 +177,7 @@ func newProfileShowCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			fmt.Print(string(content))
+			success = true
 			return nil
 		},
 		Example: "  pm-assist profile show --name jane-doe",

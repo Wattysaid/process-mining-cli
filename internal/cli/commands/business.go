@@ -92,6 +92,16 @@ func newBusinessSetCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "set",
 		Short: "Set active business name in config",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:   "pm-assist business set",
+				Purpose: "Set the active business profile",
+				Writes:  []string{"pm-assist.yaml"},
+				Next:    "pm-assist status",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist business set", Next: "pm-assist status"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -119,6 +129,7 @@ func newBusinessSetCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			fmt.Printf("[SUCCESS] Active business set to %s\n", name)
+			success = true
 			return nil
 		},
 		Example: "  pm-assist business set --name acme",
@@ -133,6 +144,15 @@ func newBusinessShowCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "show",
 		Short: "Show a business profile",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:   "pm-assist business show",
+				Purpose: "Display a business profile",
+				Next:    "pm-assist business set",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist business show", Next: "pm-assist business set"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -150,6 +170,7 @@ func newBusinessShowCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			fmt.Print(string(content))
+			success = true
 			return nil
 		},
 		Example: "  pm-assist business show --name acme",

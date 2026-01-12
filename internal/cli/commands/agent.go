@@ -14,6 +14,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/profile"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -36,6 +37,16 @@ func newAgentSetupCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "setup",
 		Short: "Configure LLM provider settings",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:   "pm-assist agent setup",
+				Purpose: "Configure LLM provider settings",
+				Writes:  []string{"pm-assist.yaml"},
+				Next:    "pm-assist agent",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist agent setup", Next: "pm-assist agent"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -124,6 +135,7 @@ func newAgentSetupCmd(global *app.GlobalFlags) *cobra.Command {
 
 			fmt.Printf("[SUCCESS] LLM provider configured: %s\n", provider)
 			printProviderNextSteps(provider)
+			success = true
 			return nil
 		},
 		Example: "  pm-assist agent setup",
