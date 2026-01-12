@@ -293,6 +293,21 @@ accordingly.
 
 ## Development
 
+### Go Version Requirement
+PM Assist requires Go **1.23+**. Some cloud connector SDKs (BigQuery, Snowflake) and their transitive dependencies require Go 1.23 or newer, so earlier versions will fail `go mod tidy`.
+
+Recommended toolchain behavior:
+- `GOTOOLCHAIN=auto` (default) will download the required Go toolchain.
+- `GOTOOLCHAIN=local` forces the locally installed Go version and will fail if it is < 1.23.
+
+WSL2 install (example):
+```bash
+sudo apt-get update
+sudo apt-get install -y golang-go
+go version
+```
+If your distro packages an older Go, install via tarball or a version manager (asdf/gvm) to get 1.23+.
+
 ``` bash
 go build ./cmd/pm-assist
 ./pm-assist version
@@ -301,6 +316,15 @@ go build ./cmd/pm-assist
 When working under Windows, prefer developing inside the WSL filesystem
 (`/home/...`) rather than `/mnt/c` or `/mnt/d` to avoid file permission
 issues with shell scripts.
+
+### Troubleshooting Toolchains
+If you see errors like “requires go >= 1.23.0”:
+- Ensure `go version` reports 1.23+.
+- If you cannot upgrade locally, run with `GOTOOLCHAIN=auto` so Go downloads the required toolchain:
+```bash
+GOTOOLCHAIN=auto go mod tidy
+GOTOOLCHAIN=auto go test ./...
+```
 
 ------------------------------------------------------------------------
 

@@ -14,7 +14,19 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: "1.23.6"
+
+      - name: Enforce Go 1.23+
+        run: |
+          ver=$(go env GOVERSION)
+          ver=${ver#go}
+          major=${ver%%.*}
+          rest=${ver#*.}
+          minor=${rest%%.*}
+          if [ "$major" -lt 1 ] || [ "$major" -eq 1 ] && [ "$minor" -lt 23 ]; then
+            echo "Go 1.23+ is required. Found $ver"
+            exit 1
+          fi
 
       - name: Run unit tests
         run: go test ./internal/...
