@@ -1,0 +1,25 @@
+id: REVIEW-0015
+title: "Business set uses unsanitized filename"
+owner_role: cli
+status: needs-review
+priority: P2
+depends_on:
+  - "TASK-0034"
+scope:
+  in:
+    - "Align business set lookup with sanitized filenames"
+    - "Display available businesses when lookup fails"
+  out:
+    - "No changes to business schema"
+acceptance_criteria:
+  - "Business set works with names containing spaces"
+  - "Error includes list of available businesses"
+files_expected:
+  - "internal/cli/commands/business.go"
+  - "internal/business/profile.go"
+contracts:
+  - "project-files/BUSINESS_PROFILES.md"
+quality_gates:
+  - "manual QA checklist complete"
+notes:
+  context: "Business profiles are saved with sanitized filenames but set expects raw name."

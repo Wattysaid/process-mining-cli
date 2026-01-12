@@ -13,3 +13,10 @@
 - REVIEW-0010: Startup LLM status ignores policy settings
 - REVIEW-0011: Doctor command does not validate Python dependencies
 - REVIEW-0012: Startup Python readiness ignores venv and core imports
+
+## Needs Review
+- REVIEW-0013: Run ID defaults create new output folders per command
+- REVIEW-0014: Profile set uses unsanitized filename
+- REVIEW-0015: Business set uses unsanitized filename
+- REVIEW-0016: Status command uses interactive table in non-interactive contexts
+- REVIEW-0017: Step index consistency across commands

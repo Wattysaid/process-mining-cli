@@ -1,0 +1,28 @@
+id: REVIEW-0013
+title: "Run ID defaults create new output folders per command"
+owner_role: cli
+status: needs-review
+priority: P2
+depends_on:
+  - "TASK-0011"
+scope:
+  in:
+    - "Detect latest run-id when not provided"
+    - "Reuse existing run folder across steps"
+  out:
+    - "No changes to run manifest schema"
+acceptance_criteria:
+  - "prepare/mine/report default to latest run if available"
+  - "User can still override --run-id"
+  - "Error messages suggest rerun with --run-id when missing"
+files_expected:
+  - "internal/cli/commands/ingest.go"
+  - "internal/cli/commands/prepare.go"
+  - "internal/cli/commands/mine.go"
+  - "internal/cli/commands/report.go"
+contracts:
+  - "project-files/WORKFLOWS.md"
+quality_gates:
+  - "manual QA checklist complete"
+notes:
+  context: "Default run IDs currently differ across commands, breaking the stepper flow."

@@ -1,0 +1,24 @@
+id: REVIEW-0017
+title: "Step index consistency across commands"
+owner_role: cli
+status: needs-review
+priority: P3
+depends_on:
+  - "TASK-0042"
+scope:
+  in:
+    - "Ensure step numbers match workflow order"
+    - "Align map/ingest step indices"
+  out:
+    - "No changes to workflow sequence"
+acceptance_criteria:
+  - "Step indices are consistent across init/connect/ingest/map/prepare/mine/report/review"
+  - "Displayed stepper matches documented workflow"
+files_expected:
+  - "internal/cli/commands/*.go"
+contracts:
+  - "project-files/WORKFLOWS.md"
+quality_gates:
+  - "manual QA checklist complete"
+notes:
+  context: "Ingest and map both show step 3; stepper should be consistent."

@@ -1,0 +1,25 @@
+id: REVIEW-0016
+title: "Status command uses interactive table in non-interactive contexts"
+owner_role: cli
+status: needs-review
+priority: P3
+depends_on:
+  - "TASK-0042"
+scope:
+  in:
+    - "Fallback to plain text when non-interactive"
+    - "Avoid blocking UI in scripts"
+  out:
+    - "No change to status content"
+acceptance_criteria:
+  - "pm-assist status works in non-interactive mode"
+  - "Table view only shown in interactive sessions"
+files_expected:
+  - "internal/cli/commands/status.go"
+  - "internal/ui/tui.go"
+contracts:
+  - "project-files/CLI_SPEC.md"
+quality_gates:
+  - "manual QA checklist complete"
+notes:
+  context: "Table UI currently requires keypress to exit, which can block scripts."

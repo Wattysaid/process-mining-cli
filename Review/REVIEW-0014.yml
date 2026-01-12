@@ -1,0 +1,25 @@
+id: REVIEW-0014
+title: "Profile set uses unsanitized filename"
+owner_role: cli
+status: needs-review
+priority: P2
+depends_on:
+  - "TASK-0034"
+scope:
+  in:
+    - "Align profile set lookup with sanitized filenames"
+    - "Display available profiles when lookup fails"
+  out:
+    - "No changes to profile schema"
+acceptance_criteria:
+  - "Profile set works with names containing spaces"
+  - "Error includes list of available profiles"
+files_expected:
+  - "internal/cli/commands/profile.go"
+  - "internal/profile/profile.go"
+contracts:
+  - "project-files/USER_PROFILES.md"
+quality_gates:
+  - "manual QA checklist complete"
+notes:
+  context: "Profiles are saved with sanitized filenames but set expects raw name."
