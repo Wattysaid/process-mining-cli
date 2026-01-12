@@ -317,6 +317,48 @@ When working under Windows, prefer developing inside the WSL filesystem
 (`/home/...`) rather than `/mnt/c` or `/mnt/d` to avoid file permission
 issues with shell scripts.
 
+### Testing the CLI
+
+Build + health checks:
+```bash
+go build ./cmd/pm-assist
+./pm-assist version
+./pm-assist doctor
+```
+
+Interactive flow (no data yet):
+```bash
+./pm-assist
+./pm-assist profile init
+./pm-assist business init
+./pm-assist agent setup
+```
+
+Sample dataset smoke run:
+1) Create a project
+```bash
+./pm-assist init
+```
+
+2) Register the bundled sample CSV
+```bash
+./pm-assist connect --type file --name sample --paths .codex/skills/cli-tool-skills/pm-02-ingest-profile/assets/sample_log.csv --format csv
+```
+
+3) Run the pipeline
+```bash
+./pm-assist ingest --connector sample
+./pm-assist prepare
+./pm-assist mine
+./pm-assist report --html true --pdf false
+```
+
+4) Inspect outputs
+- `outputs/<run-id>/analysis_notebook.ipynb`
+- `outputs/<run-id>/stage_09_report/`
+- `outputs/<run-id>/run_manifest.json`
+- `outputs/<run-id>/config_snapshot.yaml`
+
 ### Troubleshooting Toolchains
 If you see errors like “requires go >= 1.23.0”:
 - Ensure `go version` reports 1.23+.
