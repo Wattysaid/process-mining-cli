@@ -6,6 +6,8 @@ toolchain go1.23.6
 
 require (
 	cloud.google.com/go/bigquery v1.66.2
+	github.com/charmbracelet/bubbles v0.20.0
+	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/lib/pq v1.10.9
