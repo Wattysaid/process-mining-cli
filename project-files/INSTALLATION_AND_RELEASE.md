@@ -1,6 +1,6 @@
 # Installation and Release Engineering
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 ## 1. Distribution strategy (recommended)
 - CLI is a single binary (Go recommended).
@@ -8,7 +8,7 @@
 - Installer script downloads the correct artefact and installs it to `~/.local/bin`.
 - First run creates a project-local `.venv` unless the user chooses a shared env.
 
-Status: Installer script and release workflow exist; packaging validation pending.
+Status: Installer script and release workflow exist; packaging validation and offline wheels pending.
 
 ## 2. Installer requirements (curl | sh)
 The installer must:
@@ -55,7 +55,7 @@ Two viable approaches (Codex to choose, with rationale):
 A) CLI manages a venv and installs Python package via pip (network required)
 B) CLI ships Python wheels in release assets and installs offline (preferred for enterprise)
 
-Current state: wheels are packaged under `resources/wheels`, and offline installs use `PM_ASSIST_WHEELS_DIR` if set.
+Current state: CLI installs via pip into `.venv` when the user opts in. Offline wheels are not bundled yet.
 For IP protection, prefer shipping bundled wheels or embedded assets and avoid editable source distributions.
 
 ## 7. Signature verification (optional)
@@ -67,3 +67,8 @@ For IP protection, prefer shipping bundled wheels or embedded assets and avoid e
 pm4py visualisations may require OS-level Graphviz.
 - Provide `pm-assist doctor` checks.
 - Provide clear OS-specific install guidance.
+
+## 8. Build notes
+- Go 1.23+ required (dependency graph needs Go >= 1.23).
+- Use `GOTOOLCHAIN=auto` for module resolution if local Go < 1.23.
+- If git metadata is unavailable, build with `-buildvcs=false`.

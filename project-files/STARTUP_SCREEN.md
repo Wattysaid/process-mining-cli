@@ -1,9 +1,9 @@
 # Startup Screen and First-Run Experience
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 This file defines the terminal starting screen, first-run experience, and menu-driven entry flow for the PM Assist CLI.  
-It is intentionally **stdout-based (not full-screen TUI)** to remain compatible with SSH, CI, and log capture.
+The startup screen is stdout-based; prompts use Bubble Tea widgets when a TTY is detected.
 
 ## 1. When the startup screen is shown
 
@@ -185,13 +185,14 @@ Menu options must map to commands:
 
 Recommended libraries:
 - Cobra (commands)
-- fatih/color or charmbracelet/lipgloss (styling)
-- AlecAivazis/survey (menus)
+- charmbracelet/lipgloss (styling)
+- charmbracelet/bubbletea + bubbles (lists, inputs, spinners, progress, file picker)
 
 Implementation notes:
-- Banner printed before Cobra command routing when no subcommand is provided
+- Splash printed before prompts when no subcommand is provided
 - Menu routing handled before executing default command
 - All menu actions call the same internal handlers as CLI commands
+- After successful commands, reprint splash with `[OK]` next to the completed command
 
 ## 8. Enterprise considerations
 

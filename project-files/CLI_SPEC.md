@@ -1,6 +1,6 @@
 # CLI Specification: Commands, prompts, and outputs
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 ## 1. CLI name and philosophy
 Tool name: `pm-assist`  
@@ -25,7 +25,7 @@ When the user runs `pm-assist` with no subcommand, show the startup screen and m
 - `--business <name>` use a specific business profile from `.business/`
 
 ## 3. Command tree (MVP)
-Status: Core commands implemented; non-interactive flags and some connector types pending.
+Status: Core commands implemented; non-interactive TUI fallback and Windows venv handling pending.
 ### `pm-assist version`
 - Prints version, build metadata, python runtime status.
 
@@ -59,12 +59,15 @@ Creates:
 ### `pm-assist connect`
 MVP connectors:
 - `file` (CSV/Parquet/XLSX/JSON/ZIP-CSV/XES)
+- `database` (Postgres/MySQL/MSSQL/Snowflake/BigQuery)
 Prompts:
 - Path(s)
 - Delimiter, encoding
 - Row count estimation and sampling approach
+ - Read-only connection test (DB connectors)
+ - Optional schema/table listing for DB connectors
 Outputs:
-- `connectors.yaml` or embedded config in `pm-assist.yaml`
+- Embedded config in `pm-assist.yaml`
 
 ### `pm-assist ingest`
 - Loads data (full or sampled) into a canonical staging dataset
@@ -179,3 +182,13 @@ Constraints:
 - 5: data validation failed (blocking)
 - 6: pipeline step failed
 - 7: LLM error (only if LLM-enabled steps executed)
+### `pm-assist status`
+- Shows project dashboard and next recommended step.
+- Displays connector status (ok/missing) and latest run manifest.
+
+### `pm-assist start`
+- Wizard mode that chains the guided pipeline end-to-end.
+- Respects non-interactive flags and per-step confirmations.
+
+### `pm-assist connectors list`
+- Lists configured connectors and their status.

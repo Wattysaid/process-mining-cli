@@ -1,6 +1,6 @@
 # Implementation Plan
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 ## Phase 1: Core CLI and Orchestration
 - Cobra command tree with global flags
@@ -8,15 +8,17 @@
 - User and business profiles
 - Project scaffolding templates
 - Config load/save
+- Bubble Tea prompt UI (lists, inputs, spinners, progress, file picker)
+- Status dashboard and wizard entrypoint
 
 Status: **Complete**
 
 ## Phase 2: Data Access and Ingest
 - File connectors (CSV/Parquet)
-- DB connector capture + read-only validation (Postgres)
+- DB connector capture + read-only validation (Postgres/MySQL/MSSQL/Snowflake/BigQuery)
 - Ingest pipeline wired to `cli-tool-skills`
 
-Status: **In progress** (DB drivers beyond Postgres pending)
+Status: **Complete**
 
 ## Phase 3: Preparation and Mining
 - Data quality + clean/filter flows
@@ -37,4 +39,4 @@ Status: **Complete**
 - Policy controls (disable LLM, connector restrictions)
 - Auditable manifests and checksums
 
-Status: **Planned**
+Status: **In progress** (Go 1.23 toolchain required; offline wheels/asset bundling pending)
