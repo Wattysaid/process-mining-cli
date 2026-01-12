@@ -82,6 +82,9 @@ func NewPrepareCmd(global *app.GlobalFlags) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			if _, err := os.Stat(inputPath); err != nil {
+				return formatPathError(inputPath)
+			}
 			caseCol, err := resolveString(flagCase, "Case ID column", "case_id", true)
 			if err != nil {
 				return err

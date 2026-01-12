@@ -10,6 +10,7 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/lib/pq v1.10.9
 	github.com/russross/blackfriday/v2 v2.1.0
+	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/snowflakedb/gosnowflake v1.18.1
 	github.com/spf13/cobra v1.8.1
 	google.golang.org/api v0.230.0

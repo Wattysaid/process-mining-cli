@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -114,4 +115,51 @@ func progressBar(step int, total int, width int) string {
 		filled = width
 	}
 	return strings.Repeat("#", filled) + strings.Repeat("-", width-filled)
+}
+
+func confirmSummary(title string, lines []string) (bool, error) {
+	fmt.Println()
+	fmt.Println(title)
+	for _, line := range lines {
+		fmt.Printf("  - %s\n", line)
+	}
+	fmt.Println()
+	return prompt.AskBool("Continue?", true)
+}
+
+func isWindowsPath(path string) bool {
+	if len(path) < 2 {
+		return false
+	}
+	drive := path[0]
+	if drive < 'A' || (drive > 'Z' && drive < 'a') || drive > 'z' {
+		return false
+	}
+	return len(path) > 2 && path[1] == ':' && (path[2] == '\\' || path[2] == '/')
+}
+
+func inWSL() bool {
+	data, err := os.ReadFile("/proc/version")
+	if err != nil {
+		return false
+	}
+	return strings.Contains(strings.ToLower(string(data)), "microsoft")
+}
+
+func normalizePathInput(path string) string {
+	trimmed := strings.Trim(path, "\"'")
+	if inWSL() && isWindowsPath(trimmed) {
+		drive := strings.ToLower(string(trimmed[0]))
+		rest := strings.ReplaceAll(trimmed[2:], "\\", "/")
+		return fmt.Sprintf("/mnt/%s/%s", drive, strings.TrimPrefix(rest, "/"))
+	}
+	return trimmed
+}
+
+func formatPathError(path string) error {
+	if inWSL() && isWindowsPath(path) {
+		converted := normalizePathInput(path)
+		return fmt.Errorf("path not found: %s. You are running under WSL; try %s", path, converted)
+	}
+	return fmt.Errorf("path not found: %s", path)
 }

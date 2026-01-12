@@ -37,6 +37,19 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "ingest",
 		Short: "Ingest data into a staging dataset",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:     "pm-assist ingest",
+				Purpose:   "Ingest and normalize source data",
+				StepIndex: 3,
+				StepTotal: 7,
+				Writes:    []string{"outputs/<run-id>/stage_01_ingest_profile"},
+				Asks:      []string{"connector", "schema"},
+				Next:      "pm-assist prepare",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist ingest", Next: "pm-assist prepare"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -59,7 +72,11 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				return nil
 			}
 
-			connectorName, err := resolveString(flagConnector, "Connector name", cfg.Connectors[0].Name, true)
+			defaultConnector := cfg.Connectors[0].Name
+			if len(cfg.Connectors) == 1 {
+				defaultConnector = cfg.Connectors[0].Name
+			}
+			connectorName, err := resolveString(flagConnector, "Connector name", defaultConnector, true)
 			if err != nil {
 				return err
 			}
@@ -105,6 +122,9 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				filePath = selected.File.Paths[0]
 				if flagFile != "" {
 					filePath = flagFile
+				}
+				if _, err := os.Stat(filePath); err != nil {
+					return formatPathError(filePath)
 				}
 				format = selected.File.Format
 				delimiter = selected.File.Delimiter
@@ -326,6 +346,7 @@ func NewIngestCmd(global *app.GlobalFlags) *cobra.Command {
 				return err
 			}
 			stepSuccess = true
+			success = true
 
 			fmt.Println("[SUCCESS] Ingest completed.")
 			return nil

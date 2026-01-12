@@ -109,7 +109,7 @@ func NewMapCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			if _, err := os.Stat(inputPath); err != nil {
-				return fmt.Errorf("input log not accessible: %w", err)
+				return formatPathError(inputPath)
 			}
 
 			previewNow, err := resolveBool(flagPreview, "Preview CSV headers and sample rows?", true)

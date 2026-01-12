@@ -40,6 +40,19 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "init",
 		Short: "Create a new PM Assist project scaffold",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:     "pm-assist init",
+				Purpose:   "Create a new project scaffold and profile",
+				StepIndex: 1,
+				StepTotal: 7,
+				Writes:    []string{"pm-assist.yaml", ".profiles/", ".business/"},
+				Asks:      []string{"project info", "profiles", "policy"},
+				Next:      "pm-assist connect",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist init", Next: "pm-assist connect"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -122,6 +135,25 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 				if err != nil {
 					return err
 				}
+			}
+
+			summary := []string{
+				fmt.Sprintf("Project: %s", projectName),
+				fmt.Sprintf("User: %s (%s, %s)", userName, role, aptitude),
+				fmt.Sprintf("Layout: %s", templateChoice),
+				fmt.Sprintf("LLM: %s (enabled=%t)", llmProvider, allowLLM),
+				fmt.Sprintf("Offline-only: %t", offlineOnly),
+			}
+			if createBusiness {
+				summary = append(summary, fmt.Sprintf("Business: %s (%s, %s)", businessName, businessIndustry, businessRegion))
+			}
+			confirm, err := confirmSummary("Confirm project setup", summary)
+			if err != nil {
+				return err
+			}
+			if !confirm {
+				fmt.Println("[INFO] Init canceled by user.")
+				return nil
 			}
 
 			printWalkthrough("Setup walkthrough", []string{
@@ -237,6 +269,7 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 				CompletedCommand: "init",
 				WorkingDir:       projectPath,
 			})
+			success = true
 			return nil
 		},
 		Example: "  pm-assist init",

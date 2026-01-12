@@ -13,6 +13,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/db"
 	"github.com/pm-assist/pm-assist/internal/policy"
 	"github.com/pm-assist/pm-assist/internal/preview"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -45,6 +46,19 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 		Use:   "connect",
 		Short: "Register read-only data connectors",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			ui.PrintCommandStart(ui.CommandFrame{
+				Title:     "pm-assist connect",
+				Purpose:   "Register a data source",
+				StepIndex: 2,
+				StepTotal: 7,
+				Writes:    []string{"pm-assist.yaml"},
+				Asks:      []string{"connector type", "paths/credentials"},
+				Next:      "pm-assist ingest",
+			})
+			success := false
+			defer func() {
+				ui.PrintCommandEnd(ui.CommandFrame{Title: "pm-assist connect", Next: "pm-assist ingest"}, success)
+			}()
 			projectPath := global.ProjectPath
 			if projectPath == "" {
 				cwd, err := os.Getwd()
@@ -75,9 +89,13 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				return fmt.Errorf("database connectors are blocked in offline-only mode")
 			}
 			if connectorType == "file" {
-				name, err := resolveString(flagName, "Connector name", "file-source", true)
+				defaultName := autoConnectorName(cfg.Connectors, "file-source")
+				name, err := resolveString(flagName, "Connector name", defaultName, true)
 				if err != nil {
 					return err
+				}
+				if name == "?" {
+					return fmt.Errorf("connector name cannot be '?'")
 				}
 				pathList, err := resolveString(flagPaths, "File paths (comma-separated)", "", true)
 				if err != nil {
@@ -121,10 +139,36 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 					}
 				}
 
-				paths := splitCSV(pathList)
+				paths, err := resolvePathList(pathList)
+				if err != nil {
+					return err
+				}
+				if len(paths) == 1 {
+					if info, err := os.Stat(paths[0]); err == nil && info.IsDir() {
+						discovered, err := discoverFiles(paths[0])
+						if err != nil {
+							return err
+						}
+						if len(discovered) > 0 {
+							useAll, err := resolveBool("", fmt.Sprintf("Found %d CSV files. Use all?", len(discovered)), true)
+							if err != nil {
+								return err
+							}
+							if useAll {
+								paths = discovered
+							} else {
+								selected, err := selectPaths(discovered)
+								if err != nil {
+									return err
+								}
+								paths = selected
+							}
+						}
+					}
+				}
 				for _, path := range paths {
 					if _, err := os.Stat(path); err != nil {
-						fmt.Printf("[WARN] Could not access %s: %v\n", path, err)
+						return fmt.Errorf("path not accessible: %s. If using WSL, use /mnt/<drive>/... paths", path)
 					}
 				}
 				previewNow, err := resolveBool(flagPreview, "Preview CSV headers and sample rows?", true)
@@ -169,16 +213,34 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 					},
 					Options: &config.ExtraConfig{ReadOnly: true},
 				})
+				summary := []string{
+					fmt.Sprintf("Connector: %s (file)", name),
+					fmt.Sprintf("Format: %s", format),
+					fmt.Sprintf("Paths: %d", len(paths)),
+				}
+				confirm, err := confirmSummary("Confirm connector details", summary)
+				if err != nil {
+					return err
+				}
+				if !confirm {
+					fmt.Println("[INFO] Connector creation canceled.")
+					return nil
+				}
 				if err := cfg.Save(); err != nil {
 					return err
 				}
 				fmt.Println("[SUCCESS] File connector saved.")
+				success = true
 				return nil
 			}
 
-			name, err := resolveString(flagName, "Connector name", "db-source", true)
+			defaultName := autoConnectorName(cfg.Connectors, "db-source")
+			name, err := resolveString(flagName, "Connector name", defaultName, true)
 			if err != nil {
 				return err
+			}
+			if name == "?" {
+				return fmt.Errorf("connector name cannot be '?'")
 			}
 			driver, err := resolveChoice(flagDriver, "Database driver", []string{"postgres", "mysql", "mssql", "snowflake", "bigquery", "other"}, "postgres", true)
 			if err != nil {
@@ -351,10 +413,23 @@ func NewConnectCmd(global *app.GlobalFlags) *cobra.Command {
 				},
 				Options: &config.ExtraConfig{ReadOnly: true, CredentialEnv: credEnv},
 			})
+			summary := []string{
+				fmt.Sprintf("Connector: %s (%s)", name, connectorType),
+				fmt.Sprintf("Format/Driver: %s", driver),
+			}
+			confirm, err := confirmSummary("Confirm connector details", summary)
+			if err != nil {
+				return err
+			}
+			if !confirm {
+				fmt.Println("[INFO] Connector creation canceled.")
+				return nil
+			}
 			if err := cfg.Save(); err != nil {
 				return err
 			}
 			fmt.Println("[SUCCESS] Database connector saved.")
+			success = true
 			return nil
 		},
 		Example: "  pm-assist connect",
@@ -429,4 +504,80 @@ func printCatalog(listSchemas func() ([]string, error), listTables func(schema s
 		fmt.Printf("  - %s\n", table)
 	}
 	return nil
+}
+
+func autoConnectorName(connectors []config.ConnectorSpec, prefix string) string {
+	count := 0
+	for _, connector := range connectors {
+		if strings.HasPrefix(connector.Name, prefix) {
+			count++
+		}
+	}
+	return fmt.Sprintf("%s-%d", prefix, count+1)
+}
+
+func resolvePathList(pathList string) ([]string, error) {
+	paths := splitCSV(pathList)
+	out := []string{}
+	for _, raw := range paths {
+		normalized := normalizePathInput(raw)
+		if normalized != raw && inWSL() && isWindowsPath(raw) {
+			convert, err := resolveBool("", fmt.Sprintf("Convert Windows path %s to %s?", raw, normalized), true)
+			if err != nil {
+				return nil, err
+			}
+			if !convert {
+				normalized = raw
+			}
+		}
+		matches, err := filepath.Glob(normalized)
+		if err == nil && len(matches) > 0 {
+			out = append(out, matches...)
+			continue
+		}
+		out = append(out, normalized)
+	}
+	return out, nil
+}
+
+func discoverFiles(dir string) ([]string, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	out := []string{}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := strings.ToLower(entry.Name())
+		if strings.HasSuffix(name, ".csv") {
+			out = append(out, filepath.Join(dir, entry.Name()))
+		}
+	}
+	return out, nil
+}
+
+func selectPaths(paths []string) ([]string, error) {
+	if len(paths) == 0 {
+		return nil, nil
+	}
+	fmt.Println("Select files by number (comma-separated):")
+	for i, path := range paths {
+		fmt.Printf("  %d) %s\n", i+1, path)
+	}
+	answer, err := prompt.AskString("Selection", "1", true)
+	if err != nil {
+		return nil, err
+	}
+	indices := splitCSV(answer)
+	out := []string{}
+	for _, item := range indices {
+		index, err := strconv.Atoi(strings.TrimSpace(item))
+		if err != nil || index < 1 || index > len(paths) {
+			return nil, fmt.Errorf("invalid selection: %s", item)
+		}
+		out = append(out, paths[index-1])
+	}
+	return out, nil
 }
