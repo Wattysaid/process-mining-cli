@@ -1,11 +1,11 @@
 # Architecture: PM Assist CLI
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 ## 1. Architecture overview
 PM Assist is a two-layer application:
 
-Status: CLI orchestration implemented; packaging of Python assets pending.
+Status: CLI orchestration implemented; packaging of Python assets and offline wheels pending.
 
 1) **CLI Orchestrator (Go recommended)**
 - Handles commands, prompting, validation, configuration, logging, and run management
@@ -13,6 +13,7 @@ Status: CLI orchestration implemented; packaging of Python assets pending.
 - Calls into Python modules for heavy lifting
 - Provides a stable interface for enterprise deployment
 - Maintains user profiles in `.profiles/` and adapts prompts to user aptitude
+- Provides a styled CLI via Bubble Tea widgets when a TTY is detected
 
 2) **Python Pipeline Library**
 - Implements data prep, event log construction, pm4py analysis, notebook/report generation
@@ -31,7 +32,9 @@ pm-assist/
   internal/
     cli/                         # command handlers, prompts
     config/                      # config model + merge/validate
+    db/                          # connector validation (Postgres/MySQL/MSSQL/Snowflake/BigQuery)
     runner/                      # python env + module execution
+    ui/                          # splash screens, frames, and TUI widgets
     telemetry/                   # optional metrics, local only by default
   python/
     pm_assist/                   # python package (pip-installable)
@@ -56,7 +59,7 @@ pm-assist/
 - The CLI resolves configuration:
   - defaults -> project config -> command flags -> prompt answers
 - The CLI creates (or reuses) a Python venv:
-  - stored under `~/.local/share/pm-assist/venv` or within the project (configurable)
+  - stored under `<project>/.venv` by default
 - The CLI runs a Python module entrypoint, passing:
   - run id, paths, config, and redacted secrets via environment variables
 - Python writes outputs; CLI surfaces progress and summarises results.
@@ -97,6 +100,10 @@ pm-assist/
   - project `.env` file (discouraged for enterprise; allowed for dev)
 - Secrets never written to disk, never logged
 - LLM calls can be disabled globally and per project
+
+## 10. Build and toolchain
+- Go 1.23+ required (dependency graph).
+- Use `GOTOOLCHAIN=auto` for module resolution if local Go < 1.23.
 
 
 ## 9. UX entrypoint

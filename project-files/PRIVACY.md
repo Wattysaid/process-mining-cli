@@ -1,6 +1,6 @@
 # Privacy and Data Handling
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 ## 1. Data minimisation
 - Only ingest columns required for the selected analyses.
@@ -17,7 +17,7 @@
 - When enabled (OpenAI/Anthropic/Gemini/Ollama):
   - send summaries first (schema and aggregates)
   - require explicit approval for samples
-  - record a ledger of calls and prompts (redacted) for audit
+  - record a ledger of calls and prompts (redacted) for audit (planned)
 
 ## 4. Retention
 - Provide `pm-assist clean --run-id <id>` to remove run artefacts (post-MVP).

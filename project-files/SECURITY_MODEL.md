@@ -1,6 +1,6 @@
 # Security Model
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 ## 1. Threat model (lightweight)
 Assets:
@@ -26,6 +26,7 @@ Threats:
 - Bundle Python assets and avoid editable source distributions
 - Only allow user edits in `.profiles/` and project data/output directories
 - Do not expose internal source files via CLI commands or logs
+- CLI UI uses local rendering only; no terminal content is streamed externally
 
 Status: Policy gating implemented; structured logging and run manifests implemented.
 

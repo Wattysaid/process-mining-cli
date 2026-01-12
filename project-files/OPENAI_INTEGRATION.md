@@ -1,6 +1,6 @@
 # LLM Integration: Security, cost control, and agent behaviour
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 ## 1. Principles
 - LLM integration is **optional** and **explicitly opted-in** by the user.
@@ -25,7 +25,7 @@ Config keys (stored in `pm-assist.yaml`):
 - `llm.endpoint` (for Ollama or custom gateways)
 
 CLI behaviour:
-- `pm-assist agent` and `pm-assist report --narrative` must:
+- `pm-assist agent setup` and `pm-assist report --narrative` must:
   - check provider configuration and required env vars
   - if missing, show steps:
     - `export OPENAI_API_KEY="..."` (Linux/macOS/WSL)

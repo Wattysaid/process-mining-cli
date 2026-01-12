@@ -1,6 +1,6 @@
 # PRD: PM Assist CLI
 
-**Document version:** R1.00 (2026-01-11)  
+**Document version:** R1.01 (2026-01-12)  
 **Owner:** Product / Engineering  
 **Status:** Draft  
 **Primary KPI:** Time-to-first-insight for a new dataset (target: < 60 minutes for a competent analyst)
@@ -30,7 +30,7 @@ Secondary:
 - Run a QA pack (schema checks, duplicates, sorting, timestamp sanity, basic statistical checks)
 
 ## 4. Use cases (post-MVP)
-- Read-only connectors: Postgres/SQL Server/Snowflake/BigQuery, S3/ADLS, SharePoint
+- Read-only connectors: S3/ADLS, SharePoint
 - Drift detection across windows
 - Predictive monitoring (remaining time, SLA breach risk)
 - Simulation / what-if (bounded scope, explicit assumptions)
@@ -57,6 +57,8 @@ Secondary:
 
 ## 8. MVP acceptance criteria
 - A new user can run: init -> ingest -> prepare -> mine -> report
+- A new user can run: init -> connect -> ingest -> map -> prepare -> mine -> report
+- Wizard mode (`pm-assist start`) can complete the guided end-to-end flow
 - Outputs are produced in a run folder with a stable structure
 - LLM integration is optional and requires explicit credentials + opt-in per run (or local Ollama)
 - QA report clearly flags data issues and model caveats

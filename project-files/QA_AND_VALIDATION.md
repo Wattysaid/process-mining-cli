@@ -1,6 +1,6 @@
 # QA and Validation Pack
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 ## 1. Goals
 The QA pack ensures:
@@ -43,6 +43,7 @@ The QA pack ensures:
 - `quality/qa_summary.md` (human-readable)
 - `quality/qa_results.json` (machine-readable)
 - `quality/issues_backlog.csv` (prioritised fix list)
+- `run_manifest.json` includes QA step status and timestamps
 
 ## 4. Pass/fail rules
 - Default is “warn not fail”, except for:
@@ -56,3 +57,6 @@ The QA pack ensures:
 - In non-interactive mode:
   - fail on blocking rules only
 
+## 6. Status
+- QA pack is wired into `pm-assist review`.
+- Summaries are appended to the notebook when the user confirms.

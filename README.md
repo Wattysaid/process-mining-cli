@@ -58,9 +58,16 @@ pm-assist init
 ``` bash
 pm-assist connect
 pm-assist ingest
+pm-assist map
 pm-assist prepare
 pm-assist mine
 pm-assist report
+```
+
+### Run the full wizard
+
+``` bash
+pm-assist start
 ```
 
 ------------------------------------------------------------------------
@@ -78,10 +85,11 @@ deterministic Python scripts for data processing.
 1.  **Initialize**: create project layout and profiles.\
 2.  **Connect**: register read-only data sources.\
 3.  **Ingest**: load and validate data.\
-4.  **Prepare**: clean and transform event logs.\
-5.  **Mine**: discovery, conformance, performance, variant analysis.\
-6.  **Report**: narrative insights and artefacts.\
-7.  **Review**: automated QA checks and audit summary.
+4.  **Map**: select case/activity/timestamp columns.\
+5.  **Prepare**: clean and transform event logs.\
+6.  **Mine**: discovery, conformance, performance, variant analysis.\
+7.  **Report**: narrative insights and artefacts.\
+8.  **Review**: automated QA checks and audit summary.
 
 ------------------------------------------------------------------------
 
@@ -96,11 +104,12 @@ You are asked to identify bottlenecks in the procurement process.
 2.  `pm-assist connect` asks how to access procurement data (ERP, CSV
     exports, database).\
 3.  `pm-assist ingest` validates tables and schema.\
-4.  `pm-assist prepare` cleans timestamps, filters invalid rows, and
+4.  `pm-assist map` captures the case, activity, and timestamp columns.\
+5.  `pm-assist prepare` cleans timestamps, filters invalid rows, and
     normalises activity names.\
-5.  `pm-assist mine` highlights the longest waiting steps and most
+6.  `pm-assist mine` highlights the longest waiting steps and most
     frequent rework loops.\
-6.  `pm-assist report` creates a summary report and appends all code to
+7.  `pm-assist report` creates a summary report and appends all code to
     the notebook.
 
 ### Scenario 2: Duplicate events in a dataset

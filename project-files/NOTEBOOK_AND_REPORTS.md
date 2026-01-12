@@ -1,6 +1,6 @@
 # Notebook and Report Generation
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 ## 1. Output philosophy
 PM Assist should deliver outputs that enterprises can:
@@ -27,6 +27,7 @@ The CLI produces:
 - Support:
   - unexecuted notebooks (default)
   - executed notebooks (optional; can be expensive)
+- Each confirmed CLI step appends to the notebook for reproducibility.
 
 ## 3. Report generation requirements
 Report structure (MVP):
@@ -69,3 +70,7 @@ LLMs must not be used for:
 - Save figures to `outputs/<run-id>/figures/`
 - Reference images in notebook and report
 - Support a no-figures mode for restricted environments
+
+## 6. Status
+- Report bundle generation is implemented (`pm-assist report`).
+- Notebook append is wired to user-confirmed steps.

@@ -1,11 +1,11 @@
 # Workflows: End-to-end process mining delivery
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 ## 1. Engagement workflow (consulting-style)
 PM Assist should guide the user through the same phases a mature process mining team would follow, using the `cli-tool-skills` Python steps as the minimum capability baseline. The assistant must stay decision-neutral and ask the user to confirm choices, adapting prompt depth to the active user profile (beginner/intermediate/expert).
 
-Status: Workflow steps implemented; non-interactive automation coverage pending.
+Status: Workflow steps implemented; non-interactive TUI fallback and Windows venv handling pending.
 
 AI usage rules:
 - Use AI to interpret user intent, ask for missing connection parameters, and explain results.
@@ -22,7 +22,7 @@ AI usage rules:
   - customer segment, region, product, channel, priority, cost rates
 
 CLI support:
-- `pm-assist init` prompts for process name, objectives, stakeholders, and KPIs
+- `pm-assist init` prompts for project name, user profile, business profile, and policy settings
 - Generates a scope file (YAML) used in reports
 
 ### Phase B: Extract (read-only)
@@ -84,6 +84,10 @@ CLI support:
   - run bundle
   - run manifest
   - reproducibility checklist
+
+### Wizard flow
+- `pm-assist start` runs the guided flow end-to-end, respecting confirmations and policies.
+- `pm-assist status` surfaces the next recommended step based on the latest run manifest.
 
 ## 2. Pipeline step catalogue (MVP)
 Each step must be:
