@@ -1,0 +1,28 @@
+id: TASK-0042
+title: "Add UX validation for splash screens and progress"
+owner_role: qa
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0020"
+  - "TASK-0002"
+scope:
+  in:
+    - "Verify splash renders before any prompts"
+    - "Verify post-command splash highlights completed step"
+    - "Verify progress bars appear for long steps"
+  out:
+    - "No UI redesign"
+acceptance_criteria:
+  - "Startup splash is first output"
+  - "Post-init splash marks init as completed"
+  - "Ingest/prepare/mine/report show progress indicators"
+files_expected:
+  - "internal/cli/startup.go"
+  - "internal/cli/commands/*.go"
+contracts:
+  - "project-files/STARTUP_SCREEN.md"
+quality_gates:
+  - "manual QA checklist complete"
+notes:
+  context: "User experience is critical for CLI adoption."

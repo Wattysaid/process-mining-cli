@@ -1,0 +1,29 @@
+id: TASK-0041
+title: "Add end-to-end smoke test for CLI"
+owner_role: qa
+status: ready
+priority: P1
+depends_on:
+  - "TASK-0002"
+  - "TASK-0004"
+  - "TASK-0007"
+scope:
+  in:
+    - "Automated smoke run using bundled sample data"
+    - "Validate outputs and run manifest"
+    - "Document expected success criteria"
+  out:
+    - "No load testing"
+acceptance_criteria:
+  - "Smoke test runs init→connect→ingest→prepare→mine→report"
+  - "Outputs include notebook, report, manifest"
+  - "Failures are clearly reported"
+files_expected:
+  - "scripts/smoke.sh"
+  - "project-files/QA_AND_VALIDATION.md"
+contracts:
+  - "project-files/QA_AND_VALIDATION.md"
+quality_gates:
+  - "smoke test passes"
+notes:
+  context: "Provides a quick regression check for critical flows."

@@ -1,0 +1,27 @@
+id: TASK-0048
+title: "Verify profile-based prompt depth"
+owner_role: qa
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0033"
+  - "TASK-0034"
+scope:
+  in:
+    - "Validate beginner/intermediate/expert prompt depth"
+    - "Confirm active profile is honored"
+  out:
+    - "No changes to prompt wording"
+acceptance_criteria:
+  - "Agent prompts vary by profile prompt depth"
+  - "Active profile is used by default"
+  - "Profile overrides work via flags"
+files_expected:
+  - "internal/cli/commands/agent.go"
+  - "internal/profile/profile.go"
+contracts:
+  - "project-files/USER_PROFILES.md"
+quality_gates:
+  - "manual QA checklist complete"
+notes:
+  context: "Prompt depth must align with user aptitude."

@@ -1,0 +1,27 @@
+id: TASK-0047
+title: "Verify self-update and installer integrity"
+owner_role: infra
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0001"
+scope:
+  in:
+    - "Validate checksum verification"
+    - "Test self-update flow"
+    - "Document expected failure modes"
+  out:
+    - "No new release channels"
+acceptance_criteria:
+  - "Installer verifies checksums"
+  - "Self-update replaces binary safely"
+  - "Failure modes are documented"
+files_expected:
+  - "scripts/install.sh"
+  - "internal/updater/updater.go"
+contracts:
+  - "project-files/INSTALLATION_AND_RELEASE.md"
+quality_gates:
+  - "installer test checklist complete"
+notes:
+  context: "Ensures reliable upgrades in enterprise environments."

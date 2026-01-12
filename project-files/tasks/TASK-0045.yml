@@ -1,0 +1,28 @@
+id: TASK-0045
+title: "Verify secrets and privacy protections"
+owner_role: security
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0016"
+  - "TASK-0017"
+scope:
+  in:
+    - "Ensure credentials are not stored in config or logs"
+    - "Verify LLM redaction ledger"
+    - "Validate column exclusion and pseudonymization"
+  out:
+    - "No external compliance audits"
+acceptance_criteria:
+  - "No secrets present in config snapshots"
+  - "LLM ledger contains redacted prompts"
+  - "Excluded columns never appear in outputs"
+files_expected:
+  - "project-files/PRIVACY.md"
+  - "project-files/SECURITY_MODEL.md"
+contracts:
+  - "project-files/PRIVACY.md"
+quality_gates:
+  - "privacy checklist complete"
+notes:
+  context: "Protects sensitive data and ensures compliance."

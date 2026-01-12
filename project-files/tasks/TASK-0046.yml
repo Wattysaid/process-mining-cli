@@ -1,0 +1,27 @@
+id: TASK-0046
+title: "Verify report bundle contents"
+owner_role: qa
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0007"
+scope:
+  in:
+    - "Validate report bundle structure"
+    - "Ensure manifest and config snapshot included"
+    - "Check optional HTML/PDF outputs"
+  out:
+    - "No custom report theming"
+acceptance_criteria:
+  - "Bundle contains report.md and notebook"
+  - "Manifest and config snapshot are included"
+  - "HTML/PDF are included when enabled"
+files_expected:
+  - "internal/cli/commands/report.go"
+  - "project-files/NOTEBOOK_AND_REPORTS.md"
+contracts:
+  - "project-files/NOTEBOOK_AND_REPORTS.md"
+quality_gates:
+  - "bundle verification passes"
+notes:
+  context: "Ensures deliverables are complete and auditable."

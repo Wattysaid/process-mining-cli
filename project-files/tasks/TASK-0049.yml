@@ -1,0 +1,27 @@
+id: TASK-0049
+title: "Validate progress and status messaging"
+owner_role: qa
+status: ready
+priority: P3
+depends_on:
+  - "TASK-0042"
+scope:
+  in:
+    - "Verify progress indicators for long-running steps"
+    - "Ensure consistent status prefixes"
+    - "Check warnings and error messaging"
+  out:
+    - "No change to logging framework"
+acceptance_criteria:
+  - "Progress bars appear on ingest/prepare/mine/report"
+  - "Status messages use consistent prefixes"
+  - "Warnings are clear and actionable"
+files_expected:
+  - "internal/cli/commands/*.go"
+  - "internal/cli/commands/util.go"
+contracts:
+  - "project-files/CODING_STANDARDS.md"
+quality_gates:
+  - "manual QA checklist complete"
+notes:
+  context: "Users need clear feedback during execution."

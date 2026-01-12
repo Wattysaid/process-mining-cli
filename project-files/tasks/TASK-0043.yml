@@ -1,0 +1,28 @@
+id: TASK-0043
+title: "Validate connector test coverage"
+owner_role: qa
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0005"
+  - "TASK-0024"
+scope:
+  in:
+    - "Read-only validation for Postgres/MySQL/MSSQL"
+    - "Read-only validation for Snowflake/BigQuery"
+    - "File connector validation and preview"
+  out:
+    - "No performance benchmarking"
+acceptance_criteria:
+  - "Each connector validates with a test target"
+  - "Doctor reports reachability for configured connectors"
+  - "Failure messages are actionable"
+files_expected:
+  - "internal/cli/commands/connect.go"
+  - "internal/cli/commands/doctor.go"
+contracts:
+  - "project-files/CLI_SPEC.md"
+quality_gates:
+  - "connector test checklist complete"
+notes:
+  context: "Ensures connectors behave consistently across environments."

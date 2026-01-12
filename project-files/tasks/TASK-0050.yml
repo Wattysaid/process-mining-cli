@@ -1,0 +1,27 @@
+id: TASK-0050
+title: "Verify run manifest completeness"
+owner_role: qa
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0011"
+scope:
+  in:
+    - "Validate manifest contains inputs/outputs hashes"
+    - "Verify step status transitions"
+    - "Check config snapshot inclusion"
+  out:
+    - "No changes to manifest schema"
+acceptance_criteria:
+  - "Manifest includes input/output hashes"
+  - "Step status transitions are correct"
+  - "Config snapshot path is present"
+files_expected:
+  - "internal/manifest/manifest.go"
+  - "project-files/SECURITY_MODEL.md"
+contracts:
+  - "project-files/SECURITY_MODEL.md"
+quality_gates:
+  - "manifest verification passes"
+notes:
+  context: "Manifest integrity supports audit requirements."

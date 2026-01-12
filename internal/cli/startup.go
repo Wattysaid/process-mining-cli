@@ -7,12 +7,12 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
-	"strings"
 
 	"github.com/pm-assist/pm-assist/internal/buildinfo"
 	"github.com/pm-assist/pm-assist/internal/cli/prompt"
 	"github.com/pm-assist/pm-assist/internal/config"
 	"github.com/pm-assist/pm-assist/internal/policy"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -23,8 +23,9 @@ func showSplashOnce() {
 		return
 	}
 	splashShown = true
-	printBanner()
-	printIntroPanel()
+	cwd, _ := os.Getwd()
+	cfg, _ := config.Load("")
+	ui.PrintSplash(cfg, ui.SplashOptions{WorkingDir: cwd})
 }
 
 func runStartup(cmdRoot *cobra.Command) error {
@@ -78,59 +79,6 @@ func runStartup(cmdRoot *cobra.Command) error {
 	default:
 		return fmt.Errorf("invalid selection")
 	}
-}
-
-func printIntroPanel() {
-	cwd, _ := os.Getwd()
-	llmProvider := "none"
-	llmModel := "n/a"
-	cfg, err := config.Load("")
-	if err == nil {
-		if cfg.LLM.Provider != "" {
-			llmProvider = cfg.LLM.Provider
-		}
-		if cfg.LLM.Model != "" {
-			llmModel = cfg.LLM.Model
-		}
-	}
-
-	lines := []string{
-		fmt.Sprintf(">_ PM Assist CLI (%s)", buildinfo.Version),
-		fmt.Sprintf("model:     %s / %s", llmProvider, llmModel),
-		fmt.Sprintf("directory: %s", cwd),
-	}
-	printBox(lines)
-
-	fmt.Println()
-	fmt.Println("To get started, choose one of these commands:")
-	fmt.Println()
-	fmt.Println("  init        - create a new project scaffold")
-	fmt.Println("  connect     - register a data source")
-	fmt.Println("  ingest      - ingest and normalize data")
-	fmt.Println("  prepare     - run data quality and cleaning")
-	fmt.Println("  mine        - run discovery and analysis")
-	fmt.Println("  report      - generate reports and bundles")
-	fmt.Println("  review      - run QA checks")
-	fmt.Println("  agent setup - configure LLM integration")
-	fmt.Println("  doctor      - check environment readiness")
-	fmt.Println()
-}
-
-func printBox(lines []string) {
-	maxLen := 0
-	for _, line := range lines {
-		if len(line) > maxLen {
-			maxLen = len(line)
-		}
-	}
-	width := maxLen + 2
-	border := "+" + strings.Repeat("-", width) + "+"
-	fmt.Println(border)
-	for _, line := range lines {
-		padding := width - len(line)
-		fmt.Printf("| %s%s|\n", line, strings.Repeat(" ", padding-1))
-	}
-	fmt.Println(border)
 }
 
 type runManifest struct {

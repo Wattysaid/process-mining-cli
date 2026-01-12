@@ -13,6 +13,7 @@ import (
 	"github.com/pm-assist/pm-assist/internal/profile"
 	"github.com/pm-assist/pm-assist/internal/runner"
 	"github.com/pm-assist/pm-assist/internal/scaffold"
+	"github.com/pm-assist/pm-assist/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -231,6 +232,11 @@ func NewInitCmd(global *app.GlobalFlags) *cobra.Command {
 			}
 
 			fmt.Println("[SUCCESS] Project scaffold created")
+			cfg, _ := config.Load(configPath)
+			ui.PrintSplash(cfg, ui.SplashOptions{
+				CompletedCommand: "init",
+				WorkingDir:       projectPath,
+			})
 			return nil
 		},
 		Example: "  pm-assist init",

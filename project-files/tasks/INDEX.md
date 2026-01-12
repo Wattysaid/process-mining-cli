@@ -30,6 +30,16 @@
 - TASK-0034: Add profile and business command set
 - TASK-0035: Standardize exit codes and error handling
 - TASK-0036: Enforce internal code protection and edit boundaries
+- TASK-0041: Add end-to-end smoke test for CLI
+- TASK-0042: Add UX validation for splash screens and progress
+- TASK-0043: Validate connector test coverage
+- TASK-0044: Validate policy enforcement
+- TASK-0045: Verify secrets and privacy protections
+- TASK-0046: Verify report bundle contents
+- TASK-0047: Verify self-update and installer integrity
+- TASK-0048: Verify profile-based prompt depth
+- TASK-0049: Validate progress and status messaging
+- TASK-0050: Verify run manifest completeness
 
 ## v0.2
 - TASK-0024: Add Snowflake and BigQuery connectors

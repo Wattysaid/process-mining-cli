@@ -1,0 +1,28 @@
+id: TASK-0044
+title: "Validate policy enforcement"
+owner_role: security
+status: ready
+priority: P2
+depends_on:
+  - "TASK-0006"
+scope:
+  in:
+    - "Block LLM usage when disabled"
+    - "Block external connectors in offline-only mode"
+    - "Enforce allow/deny connector lists"
+  out:
+    - "No policy UI changes"
+acceptance_criteria:
+  - "LLM commands fail when disabled"
+  - "Offline-only blocks external providers"
+  - "Connector allow/deny lists are enforced"
+files_expected:
+  - "internal/policy/policy.go"
+  - "internal/cli/commands/agent.go"
+  - "internal/cli/commands/connect.go"
+contracts:
+  - "project-files/SECURITY_MODEL.md"
+quality_gates:
+  - "policy tests pass"
+notes:
+  context: "Policy enforcement is mandatory for enterprise deployments."
