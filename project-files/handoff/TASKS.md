@@ -1,6 +1,6 @@
 # Outstanding Tasks
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 ## 1) Packaging and Offline Assets (Critical)
 - Bundle Python assets into `resources/cli-tool-skills` during release builds.
@@ -37,3 +37,10 @@
 
 ## 9) Signed Releases (Nice-to-have)
 ~~Signed releases + verification hooks (cosign).~~
+
+## 10) UX/Platform Hardening (High)
+- Windows venv path handling (use `.venv/Scripts` on Windows).
+- Non-interactive TUI fallback (TTY detection; bypass Bubble Tea when not interactive).
+- Directory picker should allow directory selection.
+- Profile/business `set/show` should resolve sanitized filenames.
+- Run-id reuse behavior when not explicitly provided.

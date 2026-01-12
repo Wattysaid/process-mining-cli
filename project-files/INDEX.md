@@ -1,6 +1,6 @@
 # Project File Index
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 Use this index to navigate the instruction set.
 
@@ -36,3 +36,7 @@ Use this index to navigate the instruction set.
 ## Codex agent controls
 - `.codex/agent.md`
 - `.codex/skills/*/skill.md`
+
+## Operational tracking
+- `project-files/tasks/` (task cards for implementation)
+- `Review/` (review findings and resolutions)

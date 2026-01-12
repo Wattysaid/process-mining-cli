@@ -1,6 +1,6 @@
 # Release Instructions (GitHub Releases)
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 This file explains how to produce release artifacts that the installer expects.
 
@@ -35,7 +35,7 @@ Example assets:
 ```
 
 ## 2) Build prerequisites
-- Go 1.22+
+- Go 1.23+
 - Access to module downloads (GitHub Actions or local network)
 
 Optional:
@@ -50,7 +50,7 @@ mkdir -p "$OUTDIR"
 
 build() {
   GOOS=$1 GOARCH=$2 \
-    go build -trimpath -ldflags "-s -w" -o pm-assist ./cmd/pm-assist
+    go build -buildvcs=false -trimpath -ldflags "-s -w" -o pm-assist ./cmd/pm-assist
   TAR_OS=$3
   TAR_ARCH=$4
   tar -czf "$OUTDIR/pm-assist_${TAR_OS}_${TAR_ARCH}.tar.gz" pm-assist

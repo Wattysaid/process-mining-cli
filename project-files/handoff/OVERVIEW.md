@@ -1,6 +1,6 @@
 # Handoff Overview
 
-**Document version:** R1.00 (2026-01-11)
+**Document version:** R1.01 (2026-01-12)
 
 This folder summarizes current implementation status and the remaining work needed to reach production readiness.
 Use it as the entrypoint for a new agent with no prior context.
@@ -10,3 +10,4 @@ Start here:
 - `project-files/handoff/TASKS.md`
 - `project-files/RELEASE_INSTRUCTIONS.md`
 - `project-files/CONTEXT_HANDOFF.md`
+- `Review/INDEX.md`
